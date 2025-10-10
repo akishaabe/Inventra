@@ -1,0 +1,171 @@
+@import url('https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@700&family=SF+Pro+Display:wght@400&display=swap');
+
+/* Fullscreen dark brown background */
+:host {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #3E2723;
+  font-family: 'SF Pro Display', sans-serif;
+}
+
+/* Card container */
+.login-container {
+  position: relative;
+  background-color: #D9D9D9;
+  border-radius: 40px;
+  padding: 60px 80px;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Back link (upper-left corner of card) */
+.back {
+  position: absolute;
+  top: 30px;
+  left: 40px;
+  font-size: 14px;
+  color: #2B1E1A;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: 'SF Pro Display', sans-serif;
+}
+
+/* Title (Abhaya Libre) */
+.login-title {
+  font-family: 'Abhaya Libre', serif !important;
+  font-size: 80px;
+  font-weight: 0;
+  color: #3E2723;
+  margin-top: 10px;
+  margin-bottom: 30px;
+  letter-spacing: -2.5px;
+
+}
+
+/* Input fields */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background-color: #F7F4F1;
+  font-size: 16px;
+  font-family: 'SF Pro Display', sans-serif;
+  box-sizing: border-box;
+}
+
+/* Forgot password link */
+.forgot {
+  text-align: left;
+  font-size: 13px;
+  color: #0026FF;
+  text-decoration: none;
+  margin-top: -5px;
+  margin-bottom: 5px;
+}
+
+.forgot:hover {
+  text-decoration: underline;
+}
+
+/* Continue button */
+.continue-btn {
+  background-color: #F5F0EA;
+  border: 1px solid #2B1E1A;
+  border-radius: 12px;
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #2B1E1A;
+  font-family: 'SF Pro Display', sans-serif;
+}
+
+.continue-btn:hover {
+  background-color: #EDE7E3;
+}
+
+/* Divider ("or Log In with") */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 25px 0;
+  color: #3E2723;
+  font-size: 12px;
+  font-family: 'SF Pro Display', sans-serif;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #3E2723;
+  margin: 0 10px;
+}
+
+/* Google login button */
+.google-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #3E2723;
+  border-radius: 10px;
+  background-color: #F7F4F1;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-family: 'SF Pro Display', sans-serif;
+  font-size: 15px;
+  width: 100%;
+}
+
+.google-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+.google-btn:hover {
+  background-color: #EDE7E3;
+}
+
+/* Responsive for mobile */
+@media (max-width: 480px) {
+  .login-container {
+    width: 90%;
+    padding: 40px 20px;
+    border-radius: 30px;
+  }
+
+  .login-title {
+    font-size: 36px;
+  }
+
+  input {
+    font-size: 14px;
+  }
+
+  .continue-btn,
+  .google-btn {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .back {
+    top: 20px;
+    left: 25px;
+    font-size: 13px;
+  }
+}
