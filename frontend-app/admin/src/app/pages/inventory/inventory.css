@@ -1,0 +1,182 @@
+/* fonts (you already use Abhaya Libre for header elsewhere) */
+.inventory-container { font-family: 'SF Pro', sans-serif; }
+
+/* ensure content is pushed down below fixed navbar */
+.inventory-main {
+  margin-top: 84px; /* matches navbar height + margin */
+  padding: 28px 60px;
+  background: #ffffff;
+  min-height: calc(100vh - 84px);
+}
+
+/* heading -- Abhaya Libre */
+.inventory-title {
+  font-family: 'Abhaya Libre', serif;
+  font-size: 3.8rem;
+  color: #3e2723;
+  margin: 4px 0 18px 0;
+  letter-spacing: 1px;
+}
+
+/* top controls row */
+.controls-row {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.search {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #e3dfdc;
+  max-width: 420px;
+  font-size: 0.95rem;
+}
+
+.sort-wrapper { display: flex; align-items: center; gap: 8px; }
+
+.action-buttons {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+}
+
+/* action buttons */
+.btn {
+  background: #4b2e2b;
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px 14px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all .18s ease;
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; filter: grayscale(.2); }
+.btn:hover:not(:disabled) {
+  background: #fff;
+  color: #4b2e2b;
+  box-shadow: 0 6px 18px rgba(75,46,43,0.12);
+  transform: translateY(-2px);
+}
+
+/* table wrapper to provide rounded container background like the screenshot */
+.table-wrap {
+  margin-top: 18px;
+}
+
+/* table */
+.inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+}
+
+.inventory-table thead tr {
+  background: #ded6d4; /* soft header brown/gray */
+}
+
+.inventory-table th, .inventory-table td {
+  padding: 14px 18px;
+  text-align: left;
+  color: #3e2723;
+}
+
+.inventory-table th.sortable { cursor: pointer; user-select: none; }
+.sort-indicator { margin-left: 6px; color: #6b504b; font-size: 0.9rem; opacity: 0.9; }
+
+/* alternating rows + selected */
+.inventory-table tbody tr:nth-child(even) { background: #faf8f7; }
+.inventory-table tbody tr.selected { background: #f1e9e7; }
+
+/* small checkbox column */
+.col-check { width: 44px; text-align: center; }
+
+/* empty row */
+.empty { text-align: center; padding: 28px; color: #8a7f7b; }
+
+/* Modal background and card */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(61,31,27,0.7);
+  z-index: 300;
+  animation: fadeIn .18s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-card {
+  width: 620px;
+  max-width: 92%;
+  background: #e7e7e7;
+  border-radius: 22px;
+  padding: 38px 54px;
+  position: relative;
+  box-shadow: 0 18px 36px rgba(0,0,0,0.25);
+  max-height: 86vh;
+  overflow: auto;
+}
+
+/* modal heading */
+.modal-card h2 {
+  font-family: 'Abhaya Libre', serif;
+  font-size: 2.4rem;
+  color: #3e2723;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* back button inside modal */
+.back-btn {
+  position: absolute;
+  left: 26px;
+  top: 22px;
+  color: #3e2723;
+  font-family: 'SF Pro', sans-serif;
+  cursor: pointer;
+}
+
+/* form inputs */
+.modal-card label { display:block; margin-top: 10px; color: #3e2723; font-weight:600; }
+.modal-card input {
+  width: 100%;
+  padding: 12px 14px;
+  margin-top: 6px;
+  border-radius: 10px;
+  border: none;
+  background: #fbf6f4;
+  font-size: 1rem;
+  color: #3e2723;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.06) inset;
+}
+.modal-card input:focus { outline: 2px solid rgba(75,46,43,0.12); }
+
+/* errors */
+.error { font-size: 0.85rem; color: #bb3b3b; margin-top:6px; }
+
+/* continue button */
+.continue-btn {
+  margin-top: 20px;
+  width: 160px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #3e2723;
+  background: #fffaf6;
+  color: #3e2723;
+  font-weight: 700;
+  cursor: pointer;
+}
+.continue-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* delete modal style */
+.modal-card.delete { width: 480px; text-align:center; border-radius:16px; padding:28px 20px; }
+.modal-buttons { display:flex; justify-content:center; gap:12px; margin-top:18px; }
+.confirm-delete { background:#b84040; color:#fff; border-radius:8px; padding:8px 14px; border:none; cursor:pointer; }
