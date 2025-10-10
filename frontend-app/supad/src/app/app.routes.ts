@@ -11,7 +11,7 @@ import { Signup } from './pages/signup/signup';
 import { Twofa } from './pages/twofa/twofa';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'Home', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'home', component: Home },
   { path: 'login', loadComponent: () => import('./pages/login/login').then(m => m.Login) },
   { path: 'signup', component: Signup },

@@ -146,3 +146,17 @@ body {
   .about h3 { font-size: 1rem; }
   .about p { font-size: 0.9rem; }
 }
+
+.login-link {
+  color: #f7d7c8;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+
+.login-link:visited,
+.login-link:focus,
+.login-link:active {
+  color: #f7d7c8;
+  text-decoration: none;
+}
