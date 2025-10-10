@@ -25,7 +25,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Back link (upper-left corner of card) */
+/* Back link */
 .back {
   position: absolute;
   top: 30px;
@@ -37,7 +37,7 @@
   font-family: 'SF Pro Display', sans-serif;
 }
 
-/* Title (Abhaya Libre) */
+/* Title */
 .login-title {
   font-family: 'Abhaya Libre', serif !important;
   font-size: 80px;
@@ -46,10 +46,9 @@
   margin-top: 10px;
   margin-bottom: 30px;
   letter-spacing: -2.5px;
-
 }
 
-/* Input fields */
+/* Form Inputs */
 form {
   display: flex;
   flex-direction: column;
@@ -81,23 +80,41 @@ input {
   text-decoration: underline;
 }
 
-/* Continue button */
-.continue-btn {
-  background-color: #F5F0EA;
-  border: 1px solid #2B1E1A;
+/* Buttons: Continue & Google */
+.continue-btn, .google-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
   border-radius: 12px;
-  padding: 10px;
+  padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
-  color: #2B1E1A;
   font-family: 'SF Pro Display', sans-serif;
+  width: 100%; /* same width for both buttons */
+  border: 1px solid #2B1E1A;
+  background-color: #F5F0EA;
+  color: #2B1E1A;
+  transition: 
+    background-color 0.3s ease,
+    color 0.3s ease,
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
-.continue-btn:hover {
-  background-color: #EDE7E3;
+.continue-btn:hover, .google-btn:hover {
+  background-color: #2B1E1A; /* immediate color inversion */
+  color: #F5F0EA;
+  transform: translateY(-2px); /* subtle lift */
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
-/* Divider ("or Log In with") */
+.google-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+/* Divider */
 .divider {
   display: flex;
   align-items: center;
@@ -116,32 +133,7 @@ input {
   margin: 0 10px;
 }
 
-/* Google login button */
-.google-btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid #3E2723;
-  border-radius: 10px;
-  background-color: #F7F4F1;
-  padding: 10px 20px;
-  cursor: pointer;
-  font-family: 'SF Pro Display', sans-serif;
-  font-size: 15px;
-  width: 100%;
-}
-
-.google-btn img {
-  width: 20px;
-  height: 20px;
-}
-
-.google-btn:hover {
-  background-color: #EDE7E3;
-}
-
-/* Responsive for mobile */
+/* Responsive */
 @media (max-width: 480px) {
   .login-container {
     width: 90%;
