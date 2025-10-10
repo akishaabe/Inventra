@@ -1,21 +1,21 @@
-/* fonts (you already use Abhaya Libre for header elsewhere) */
+
 .inventory-container { font-family: 'SF Pro', sans-serif; }
 
-/* ensure content is pushed down below fixed navbar */
 .inventory-main {
-  margin-top: 84px; /* matches navbar height + margin */
+  margin-top: 84px;
   padding: 28px 60px;
   background: #ffffff;
   min-height: calc(100vh - 84px);
 }
 
-/* heading -- Abhaya Libre */
+/* heading */
 .inventory-title {
   font-family: 'Abhaya Libre', serif;
-  font-size: 3.8rem;
-  color: #3e2723;
+  font-size: 5rem;
+  color: #000000;
   margin: 4px 0 18px 0;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
+  font-weight: 800;
 }
 
 /* top controls row */
@@ -62,7 +62,7 @@
   transform: translateY(-2px);
 }
 
-/* table wrapper to provide rounded container background like the screenshot */
+/* table wrapper rounded */
 .table-wrap {
   margin-top: 18px;
 }
@@ -77,7 +77,7 @@
 }
 
 .inventory-table thead tr {
-  background: #ded6d4; /* soft header brown/gray */
+  background: #ded6d4;
 }
 
 .inventory-table th, .inventory-table td {
@@ -180,3 +180,54 @@
 .modal-card.delete { width: 480px; text-align:center; border-radius:16px; padding:28px 20px; }
 .modal-buttons { display:flex; justify-content:center; gap:12px; margin-top:18px; }
 .confirm-delete { background:#b84040; color:#fff; border-radius:8px; padding:8px 14px; border:none; cursor:pointer; }
+
+/* === Animations (Unified with Dashboard) === */
+.inventory-page {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.inventory-title {
+  animation: slideDown 0.8s ease-out;
+}
+
+/* Subtle table fade + row stagger animation */
+.inventory-table tbody tr {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: rowFade 0.5s ease-out forwards;
+}
+
+.inventory-table tbody tr:nth-child(1) { animation-delay: 0.1s; }
+.inventory-table tbody tr:nth-child(2) { animation-delay: 0.2s; }
+.inventory-table tbody tr:nth-child(3) { animation-delay: 0.3s; }
+.inventory-table tbody tr:nth-child(4) { animation-delay: 0.4s; }
+
+/* Smooth modal fade-in */
+.modal {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.modal-content {
+  animation: slideUp 0.4s ease-out;
+}
+
+/* === Keyframes === */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes rowFade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
