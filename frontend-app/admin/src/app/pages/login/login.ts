@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./login.css']
 })
 export class LoginComponent {
-  email = '';       // ✅ changed from username
+  email = '';  
   password = '';
 
   constructor(private router: Router) {}
