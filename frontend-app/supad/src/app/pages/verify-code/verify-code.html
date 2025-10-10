@@ -1,0 +1,29 @@
+<div class="container">
+  <div class="logo">
+    <img src="assets/logo.png" alt="Inventra Logo" />
+  </div>
+
+  <div class="icon">
+    <img src="assets/icons/lock.png" alt="Lock Icon" />
+  </div>
+
+  <h2>Forgot Password?</h2>
+  <p>We just sent a 6-digit verification code to your email. Please enter it below.</p>
+
+  <div class="code-inputs">
+    <input *ngFor="let c of code; let i = index"
+           id="code-{{i}}"
+           maxlength="1"
+           [(ngModel)]="code[i]"
+           (input)="onInput($event, i)"
+           name="code{{i}}"
+           type="text"
+           required />
+  </div>
+
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <button (click)="onSubmit()">Continue</button>
+
+  <p class="resend">Didn’t receive the code? <a href="#">Resend</a></p>
+</div>
