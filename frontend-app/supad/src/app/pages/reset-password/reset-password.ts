@@ -12,35 +12,87 @@ import { FormsModule } from '@angular/forms';
 })
 export class ResetPassword {
   password = '';
-  confirm = '';
+  confirmPassword = '';
   error = '';
-  success = false;
-  email = localStorage.getItem('resetEmail') || '';
+  sending = false;
+
+  hasUppercase = false;
+  hasLowercase = false;
+  hasNumber = false;
+  hasSymbol = false;
+  isLengthValid = false;
+  strength = 0;
+  strengthLabel = '';
+  strengthColor = '';
+  passwordsMatch = true;
 
   constructor(private router: Router) {}
 
-  validatePassword(p: string) {
-    if (p.length < 8) return 'Password must be at least 8 characters long.';
-    if (!/[A-Z]/.test(p)) return 'Password must include at least one uppercase letter.';
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(p)) return 'Password must include at least one special character.';
-    return '';
+  onPasswordInput() {
+    const pw = this.password;
+
+    this.hasUppercase = /[A-Z]/.test(pw);
+    this.hasLowercase = /[a-z]/.test(pw);
+    this.hasNumber = /\d/.test(pw);
+    this.hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(pw);
+    this.isLengthValid = pw.length >= 8;
+
+    let score = 0;
+    if (this.hasUppercase) score++;
+    if (this.hasLowercase) score++;
+    if (this.hasNumber) score++;
+    if (this.hasSymbol) score++;
+    if (this.isLengthValid) score++;
+
+    this.strength = score;
+
+    if (score <= 2) {
+      this.strengthLabel = 'Weak';
+      this.strengthColor = 'red';
+    } else if (score === 3 || score === 4) {
+      this.strengthLabel = 'Medium';
+      this.strengthColor = 'orange';
+    } else if (score === 5) {
+      this.strengthLabel = 'Strong';
+      this.strengthColor = 'green';
+    }
+
+    this.checkPasswordMatch();
+  }
+
+  onConfirmPasswordInput() {
+    this.checkPasswordMatch();
+  }
+
+  checkPasswordMatch() {
+    this.passwordsMatch = this.password === this.confirmPassword || !this.confirmPassword;
   }
 
   onSubmit() {
     this.error = '';
-    const v = this.validatePassword(this.password);
-    if (v) { this.error = v; return; }
-    if (this.password !== this.confirm) { this.error = 'Re-enter the same password to confirm.'; return; }
 
+    if (!this.password || !this.confirmPassword) {
+      this.error = 'Please fill out both fields.';
+      return;
+    }
+
+    const strongPassword =
+      this.hasUppercase && this.hasLowercase && this.hasNumber && this.hasSymbol && this.isLengthValid;
+
+    if (!strongPassword) {
+      this.error = 'Please make sure your password meets all the requirements.';
+      return;
+    }
+
+    if (!this.passwordsMatch) {
+      this.error = 'Passwords do not match.';
+      return;
+    }
+
+    this.sending = true;
     setTimeout(() => {
-      this.success = true;
-
-      localStorage.removeItem('resetEmail');
-    }, 400);
-  }
-
-  onOk() {
-    this.success = false;
-    this.router.navigate(['/login']);
+      alert('Password reset successfully!');
+      this.router.navigate(['/login']);
+    }, 1000);
   }
 }
