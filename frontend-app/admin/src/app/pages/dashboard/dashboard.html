@@ -1,0 +1,33 @@
+<div class="dashboard-container">
+  <app-navbar (toggleSidebar)="sidebarOpen = !sidebarOpen"></app-navbar>
+  <app-sidebar [isOpen]="sidebarOpen"></app-sidebar>
+
+  <main class="dashboard-main">
+    <h1 class="dashboard-title">Dashboard</h1>
+
+    <div class="stats-grid">
+      <div class="stat-card white-text">
+        <h2>Today's Sales</h2>
+        <p class="stat-value">₱ 9,240.00</p>
+      </div>
+
+      <div class="stat-card">
+        <h2>Low-Stock Items</h2>
+        <p class="stat-value">8 item(s)</p>
+        <a>See Full Details...</a>
+      </div>
+
+      <div class="stat-card white-text">
+        <h2>Current Stock Value</h2>
+        <p class="stat-value">₱ 124,856.75</p>
+        <p class="positive">↑ 2.3%</p>
+      </div>
+
+      <div class="stat-card">
+        <h2>Forecast Demand</h2>
+        <p class="stat-value">₱ 9,240.00</p>
+        <a>Generate Report</a>
+      </div>
+    </div>
+  </main>
+</div>

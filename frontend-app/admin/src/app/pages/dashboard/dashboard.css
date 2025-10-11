@@ -1,0 +1,149 @@
+/* === Fonts === */
+@font-face {
+  font-family: 'SF Pro';
+  src: url('/assets/fonts/SFPRODISPLAYREGULAR.OTF') format('opentype');
+}
+
+@font-face {
+  font-family: 'SF Compact Rounded';
+  src: url('/assets/fonts/SF-Compact-Rounded-Regular.ttf') format('truetype');
+}
+
+/* === General Layout === */
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  color: #4b2e2b;
+  min-height: 100vh;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard-main {
+  margin-top: 64px;
+  padding: 2rem 3rem;
+  background-color: #fff;
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* === Title === */
+.dashboard-title {
+  font-family: 'Abhaya Libre ExtraBold', serif;
+  font-size: 5rem;
+  font-weight: 800;
+  margin-bottom: 2.5rem;
+  color: #000000;
+  letter-spacing: 0.5px;
+  animation: slideDown 0.8s ease-out;
+}
+
+/* === Grid Layout for Cards === */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+/* === Card Style === */
+.stat-card {
+  background-color: #4B2E2B;
+  border-radius: 20px;
+  padding: 2rem 2.5rem;
+  box-shadow: 4px 6px 12px rgba(0, 0, 0, 0.25);
+  color: #ffffff;
+  position: relative;
+  min-height: 180px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    transform 0.4s ease,
+    box-shadow 0.4s ease,
+    filter 0.4s ease,
+    background-color 0.5s ease,
+    color 0.5s ease;
+}
+
+/* === Staggered load === */
+.stat-card:nth-child(1) { animation: cardEnter 0.6s ease-out 0.1s forwards; }
+.stat-card:nth-child(2) { animation: cardEnter 0.6s ease-out 0.25s forwards; }
+.stat-card:nth-child(3) { animation: cardEnter 0.6s ease-out 0.4s forwards; }
+.stat-card:nth-child(4) { animation: cardEnter 0.6s ease-out 0.55s forwards; }
+
+/* === Hover Effect with color inversion === */
+.stat-card:hover {
+  transform: translateY(-6px) scale(1.05);
+  box-shadow: 8px 12px 20px rgba(0, 0, 0, 0.35);
+  filter: brightness(1.05);
+  background-color: #ffffff;
+  color: #4B2E2B;
+  cursor: pointer;
+}
+
+/* === Inside text colors adjust dynamically === */
+.stat-card:hover h2 {
+  color: #4B2E2B;
+}
+
+.stat-card:hover .stat-value {
+  color: #4B2E2B;
+}
+
+.stat-card:hover a {
+  color: #4B2E2B;
+}
+
+/* === Headings and Values === */
+.stat-card h2 {
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+  letter-spacing: 0.3px;
+}
+
+.stat-value {
+  font-family: 'SF Compact Rounded', 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 2.4rem;
+  font-weight: 500;
+  color: #ffffff;
+  transition: color 0.4s ease;
+}
+
+/* === Footer Links === */
+.stat-card a {
+  position: absolute;
+  bottom: 0.8rem;
+  right: 1rem;
+  font-size: 0.9rem;
+  color: #ffffff;
+  text-decoration: underline;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: color 0.25s ease, opacity 0.25s ease;
+}
+
+.stat-card a:hover {
+  opacity: 1;
+}
+
+/* === Animations === */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}

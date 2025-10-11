@@ -1,0 +1,65 @@
+<div class="forecasting-container">
+  <app-navbar (toggleSidebar)="sidebarOpen = !sidebarOpen"></app-navbar>
+  <app-sidebar [isOpen]="sidebarOpen"></app-sidebar>
+
+  <main class="forecasting-main">
+    <h1 class="page-title">Forecasting</h1>
+
+    <div class="forecasting-content">
+      <!-- LEFT PANEL -->
+      <div class="left-panel">
+        <div class="chart-container">
+          <canvas id="forecastChart"></canvas>
+        </div>
+
+        <div class="filters">
+          <span>Forecast Period: <a href="#" class="link">Next 2 weeks</a></span>
+          <span>Product: <a href="#" class="link">All Products</a></span>
+        </div>
+
+        <div class="table-container">
+          <h3>DETAILED FORECAST</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Week(s)</th>
+                <th>Prediction</th>
+                <th>Current</th>
+                <th>Action Needed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of forecastData">
+                <td>{{ item.product }}</td>
+                <td>
+                  <div *ngFor="let week of item.weeks">{{ week }}</div>
+                </td>
+                <td>
+                  <div *ngFor="let pred of item.prediction">{{ pred }}</div>
+                </td>
+                <td>{{ item.current }}</td>
+                <td>{{ item.action }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="right-panel">
+        <h3>AI RECOMMENDATIONS</h3>
+        <div
+          class="card"
+          *ngFor="let rec of recommendations"
+          (click)="openRecommendation(rec)"
+        >
+          <h4 [class]="rec.priority">{{ rec.title }} ({{ rec.count }})</h4>
+          <p>{{ rec.description }}</p>
+          <small>{{ rec.subtext }}</small>
+          <a href="#" class="link">{{ rec.actionText }}</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

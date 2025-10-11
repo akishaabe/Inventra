@@ -1,0 +1,10 @@
+<div class="sidebar" [class.open]="isOpen">
+  <ul>
+    <li routerLink="/dashboard" routerLinkActive="active">Dashboard</li>
+    <li routerLink="/inventory" routerLinkActive="active">Inventory</li>
+    <li routerLink="/forecasting" routerLinkActive="active">Forecasting</li>
+    <li routerLink="/reports" routerLinkActive="active">Reports</li>
+    <li routerLink="/settings" routerLinkActive="active">Settings</li>
+    <li class="logout" (click)="logout()">Logout</li>
+  </ul>
+</div>
