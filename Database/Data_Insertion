@@ -1,0 +1,120 @@
+USE inventra;
+
+-- 1. USERS
+INSERT INTO users (full_name, email, password_hash, role, is_2fa_enabled, date_registered, last_password_change) VALUES
+('Jericho Leanard Mendoza', 'jericho.mendoza@inventra.com', 'hashed_pw_1', 'SUPERADMIN', TRUE, '2025-09-01 09:00:00', '2025-09-05 09:00:00'),
+('Maria Santos', 'maria.santos@inventra.com', 'hashed_pw_2', 'ADMIN', TRUE, '2025-09-03 10:30:00', '2025-09-08 11:00:00'),
+('Carlos Dizon', 'carlos.dizon@inventra.com', 'hashed_pw_3', 'STAFF', FALSE, '2025-09-05 08:15:00', '2025-09-07 09:45:00'),
+('Anne Rivera', 'anne.rivera@inventra.com', 'hashed_pw_4', 'STAFF', FALSE, '2025-09-06 13:40:00', NULL),
+('John Cruz', 'john.cruz@inventra.com', 'hashed_pw_5', 'ADMIN', TRUE, '2025-09-07 15:10:00', '2025-09-09 17:00:00'),
+('Paula Reyes', 'paula.reyes@inventra.com', 'hashed_pw_6', 'STAFF', FALSE, '2025-09-09 08:00:00', NULL),
+('Miguel Ramos', 'miguel.ramos@inventra.com', 'hashed_pw_7', 'STAFF', FALSE, '2025-09-10 10:00:00', NULL),
+('Sofia Lim', 'sofia.lim@inventra.com', 'hashed_pw_8', 'ADMIN', TRUE, '2025-09-12 14:30:00', '2025-09-14 10:00:00'),
+('Nathaniel Bautista', 'nathan.bautista@inventra.com', 'hashed_pw_9', 'STAFF', FALSE, '2025-09-15 16:45:00', NULL),
+('Ella De Leon', 'ella.deleon@inventra.com', 'hashed_pw_10', 'STAFF', FALSE, '2025-09-17 09:20:00', NULL);
+
+-- 2. SUPPLIERS
+INSERT INTO suppliers (supplier_name, contact_person, contact_number, email) VALUES
+('Café Beans Supply Co.', 'Lucia Navarro', '+63 917 100 1111', 'lucia@cafebeans.com'),
+('RoastMasters Inc.', 'Leo Tan', '+63 917 100 2222', 'leo@roastmasters.com'),
+('PureBrew Trading', 'Karla Uy', '+63 917 100 3333', 'karla@purebrew.com'),
+('Bean Republic', 'Jose Enriquez', '+63 917 100 4444', 'jose@beanrepublic.com'),
+('Grind House Distribution', 'Erika Gomez', '+63 917 100 5555', 'erika@grindhouse.com'),
+('Brew & Co.', 'Daryl Chua', '+63 917 100 6666', 'daryl@brewandco.com'),
+('Golden Aroma Traders', 'Patrick Yu', '+63 917 100 7777', 'patrick@goldenaroma.com'),
+('CoffeeCraft Supply', 'Lara Bautista', '+63 917 100 8888', 'lara@coffeecraft.com'),
+('KapePH Importers', 'Marco Rivera', '+63 917 100 9999', 'marco@kapeph.com'),
+('DailyDrip Merchants', 'Tina Ramos', '+63 917 101 0000', 'tina@dailydrip.com');
+
+-- 3. PRODUCTS
+INSERT INTO products (sku, product_name, category, unit, reorder_level, supplier_id, cost_per_unit, has_expiry, created_at) VALUES
+('P1001', 'Arabica Beans 1kg', 'Coffee Beans', 'kg', 20, 1, 450.00, FALSE, '2025-09-01 09:00:00'),
+('P1002', 'Robusta Beans 1kg', 'Coffee Beans', 'kg', 15, 2, 380.00, FALSE, '2025-09-02 09:00:00'),
+('P1003', 'Espresso Blend 500g', 'Coffee Beans', 'pack', 10, 3, 300.00, FALSE, '2025-09-03 09:00:00'),
+('P1004', 'Paper Cups (100pcs)', 'Supplies', 'box', 25, 4, 120.00, FALSE, '2025-09-04 09:00:00'),
+('P1005', 'Milk 1L', 'Dairy', 'bottle', 10, 5, 85.00, TRUE, '2025-09-05 09:00:00'),
+('P1006', 'Sugar 5kg', 'Condiments', 'bag', 8, 6, 210.00, FALSE, '2025-09-06 09:00:00'),
+('P1007', 'Chocolate Syrup 1L', 'Flavorings', 'bottle', 5, 7, 250.00, TRUE, '2025-09-07 09:00:00'),
+('P1008', 'Whipped Cream 500ml', 'Dairy', 'bottle', 6, 8, 180.00, TRUE, '2025-09-08 09:00:00'),
+('P1009', 'Caramel Syrup 1L', 'Flavorings', 'bottle', 5, 9, 260.00, TRUE, '2025-09-09 09:00:00'),
+('P1010', 'Vanilla Extract 250ml', 'Flavorings', 'bottle', 3, 10, 190.00, TRUE, '2025-09-10 09:00:00');
+
+-- 4. INVENTORY
+INSERT INTO inventory (product_id, quantity_available, last_updated) VALUES
+(1, 120, '2025-10-10 10:00:00'),
+(2, 90, '2025-10-10 10:05:00'),
+(3, 75, '2025-10-10 10:10:00'),
+(4, 200, '2025-10-10 10:15:00'),
+(5, 50, '2025-10-10 10:20:00'),
+(6, 60, '2025-10-10 10:25:00'),
+(7, 40, '2025-10-10 10:30:00'),
+(8, 30, '2025-10-10 10:35:00'),
+(9, 25, '2025-10-10 10:40:00'),
+(10, 15, '2025-10-10 10:45:00');
+
+-- 5. SALES
+INSERT INTO sales (sale_date, total_amount, processed_by, payment_type) VALUES
+('2025-10-01 08:30:00', 1800.00, 3, 'CASH'),
+('2025-10-02 09:00:00', 2500.00, 4, 'CARD'),
+('2025-10-03 10:00:00', 1300.00, 6, 'CASH'),
+('2025-10-04 11:00:00', 2900.00, 7, 'CARD'),
+('2025-10-05 12:00:00', 2100.00, 8, 'CASH'),
+('2025-10-06 13:00:00', 3100.00, 9, 'CASH'),
+('2025-10-07 14:00:00', 2700.00, 5, 'CARD'),
+('2025-10-08 15:00:00', 1500.00, 6, 'CASH'),
+('2025-10-09 16:00:00', 3300.00, 4, 'CARD'),
+('2025-10-10 17:00:00', 2900.00, 3, 'CASH');
+
+-- 6. SALES_ITEMS
+INSERT INTO sales_items (sale_id, product_id, quantity, unit_price, line_total) VALUES
+(1, 1, 2, 450.00, 900.00),
+(1, 2, 2, 450.00, 900.00),
+(2, 3, 4, 300.00, 1200.00),
+(2, 5, 5, 85.00, 425.00),
+(3, 6, 2, 210.00, 420.00),
+(4, 7, 5, 250.00, 1250.00),
+(5, 9, 4, 260.00, 1040.00),
+(6, 8, 6, 180.00, 1080.00),
+(7, 10, 5, 190.00, 950.00),
+(8, 4, 8, 120.00, 960.00);
+
+-- 7. FORECASTS
+INSERT INTO forecasts (product_id, forecasted_demand, forecast_date, generated_by, model_meta, created_at) VALUES
+(1, 140, '2025-11-01', 1, 'Model=v1.0;Method=LinearRegression', '2025-10-10 11:00:00'),
+(2, 110, '2025-11-01', 1, 'Model=v1.0;Method=LinearRegression', '2025-10-10 11:05:00'),
+(3, 85, '2025-11-01', 1, 'Model=v1.0;Method=LinearRegression', '2025-10-10 11:10:00'),
+(4, 220, '2025-11-01', 1, 'Model=v1.0;Method=LinearRegression', '2025-10-10 11:15:00'),
+(5, 65, '2025-11-01', 1, 'Model=v1.0;Method=LinearRegression', '2025-10-10 11:20:00'),
+(6, 70, '2025-11-01', 1, 'Model=v1.0;Method=LinearRegression', '2025-10-10 11:25:00'),
+(7, 50, '2025-11-01', 1, 'Model=v1.0;Method=LinearRegression', '2025-10-10 11:30:00'),
+(8, 35, '2025-11-01', 1, 'Model=v1.0;Method=LinearRegression', '2025-10-10 11:35:00'),
+(9, 30, '2025-11-01', 1, 'Model=v1.0;Method=LinearRegression', '2025-10-10 11:40:00'),
+(10, 25, '2025-11-01', 1, 'Model=v1.0;Method=LinearRegression', '2025-10-10 11:45:00');
+
+-- 8. REPORTS
+INSERT INTO reports (report_type, generated_date, generated_by, file_path) VALUES
+('SALES', '2025-10-01 18:00:00', 1, '/reports/sales_2025-10-01.pdf'),
+('SALES', '2025-10-02 18:00:00', 1, '/reports/sales_2025-10-02.pdf'),
+('SALES', '2025-10-03 18:00:00', 1, '/reports/sales_2025-10-03.pdf'),
+('INVENTORY', '2025-10-04 18:00:00', 1, '/reports/inventory_2025-10-04.pdf'),
+('INVENTORY', '2025-10-05 18:00:00', 1, '/reports/inventory_2025-10-05.pdf'),
+('FORECAST', '2025-10-06 18:00:00', 1, '/reports/forecast_2025-10-06.pdf'),
+('FORECAST', '2025-10-07 18:00:00', 1, '/reports/forecast_2025-10-07.pdf'),
+('SALES', '2025-10-08 18:00:00', 1, '/reports/sales_2025-10-08.pdf'),
+('INVENTORY', '2025-10-09 18:00:00', 1, '/reports/inventory_2025-10-09.pdf'),
+('FORECAST', '2025-10-10 18:00:00', 1, '/reports/forecast_2025-10-10.pdf');
+
+-- 9. BACKUPS
+INSERT INTO backups (backup_date, backup_file, created_by) VALUES
+('2025-10-01 19:00:00', '/backups/inventra_backup_2025-10-01.sql', 1),
+('2025-10-02 19:00:00', '/backups/inventra_backup_2025-10-02.sql', 1),
+('2025-10-03 19:00:00', '/backups/inventra_backup_2025-10-03.sql', 1),
+('2025-10-04 19:00:00', '/backups/inventra_backup_2025-10-04.sql', 1),
+('2025-10-05 19:00:00', '/backups/inventra_backup_2025-10-05.sql', 1),
+('2025-10-06 19:00:00', '/backups/inventra_backup_2025-10-06.sql', 1),
+('2025-10-07 19:00:00', '/backups/inventra_backup_2025-10-07.sql', 1),
+('2025-10-08 19:00:00', '/backups/inventra_backup_2025-10-08.sql', 1),
+('2025-10-09 19:00:00', '/backups/inventra_backup_2025-10-09.sql', 1),
+('2025-10-10 19:00:00', '/backups/inventra_backup_2025-10-10.sql', 1);
+
+
