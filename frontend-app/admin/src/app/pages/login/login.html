@@ -1,34 +1,33 @@
-<div class="login-container">
-  <a class="back" href="#">&#x2039; Back</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In</title>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
 
-  <h1 class="login-title">Log In</h1>
+  <div class="login-container">
+    <a href="index.html" class="back">← Back</a>
+    <h1 class="title">Log In</h1>
 
-  <form (ngSubmit)="login()">
-    <input
-      type="email"
-      placeholder="Enter Email"
-      [(ngModel)]="email"
-      name="email"
-      required
-    />
+    <form>
+      <input type="email" placeholder="Enter Email" required>
+      <input type="password" placeholder="Enter Password" required>
 
-    <input
-      type="password"
-      placeholder="Enter Password"
-      [(ngModel)]="password"
-      name="password"
-      required
-    />
+      <a routerLink="/forgot-password" class="forgot">Forgot password?</a>
 
-    <a href="#" class="forgot">Forgot Password?</a>
+      <button type="submit" class="continue-btn">Continue</button>
+    </form>
 
-    <button class="continue-btn" type="submit">Continue</button>
-  </form>
+    <div class="divider">or Log In with</div>
 
-  <div class="divider">or Log In with</div>
+    <button class="google-btn" (click)="loginWithGoogle()">
+      <img src="assets/images/google-icon.png" alt="Google Logo" />
+      Continue with Google
+    </button>
+  </div>
 
-  <button class="google-btn">
-    <img src="assets/images/google logo.png" alt="Google logo">
-    Google
-  </button>
-</div>
+</body>
+</html>

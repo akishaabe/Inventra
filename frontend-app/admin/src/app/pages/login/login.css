@@ -1,163 +1,112 @@
 @import url('https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@700&family=SF+Pro+Display:wght@400&display=swap');
 
-/* Fullscreen dark brown background */
-:host {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+body {
+  background-color: #3c2321;
+  font-family: 'SF Pro Display', sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #3E2723;
-  font-family: 'SF Pro Display', sans-serif;
+  height: 100vh;
+  margin: 0;
+  animation: fadeIn 0.8s ease-in;
 }
 
-/* Card container */
 .login-container {
-  position: relative;
-  background-color: #D9D9D9;
-  border-radius: 40px;
-  padding: 60px 80px;
-  width: 400px;
+  background-color: #dedede;
+  width: 380px;
+  padding: 40px;
+  border-radius: 25px;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  animation: fadeInUp 0.8s ease forwards;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
 }
 
-/* Back link */
-.back {
-  position: absolute;
-  top: 30px;
-  left: 40px;
-  font-size: 14px;
-  color: #2B1E1A;
-  cursor: pointer;
-  text-decoration: none;
-  font-family: 'SF Pro Display', sans-serif;
-}
-
-/* Title */
-.login-title {
-  font-family: 'Abhaya Libre', serif !important;
-  font-size: 80px;
-  font-weight: 0;
-  color: #3E2723;
-  margin-top: 10px;
-  margin-bottom: 30px;
-  letter-spacing: -2.5px;
-}
-
-/* Form Inputs */
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+.title {
+  font-family: 'Abhaya Libre', serif;
+  font-size: 48px;
+  color: #3c2321;
+  margin-bottom: 25px;
+  animation: fadeInDown 0.8s ease forwards;
 }
 
 input {
+  display: block;
   width: 100%;
-  padding: 14px;
+  padding: 12px;
+  margin: 10px 0;
   border: none;
   border-radius: 10px;
-  background-color: #F7F4F1;
-  font-size: 16px;
-  font-family: 'SF Pro Display', sans-serif;
-  box-sizing: border-box;
+  background-color: #f7f4f0;
+  animation: slideUp 0.8s ease forwards;
 }
 
-/* Forgot password link */
-.forgot {
-  text-align: left;
-  font-size: 13px;
-  color: #0026FF;
-  text-decoration: none;
-  margin-top: -5px;
-  margin-bottom: 5px;
-}
-
-.forgot:hover {
-  text-decoration: underline;
-}
-
-/* Buttons: Continue & Google */
-.continue-btn, .google-btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  border-radius: 12px;
-  padding: 10px 20px;
-  font-size: 16px;
+.continue-btn,
+.google-btn {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #3c2321;
+  border-radius: 10px;
+  background-color: #f7f4f0;
+  color: #3c2321;
+  font-weight: bold;
   cursor: pointer;
-  font-family: 'SF Pro Display', sans-serif;
-  width: 100%; /* same width for both buttons */
-  border: 1px solid #2B1E1A;
-  background-color: #F5F0EA;
-  color: #2B1E1A;
-  transition: 
-    background-color 0.3s ease,
-    color 0.3s ease,
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  margin-top: 15px;
+  transition: all 0.3s ease;
+  animation: slideUp 1s ease forwards;
 }
 
-.continue-btn:hover, .google-btn:hover {
-  background-color: #2B1E1A; /* immediate color inversion */
-  color: #F5F0EA;
-  transform: translateY(-2px); /* subtle lift */
-  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+.continue-btn:hover,
+.google-btn:hover {
+  background-color: #e8e2da;
+  transform: scale(1.03);
 }
 
 .google-btn img {
   width: 20px;
-  height: 20px;
+  vertical-align: middle;
+  margin-right: 8px;
 }
 
-/* Divider */
 .divider {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  margin: 25px 0;
-  color: #3E2723;
-  font-size: 12px;
-  font-family: 'SF Pro Display', sans-serif;
+  margin: 20px 0;
+  color: #3c2321;
+  font-size: 14px;
+  animation: fadeIn 1s ease forwards;
 }
 
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  border-bottom: 1px solid #3E2723;
-  margin: 0 10px;
+.forgot {
+  display: block;
+  margin-top: 5px;
+  color: #3c2321;
+  text-decoration: underline;
+  font-size: 13px;
+  animation: fadeIn 1s ease forwards;
 }
 
-/* Responsive */
-@media (max-width: 480px) {
-  .login-container {
-    width: 90%;
-    padding: 40px 20px;
-    border-radius: 30px;
-  }
+.back {
+  display: block;
+  text-align: left;
+  color: #3c2321;
+  margin-bottom: 20px;
+  animation: fadeInDown 0.8s ease forwards;
+}
 
-  .login-title {
-    font-size: 36px;
-  }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
-  input {
-    font-size: 14px;
-  }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(25px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-  .continue-btn,
-  .google-btn {
-    font-size: 14px;
-    padding: 8px;
-  }
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-  .back {
-    top: 20px;
-    left: 25px;
-    font-size: 13px;
-  }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
