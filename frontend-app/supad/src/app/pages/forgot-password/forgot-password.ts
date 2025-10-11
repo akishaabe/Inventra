@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-forgot-password',
@@ -11,23 +11,41 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./forgot-password.css']
 })
 export class ForgotPassword {
-  email: string = '';
-  error: string = '';
+  email = '';
+  error = '';
+  sending = false;
 
   constructor(private router: Router) {}
 
-  onSubmit() {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(this.email)) {
-      this.error = 'Please enter a valid email address.';
-      return;
-    }
+ onSubmit(form: NgForm) {
+  this.error = '';
 
-    this.error = '';
-
-
-    console.log('Sending verification code to:', this.email);
-
-    this.router.navigate(['/verify-code']);
+  if (!form.valid) {
+    this.error = 'Please enter a valid email address.';
+    return;
   }
+
+  this.sending = true;
+
+
+fetch('http://localhost:4000/api/send-reset-code', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: this.email })
+})
+
+  .then(async res => {
+    if (!res.ok) throw new Error(await res.text());
+
+    
+    localStorage.setItem('resetEmail', this.email);
+
+    this.router.navigate(['/verify-code'], { queryParams: { email: this.email } });
+  })
+  .catch(err => {
+    this.error = 'Failed to send verification code.';
+    console.error(err);
+  })
+  .finally(() => this.sending = false);
+}
 }
