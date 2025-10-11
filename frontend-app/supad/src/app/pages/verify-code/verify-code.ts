@@ -43,26 +43,38 @@ export class VerifyCode implements OnInit {
   }
 
   onSubmit() {
-    this.sending = true;
-    this.error = '';
+  this.sending = true;
+  this.error = '';
 
-    const enteredCode = this.code.join('');
-    if (enteredCode.length < 6) {
-      this.error = 'Please enter all 6 digits.';
-      this.sending = false;
-      return;
-    }
+  const email = localStorage.getItem('resetEmail');
+  const enteredCode = this.code.join('');
 
-
-    setTimeout(() => {
-      if (enteredCode === '123456') {
-        this.router.navigate(['/reset-password']);
-      } else {
-        this.error = 'Invalid verification code.';
-      }
-      this.sending = false;
-    }, 1000);
+  if (!enteredCode || enteredCode.length < 6) {
+    this.error = 'Please enter all 6 digits.';
+    this.sending = false;
+    return;
   }
+
+
+  
+fetch('http://localhost:4000/api/verify-code', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email, code: enteredCode })
+})
+  .then(async res => {
+    if (!res.ok) throw new Error(await res.text());
+
+    this.router.navigate(['/reset-password']);
+  })
+  .catch(async err => {
+    const message = await err.message;
+    this.error = 'Invalid or expired verification code.';
+    console.error(err);
+  })
+  .finally(() => this.sending = false);
+}
+
 
   startTimer() {
     this.canResend = false;

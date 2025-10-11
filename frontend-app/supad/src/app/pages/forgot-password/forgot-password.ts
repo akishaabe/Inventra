@@ -28,11 +28,12 @@ export class ForgotPassword {
   this.sending = true;
 
 
-  fetch(', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: this.email })
-  })
+fetch('http://localhost:4000/api/send-reset-code', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: this.email })
+})
+
   .then(async res => {
     if (!res.ok) throw new Error(await res.text());
 
