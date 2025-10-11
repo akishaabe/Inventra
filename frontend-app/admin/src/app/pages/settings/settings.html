@@ -1,0 +1,148 @@
+<app-navbar (toggleSidebar)="toggleSidebar()"></app-navbar>
+<app-sidebar [isOpen]="sidebarOpen"></app-sidebar>
+
+<main class="settings-main">
+  <h1 class="settings-title">Settings</h1>
+
+  <div class="user-management">
+    <!-- LEFT PROFILE SUMMARY -->
+    <aside class="profile-summary">
+      <div class="profile-pic"></div>
+      <h2 class="profile-name">{{ firstName }} {{ lastName }}</h2>
+      <p class="small"><strong>Email</strong><br />{{ email }}</p>
+      <p class="small"><strong>Role</strong><br />Admin</p>
+      <p class="small"><strong>Status</strong><br />Active</p>
+      <p class="small"><strong>Last Login</strong><br />September 23, 2025, 18:00 PST</p>
+    </aside>
+
+    <!-- RIGHT: EDIT PROFILE + MANAGE USERS -->
+    <section class="settings-right">
+      <!-- EDIT PROFILE -->
+      <div class="edit-profile">
+        <h3>Edit Profile</h3>
+
+        <div class="form-grid">
+          <input type="text" placeholder="First Name" [(ngModel)]="firstName" name="firstName" />
+          <input type="text" placeholder="Last Name" [(ngModel)]="lastName" name="lastName" />
+        </div>
+
+        <div class="form-row-single">
+          <input type="email" placeholder="Email" [(ngModel)]="email" name="profileEmail" />
+        </div>
+
+        <div class="save-row">
+          <button class="save-btn" (click)="saveChanges()">Save Changes!</button>
+        </div>
+      </div>
+
+      <!-- MANAGE USERS -->
+      <div class="manage-users">
+        <div class="manage-header">
+          <h3>Manage Users</h3>
+          <a href="#" (click)="openAddUserModal($event)">Add a user</a>
+        </div>
+
+        <div class="user-cards">
+          <div class="user-card" *ngFor="let user of users">
+            <div class="user-avatar"></div>
+            <div class="user-name">{{ user.name }}</div>
+            <div class="user-role">{{ user.role }}</div>
+
+            <!-- remove button (PNG) -->
+            <button class="remove-image-btn" (click)="promptRemoveUser(user)">
+              <img src="assets/images/rmv-usr.png" alt="remove user" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ADD USER MODAL -->
+<div class="modal" *ngIf="showAddUser">
+  <div class="modal-card add-user">
+    <span class="back-btn" (click)="closeAddUserModal()">‹ Back</span>
+    <h2>Add User</h2>
+
+    <form #addForm="ngForm" (ngSubmit)="submitNewUser(addForm)">
+      <!-- EMAIL -->
+      <input
+        type="email"
+        name="email"
+        placeholder="Enter Email"
+        [(ngModel)]="newUser.email"
+        required
+        #emailCtrl="ngModel"
+      />
+      <small class="error" *ngIf="emailCtrl.invalid && emailCtrl.touched">
+        Invalid email format (example@domain.com)
+      </small>
+
+      <!-- TEMP PASSWORD -->
+      <input
+        type="password"
+        name="password"
+        placeholder="Enter Temporary Password"
+        [(ngModel)]="newUser.password"
+        required
+        [pattern]="passwordPattern"
+        #passwordCtrl="ngModel"
+      />
+      <small class="error" *ngIf="passwordCtrl.invalid && passwordCtrl.touched">
+        Password must have at least 8 characters, 1 uppercase letter, 1 number, and 1 special character.
+      </small>
+
+      <!-- FIRST NAME -->
+      <input
+        type="text"
+        name="firstName"
+        placeholder="First Name"
+        [(ngModel)]="newUser.firstName"
+        required
+        #fn="ngModel"
+      />
+      <small class="error" *ngIf="fn.invalid && fn.touched">This field is required.</small>
+
+      <!-- LAST NAME -->
+      <input
+        type="text"
+        name="lastName"
+        placeholder="Last Name"
+        [(ngModel)]="newUser.lastName"
+        required
+        #ln="ngModel"
+      />
+      <small class="error" *ngIf="ln.invalid && ln.touched">This field is required.</small>
+
+      <div class="modal-buttons">
+        <button type="submit" class="continue-btn" [disabled]="addForm.invalid">Save</button>
+        <button type="button" class="continue-btn cancel" (click)="closeAddUserModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- REMOVE CONFIRMATION -->
+<div class="modal" *ngIf="showRemoveModal">
+  <div class="modal-card delete">
+    <h2>Remove User?</h2>
+    <p>Are you sure you want to remove this user?</p>
+    <div class="modal-buttons">
+      <button class="confirm-delete" (click)="confirmRemove()">Yes</button>
+      <button class="continue-btn cancel" (click)="cancelRemove()">No</button>
+    </div>
+  </div>
+</div>
+
+<!-- SIMPLE CONFIRMATION (User Added / Saved) -->
+<div class="modal" *ngIf="showConfirmModal">
+  <div class="modal-card small">
+    <h2>{{ confirmMessage }}</h2>
+    <div class="modal-buttons">
+      <button class="continue-btn" (click)="closeConfirmModal()">Okay</button>
+    </div>
+  </div>
+</div>
+
