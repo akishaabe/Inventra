@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,30 +10,76 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './verify-code.html',
   styleUrls: ['./verify-code.css']
 })
-export class VerifyCode {
+export class VerifyCode implements OnInit {
   code: string[] = ['', '', '', '', '', ''];
-  error: string = '';
+  codeDigits = Array(6).fill(0);
+  sending = false;
+  error = '';
+  timer = 30;
+  canResend = false;
+  interval: any;
 
   constructor(private router: Router) {}
 
+  ngOnInit() {
+    this.startTimer();
+  }
+
   onInput(event: any, index: number) {
-    const value = event.target.value;
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+
     if (value && index < 5) {
-      document.getElementById('code-' + (index + 1))?.focus();
+      const next = document.querySelectorAll('.code-box')[index + 1] as HTMLInputElement;
+      next?.focus();
+    }
+  }
+
+  onKeyDown(event: KeyboardEvent, index: number) {
+    if (event.key === 'Backspace' && !this.code[index] && index > 0) {
+      const prev = document.querySelectorAll('.code-box')[index - 1] as HTMLInputElement;
+      prev?.focus();
     }
   }
 
   onSubmit() {
+    this.sending = true;
+    this.error = '';
+
     const enteredCode = this.code.join('');
-    if (enteredCode.length !== 6) {
+    if (enteredCode.length < 6) {
       this.error = 'Please enter all 6 digits.';
+      this.sending = false;
       return;
     }
 
-    this.error = '';
 
-    console.log('Verifying code:', enteredCode);
+    setTimeout(() => {
+      if (enteredCode === '123456') {
+        this.router.navigate(['/reset-password']);
+      } else {
+        this.error = 'Invalid verification code.';
+      }
+      this.sending = false;
+    }, 1000);
+  }
 
-    this.router.navigate(['/reset-password']);
+  startTimer() {
+    this.canResend = false;
+    this.timer = 30;
+    this.interval = setInterval(() => {
+      this.timer--;
+      if (this.timer <= 0) {
+        clearInterval(this.interval);
+        this.canResend = true;
+      }
+    }, 1000);
+  }
+
+  resendCode() {
+    if (this.canResend) {
+      this.startTimer();
+      alert('Verification code resent!');
+    }
   }
 }

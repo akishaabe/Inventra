@@ -11,27 +11,36 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./reset-password.css']
 })
 export class ResetPassword {
-  password: string = '';
-  confirmPassword: string = '';
-  error: string = '';
+  password = '';
+  confirm = '';
+  error = '';
+  success = false;
+  email = localStorage.getItem('resetEmail') || '';
 
   constructor(private router: Router) {}
 
+  validatePassword(p: string) {
+    if (p.length < 8) return 'Password must be at least 8 characters long.';
+    if (!/[A-Z]/.test(p)) return 'Password must include at least one uppercase letter.';
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(p)) return 'Password must include at least one special character.';
+    return '';
+  }
+
   onSubmit() {
-    if (this.password.length < 6) {
-      this.error = 'Password must be at least 6 characters long.';
-      return;
-    }
-    if (this.password !== this.confirmPassword) {
-      this.error = 'Passwords do not match.';
-      return;
-    }
-
     this.error = '';
+    const v = this.validatePassword(this.password);
+    if (v) { this.error = v; return; }
+    if (this.password !== this.confirm) { this.error = 'Re-enter the same password to confirm.'; return; }
 
-    // 🔹 TODO: Call backend to actually reset password
-    console.log('New password set:', this.password);
+    setTimeout(() => {
+      this.success = true;
 
+      localStorage.removeItem('resetEmail');
+    }, 400);
+  }
+
+  onOk() {
+    this.success = false;
     this.router.navigate(['/login']);
   }
 }
