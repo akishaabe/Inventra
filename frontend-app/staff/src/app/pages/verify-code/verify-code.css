@@ -1,0 +1,125 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #f8f2eb;
+  font-family: "SF Pro Display", sans-serif;
+  color: #2b1e1a;
+}
+
+.page-wrap {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 80px 40px;
+}
+
+
+.site-logo {
+  position: absolute;
+  top: 36px;
+  right: 56px;
+  width: 115px;
+  height: 21px;
+  object-fit: contain;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.header img {
+  width: 55px;
+  height: 55px;
+}
+
+h1 {
+  font-family: 'Abhaya Libre', serif;
+  font-size: 36px;
+  margin: 0;
+}
+
+.lead {
+  font-size: 17px;
+  line-height: 1.5;
+  color: #1f1b19;
+  margin-bottom: 32px;
+}
+
+.code-inputs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.code-box {
+  width: 50px;
+  height: 55px;
+  border: 1.5px solid #3b231f;
+  border-radius: 10px;
+  background-color: transparent;
+  font-size: 22px;
+  text-align: center;
+  color: #1b1b1b;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.code-box:focus {
+  border-color: #5a352d;
+  box-shadow: 0 0 0 2px rgba(59, 35, 31, 0.1);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.btn-verify {
+  margin-top: 20px;
+  padding: 10px 36px;
+  border: 1.5px solid #3b231f;
+  background-color: transparent;
+  color: #3b231f;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.btn-verify:hover {
+  background-color: #3b231f;
+  color: #fff;
+}
+
+.btn-resend {
+  margin-top: 20px;
+  padding: 8px 20px;
+  border: none;
+  background: none;
+  color: #3b231f;
+  font-weight: 500;
+  text-decoration: underline;
+}
+
+.btn-resend:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error {
+  font-size: 13px;
+  color: #b30000;
+  margin-top: 6px;
+}
+
+@media (max-width: 768px) {
+  .page-wrap {
+    padding: 40px 24px;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+}

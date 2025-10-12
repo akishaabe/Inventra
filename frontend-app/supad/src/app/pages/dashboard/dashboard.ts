@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -26,8 +26,32 @@ export class Dashboard implements OnInit {
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
+        if (this.sidebarOpen) {
+      document.body.classList.add('sidebar-active');
+    } else {
+      document.body.classList.remove('sidebar-active');
+    }
   }
 
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.querySelector('.menu-toggle');
+
+  
+    if (
+      this.sidebarOpen &&
+      sidebar &&
+      !sidebar.contains(event.target as Node) &&
+      toggleBtn &&
+      !toggleBtn.contains(event.target as Node)
+    ) {
+      this.sidebarOpen = false;
+      document.body.classList.remove('sidebar-active');
+    }
+  }
+
+  
   async fetchDashboardData() {
     try {
       const res = await fetch('http://localhost:4000/api/dashboard');
@@ -42,4 +66,13 @@ export class Dashboard implements OnInit {
     localStorage.clear();
     this.router.navigate(['/login']);
   }
+
+  goToSettings() {
+  this.router.navigate(['/settings']);
+}
+
+goToInventory() {
+  this.router.navigate(['/inventory']);
+}
+
 }
