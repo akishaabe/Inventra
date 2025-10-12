@@ -15,6 +15,7 @@ export class ResetPassword {
   confirmPassword = '';
   error = '';
   sending = false;
+  passwordChanged = false;
 
   hasUppercase = false;
   hasLowercase = false;
@@ -91,8 +92,13 @@ export class ResetPassword {
 
     this.sending = true;
     setTimeout(() => {
-      alert('Password reset successfully!');
-      this.router.navigate(['/login']);
+      this.sending = false;
+      this.passwordChanged = true;
     }, 1000);
+  }
+
+  closePopup() {
+    this.passwordChanged = false;
+    this.router.navigate(['/dashboard']);
   }
 }

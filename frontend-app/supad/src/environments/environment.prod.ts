@@ -8,5 +8,8 @@ export const environment = {
   messagingSenderId: "535489947409",
   appId: "1:535489947409:web:70eff0efa695d7514f8eb0",
   measurementId: "G-723WV7HZC2"
+  },
+  resend: {
+    apiKey: 're_29KHLZqH_9eEuBgEVfnKXqi5pWoEM6r98'
   }
 };

@@ -1,14 +1,15 @@
 import { Component, EventEmitter, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
+  imports: [CommonModule, RouterLink],
   templateUrl: './navbar.html',
-  imports: [RouterLink],
   styleUrls: ['./navbar.css']
 })
-export class NavbarComponent {
+export class Navbar {
   @Output() toggleSidebar = new EventEmitter<void>();
 
   onMenuClick() {
