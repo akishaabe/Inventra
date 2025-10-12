@@ -155,3 +155,8 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
 
+
+
+/* forecast */
+import forecastsRoute from "./routes/forecasts.js";
+app.use("/api/forecasts", forecastsRoute);

@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  apiBase: 'http://localhost:4000/api',
   firebase: {
   apiKey: "AIzaSyBwHVxnhWkp8Fpa407Aa4IOVR84zXReJPQ",
   authDomain: "inventra-c2dd0.firebaseapp.com",

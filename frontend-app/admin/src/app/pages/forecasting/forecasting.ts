@@ -1,9 +1,10 @@
-import { Component, AfterViewInit, OnInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { Chart } from 'chart.js/auto';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { NavbarComponent } from '../../components/navbar/navbar';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-forecasting',
@@ -12,65 +13,124 @@ import { SidebarComponent } from '../../components/sidebar/sidebar';
   templateUrl: './forecasting.html',
   styleUrls: ['./forecasting.css']
 })
+export class Forecasting implements OnInit, AfterViewInit {
+  @ViewChild('forecastChart') chartRef!: ElementRef<HTMLCanvasElement>;
+  sidebarOpen = false;
+  forecastData: any[] = [];
+  recommendations: any[] = [];
+  chart: any;
 
-export class Forecasting implements AfterViewInit {
-  sidebarOpen = false; 
+  tableLimit = 10;
+  recLimit = 4;
+  tableExpanded = false;
+  recExpanded = false;
+  dataLoaded = false;
 
-  forecastData = [
-    {
-      product: 'Espresso Beans',
-      weeks: ['Sept. 23–27', 'Sept. 30–Oct. 4'],
-      prediction: ['45kg', '48kg'],
-      current: '38kg',
-      action: 'Order 20kg'
-    },
-    {
-      product: 'Croissants',
-      weeks: ['Sept. 23–27', 'Sept. 30–Oct. 4'],
-      prediction: ['120pcs', '135pcs'],
-      current: '84pcs',
-      action: 'Order 60pcs'
-    }
-  ];
+  constructor(private http: HttpClient) {}
 
-  recommendations = [
-    {
-      title: 'High Priority',
-      count: 3,
-      description: 'Order 20kg Espresso Beans by Sep 25',
-      subtext: 'Current: 38kg → Predicted need: 45kg/week',
-      actionText: 'Create Purchase Order',
-      priority: 'high-priority'
-    },
-    {
-      title: 'Opportunities',
-      count: 2,
-      description: 'Promo opportunity: Cold Brew demand',
-      subtext: '+25% next week',
-      actionText: 'Create Promotion',
-      priority: 'opportunity'
-    },
-    {
-      title: 'Reduce Inventory',
-      count: 1,
-      description: 'Pumpkin syrup',
-      subtext: '-15% predicted demand',
-      actionText: 'Adjust Order',
-      priority: 'reduce'
-    }
-  ];
+  ngOnInit() {
+    this.http.get<any[]>(`${environment.apiBase}/forecasts?refresh=true`).subscribe(data => {
+      console.log('API forecasts sample:', data[0]);
+
+      this.forecastData = data.map((item: any) => {
+        const demand = parseFloat(item.forecasted_demand) || 0;
+        const currentQty = parseFloat(item.quantity_available) || 0;
+
+        return {
+          product: item.product_name,
+          weeks: [this.formatWeek(item.forecast_date)],
+          prediction: [`${demand.toFixed(2)}kg`],
+          current: `${currentQty.toFixed(2)}kg`,
+          action: this.getAction(demand, currentQty)
+        };
+      });
+
+      this.recommendations = this.generateRecommendations(this.forecastData);
+      this.dataLoaded = true;
+      // Build chart only if canvas is ready
+      setTimeout(() => this.buildChart(), 100);
+    });
+  }
 
   ngAfterViewInit() {
-    const ctx = document.getElementById('forecastChart') as HTMLCanvasElement;
+    // If data already loaded, build chart now that canvas is ready
+    setTimeout(() => {
+      if (this.dataLoaded) this.buildChart();
+    }, 100);
+  }
 
-    new Chart(ctx, {
+  formatWeek(dateStr: string): string {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  getAction(predicted: number, current: number): string {
+    const diff = predicted - current;
+    if (diff > 0) return `Order ${diff.toFixed(2)}kg`;
+    if (diff < -10) return `Reduce ${Math.abs(diff).toFixed(2)}kg`;
+    return 'No action';
+  }
+
+  generateRecommendations(data: any[]): any[] {
+    return data.map(item => {
+      const predicted = parseFloat(item.prediction[0]) || 0;
+      const current = parseFloat(item.current) || 0;
+      const diff = predicted - current;
+
+      if (diff > 20) {
+        return {
+          title: 'High Priority',
+          count: 1,
+          description: `Order ${diff.toFixed(2)}kg of ${item.product}`,
+          subtext: `Current: ${current.toFixed(2)}kg → Predicted: ${predicted.toFixed(2)}kg`,
+          actionText: 'Create Purchase Order',
+          priority: 'high-priority'
+        };
+      } else if (diff < -15) {
+        return {
+          title: 'Reduce Inventory',
+          count: 1,
+          description: `${item.product}`,
+          subtext: `Overstocked by ${Math.abs(diff).toFixed(2)}kg`,
+          actionText: 'Adjust Order',
+          priority: 'reduce'
+        };
+      } else {
+        return {
+          title: 'Opportunities',
+          count: 1,
+          description: `Promo opportunity: ${item.product}`,
+          subtext: 'Stable demand',
+          actionText: 'Create Promotion',
+          priority: 'opportunity'
+        };
+      }
+    });
+  }
+
+  buildChart() {
+    const ctx = this.chartRef?.nativeElement?.getContext('2d');
+    if (!ctx) {
+      console.warn('Chart context not ready yet.');
+      return;
+    }
+
+    if (this.chart) {
+      this.chart.destroy();
+    }
+
+    const labels = this.forecastData.map(d => d.weeks[0]);
+    const predicted = this.forecastData.map(d => parseFloat(d.prediction[0]) || 0);
+    const current = this.forecastData.map(d => parseFloat(d.current) || 0);
+
+    this.chart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+        labels,
         datasets: [
           {
             label: 'Predicted Demand',
-            data: [60, 48, 90, 81, 56, 55, 40],
+            data: predicted,
             borderColor: '#8b1e1e',
             borderWidth: 2,
             fill: false,
@@ -78,7 +138,7 @@ export class Forecasting implements AfterViewInit {
           },
           {
             label: 'Current Stock',
-            data: [30, 8, 40, 19, 96, 27, 99],
+            data: current,
             borderColor: '#3a5f3a',
             borderWidth: 2,
             fill: false,
@@ -88,8 +148,12 @@ export class Forecasting implements AfterViewInit {
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: { position: 'top' }
+        },
+        scales: {
+          y: { beginAtZero: true }
         }
       }
     });
@@ -97,5 +161,15 @@ export class Forecasting implements AfterViewInit {
 
   openRecommendation(rec: any) {
     alert(`Clicked: ${rec.title}`);
+  }
+
+  toggleTable() {
+    this.tableExpanded = !this.tableExpanded;
+    this.tableLimit = this.tableExpanded ? this.forecastData.length : 10;
+  }
+
+  toggleRecs() {
+    this.recExpanded = !this.recExpanded;
+    this.recLimit = this.recExpanded ? this.recommendations.length : 4;
   }
 }
