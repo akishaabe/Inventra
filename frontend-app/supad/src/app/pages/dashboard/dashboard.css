@@ -1,207 +1,305 @@
-@import url('https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@700&family=Archivo+Black&family=SF+Pro+Display:wght@400&display=swap');
 
 .dashboard-container {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
+  background-color: #fff;
+  font-family: 'SF Pro Display', sans-serif;
+  color: #3c2321;
   overflow: hidden;
-  background-color: #ffffff;
-  color: #1a1a1a;
-  font-family: 'SF Pro Display', 'Inter', sans-serif;
 }
 
 .sidebar {
-  width: 0;
-  background-color: #f6f3ed;
+  background-color: #d9d9d9;
+  width: 230px;
+  height: 100vh;
   position: fixed;
-  height: 100%;
   left: 0;
   top: 0;
-  overflow: hidden;
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
-  z-index: 1000;
-  padding: 0;
-}
-
-.sidebar.open {
-  width: 260px;
-  padding: 2rem 1.5rem;
-  animation: fadeIn 0.3s ease forwards;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
 }
 
 .sidebar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 1.2rem 1.4rem;
 }
 
 .logo {
-  font-family: 'Abhaya Libre', serif;
-  font-weight: 700;
-  color: #3b1f1f;
-  font-size: 1.4rem;
-  letter-spacing: 0.5px;
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 1.5rem;
+  color: #3c2321;
 }
 
 .close-btn {
   background: none;
   border: none;
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   cursor: pointer;
-  color: #3b1f1f;
-  transition: transform 0.2s ease;
-}
-
-.close-btn:hover {
-  transform: scale(1.1);
+  color: #3c2321;
 }
 
 .nav-links {
-  margin-top: 2.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.3rem;
+  margin-top: -0.5rem;
 }
 
 .nav-links a {
+  padding: 1rem 1.6rem;
   text-decoration: none;
-  color: #222;
-  font-size: 1.15rem;
-  font-weight: 500;
-  transition: color 0.25s ease, transform 0.2s ease;
+  color: #3c2321;
+  font-size: 1.5rem;
+  font-family: 'SF Pro Display', sans-serif;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
 }
 
 .nav-links a:hover,
 .nav-links a.active {
-  color: #5a2a2a;
-  transform: translateX(5px);
+  background-color: #3c2321;
+  color: #fff;
+  border-left: 4px solid #fff;
 }
 
-.main-content {
-  flex: 1;
-  width: 100%;
-  margin-left: 0;
-  transition: margin-left 0.4s ease;
+.dashboard-header {
+  position: fixed;
+  top: 0;
+  left: 230px;
+  right: 0;
+  height: 70px;
+  background-color: #f7f4f0;
   display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  background-color: #fff;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 99;
 }
 
-.sidebar.open ~ .main-content {
-  margin-left: 260px;
-}
-
-.topbar {
+.header-left {
   display: flex;
   align-items: center;
-  background-color: #d3d0cd;
-  padding: 0.8rem 1.2rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  animation: slideDown 0.4s ease;
+  gap: 1rem;
 }
 
 .menu-btn {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  color: #3c2321;
+  font-size: 1.6rem;
   cursor: pointer;
-  color: #3b1f1f;
-  transition: transform 0.2s ease;
 }
 
-.menu-btn:hover {
-  transform: scale(1.1);
+.brand-name {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 1.5rem;
+  color: #3c2321;
+  letter-spacing: 1px;
 }
 
-.title {
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #3c2321;
+}
+
+.profile-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.dashboard-main {
+  margin-left: 230px;
+  margin-top: 10rem;
+  padding: 2.5rem 3rem;
+  background-color: #fff;
   flex: 1;
+  animation: fadeIn 0.6s ease-in;
+}
+
+.dashboard-title {
   font-family: 'Abhaya Libre', serif;
-  font-size: 2.4rem;
+  font-size: 3.5rem;
   font-weight: 700;
-  margin-left: 1rem;
-  letter-spacing: 0.3px;
+  color: #000;
+  margin-bottom: 2rem;
+  letter-spacing: 0.5px;
 }
 
-.user {
-  font-family: 'SF Pro Display', sans-serif;
-  font-weight: 500;
-  color: #2c2c2c;
-}
-
-.cards {
+.stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-  gap: 1.8rem;
-  padding: 2rem;
-  animation: fadeInUp 0.6s ease both;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-.card {
-  background-color: #4a2727;
-  color: #bcbcbc;
-  border-radius: 1.2rem;
-  padding: 1.8rem 1.5rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  position: relative;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  animation: popIn 0.5s ease forwards;
-}
-
-.card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
-}
-
-.card h3 {
+.stat-card {
+  border-radius: 20px;
+  padding: 2rem 2.5rem;
   font-family: 'SF Pro Display', sans-serif;
-  font-weight: 500;
-  font-size: 1rem;
   color: #fff;
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  min-height: 190px;
+  position: relative;
+  overflow: hidden;
 }
 
-.value {
-  font-size: 2rem;
-  margin: 0.6rem 0;
+.stat-card h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
 }
 
-.details {
-  font-size: 0.85rem;
-  color: #ccc;
+.stat-value {
+  font-size: 2.4rem;
+  font-weight: 600;
+}
+
+.stat-subtext {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  position: absolute;
+  bottom: 1rem;
+  left: 2rem;
+}
+
+.stat-trend {
+  position: absolute;
+  bottom: 1rem;
+  right: 2rem;
+  color: #42db05;
+  font-size: 0.9rem;
   text-decoration: underline;
   cursor: pointer;
-  transition: color 0.2s ease;
+  opacity: 0.9;
 }
 
-.details:hover {
-  color: #fff;
-}
-
-.trend {
-  color: #7fff7f;
-  font-size: 0.85rem;
+.stat-link {
   position: absolute;
-  bottom: 1.2rem;
-  right: 1.2rem;
+  bottom: 1rem;
+  right: 2rem;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  cursor: pointer;
+  opacity: 0.9;
+  color: inherit;
 }
 
+.stat-card:hover {
+  transform: translateY(-6px);
+  filter: brightness(1.1);
+}
+
+.sales {
+  background-color: #4B2E2B;
+}
+
+.low-stock {
+  background-color: #4B2E2B;
+}
+
+.stock-value {
+  background-color: #4B2E2B;
+}
+
+.forecast {
+  background-color: #4B2E2B;
+}
+
+/* === Animations === */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateX(-10px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideDown {
-  from { transform: translateY(-10px); opacity: 0; }
+  from { transform: translateY(-20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
-@keyframes popIn {
-  from { transform: scale(0.96); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+.sidebar {
+  background-color: #d9d9d9;
+  width: 240px;
+  height: 100vh;
+  position: fixed;
+  left: -240px;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.4s ease;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 200;
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+.sidebar-active main.dashboard-main::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.1);
+  z-index: 50;
+}
+
+.dashboard-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background-color: #f7f4f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 150;
+  transition: left 0.4s ease;
+}
+
+.sidebar.open ~ .dashboard-header {
+  left: 240px;
+}
+
+.dashboard-main {
+  margin-left: 0;
+  margin-top: 40px;
+  padding: 2rem 3rem;
+  background-color: #ffffff;
+  min-height: 100vh;
+  transition: filter 0.3s ease, margin-left 0.4s ease;
+  position: relative;
+  z-index: 100;
+}
+
+.sidebar.open ~ .dashboard-main {
+  margin-left: 240px;
+}
+
+
+.sidebar-active .dashboard-main {
+  filter: blur(50px);
+  pointer-events: none;
 }

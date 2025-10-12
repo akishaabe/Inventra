@@ -3,7 +3,7 @@
   <aside class="sidebar" [class.open]="sidebarOpen">
     <div class="sidebar-header">
       <h2 class="logo">inventra</h2>
-      <button class="close-btn" (click)="toggleSidebar()">×</button>
+      <button class="close-btn" (click)="toggleSidebar()">☰</button>
     </div>
     <nav class="nav-links">
       <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
@@ -15,37 +15,48 @@
     </nav>
   </aside>
 
-  <!-- Main content -->
-  <main class="main-content">
-    <header class="topbar">
-      <button class="menu-btn" (click)="toggleSidebar()">☰</button>
-      <h1 class="title">Dashboard</h1>
-      <div class="user">Café Pèdro</div>
-    </header>
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-left">
+      <button class="menu-btn" (click)="toggleSidebar()"*ngIf="!sidebarOpen">☰</button>
+      <h2 class="brand-name"*ngIf="!sidebarOpen">inventra</h2>
+    </div>
 
-    <section class="cards">
-      <div class="card">
-        <h3>Today's Sales</h3>
-        <p class="value">₱{{ dashboardData.todaySales | number: '1.2-2' }}</p>
+    <div class="header-right">
+      <span class="user-name">Café Pèdro</span>
+      <img src="assets/images/profile icon.png" alt="Profile" class="profile-icon"   (click)="goToSettings()"
+  style="cursor: pointer;"/>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="dashboard-main">
+    <h1 class="dashboard-title">Dashboard</h1>
+
+        <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card sales">
+        <h2>Today's Sales</h2>
+        <p class="stat-value">₱{{ dashboardData.todaySales | number: '1.2-2' }}</p>
       </div>
 
-      <div class="card">
-        <h3>Low-Stock Items</h3>
-        <p class="value">{{ dashboardData.lowStock }} item(s)</p>
-        <a class="details">See Full Details...</a>
+      <div class="stat-card low-stock">
+        <h2>Low-Stock Items</h2>
+        <p class="stat-value">{{ dashboardData.lowStock }} item(s)</p>
+        <a class="stat-link"  (click)="goToInventory()" style="cursor: pointer;">See Full Details...</a>
       </div>
 
-      <div class="card">
-        <h3>Current Stock Value</h3>
-        <p class="value">₱{{ dashboardData.stockValue | number: '1.2-2' }}</p>
-        <small class="trend">↑ 2.3%</small>
+      <div class="stat-card stock-value">
+        <h2>Current Stock Value</h2>
+        <p class="stat-value">₱{{ dashboardData.stockValue | number: '1.2-2' }}</p>
+        <small class="stat-trend">↑ 2.3%</small>
       </div>
 
-      <div class="card">
-        <h3>Forecast Demand</h3>
-        <p class="value">₱{{ dashboardData.forecastDemand | number: '1.2-2' }}</p>
-        <a class="details">Generate Report</a>
+      <div class="stat-card forecast">
+        <h2>Forecast Demand</h2>
+        <p class="stat-value">₱{{ dashboardData.forecastDemand | number: '1.2-2' }}</p>
+        <a class="stat-link">Generate Report</a>
       </div>
-    </section>
+    </div>
   </main>
 </div>

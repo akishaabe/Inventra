@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@700&family=SF+Pro+Display:wght@400&display=swap');
+
+body {
+  background-color: #3c2321;
+  font-family: 'SF Pro Display', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  animation: fadeIn 0.8s ease-in;
+}
+
+.login-container {
+  background-color: #dedede;
+  width: 380px;
+  padding: 40px;
+  border-radius: 25px;
+  text-align: center;
+  animation: fadeInUp 0.8s ease forwards;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+}
+
+.title {
+  font-family: 'Abhaya Libre', serif;
+  font-size: 48px;
+  color: #3c2321;
+  margin-bottom: 25px;
+  animation: fadeInDown 0.8s ease forwards;
+}
+
+input {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 10px;
+  background-color: #f7f4f0;
+  animation: slideUp 0.8s ease forwards;
+}
+
+.error {
+  color: red;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 4px;
+  text-align: left;
+}
+
+
+.continue-btn,
+.google-btn {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #3c2321;
+  border-radius: 10px;
+  background-color: #f7f4f0;
+  color: #3c2321;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: all 0.3s ease;
+  animation: slideUp 1s ease forwards;
+}
+
+.continue-btn:hover,
+.google-btn:hover {
+  background-color: #e8e2da;
+  transform: scale(1.03);
+}
+
+.google-btn img {
+  width: 20px;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.divider {
+  margin: 20px 0;
+  color: #3c2321;
+  font-size: 14px;
+  animation: fadeIn 1s ease forwards;
+}
+
+.forgot {
+  display: block;
+  margin-top: 5px;
+  color: #3c2321;
+  text-decoration: underline;
+  font-size: 13px;
+  animation: fadeIn 1s ease forwards;
+}
+
+.back {
+  display: block;
+  text-align: left;
+  color: #3c2321;
+  margin-bottom: 20px;
+  animation: fadeInDown 0.8s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(25px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
