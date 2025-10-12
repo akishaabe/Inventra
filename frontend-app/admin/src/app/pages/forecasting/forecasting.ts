@@ -1,18 +1,20 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit } from '@angular/core';
 import { Chart } from 'chart.js/auto';
 import { CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { NavbarComponent } from '../../components/navbar/navbar';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 
 @Component({
   selector: 'app-forecasting',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, SidebarComponent],
+  imports: [CommonModule, HttpClientModule, NavbarComponent, SidebarComponent],
   templateUrl: './forecasting.html',
   styleUrls: ['./forecasting.css']
 })
+
 export class Forecasting implements AfterViewInit {
-  sidebarOpen = false; // 👈 added to sync with navbar toggle
+  sidebarOpen = false; 
 
   forecastData = [
     {
