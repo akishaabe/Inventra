@@ -1,0 +1,6 @@
+# Ignore MySQL container data
+mysql-data/
+
+node_modules/
+.env
+*.log

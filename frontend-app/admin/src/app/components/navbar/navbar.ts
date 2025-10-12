@@ -9,7 +9,7 @@ import { RouterLink } from '@angular/router';
   templateUrl: './navbar.html',
   styleUrls: ['./navbar.css']
 })
-export class Navbar {
+export class NavbarComponent {
   @Output() toggleSidebar = new EventEmitter<void>();
 
   onMenuClick() {
