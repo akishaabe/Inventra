@@ -30,6 +30,7 @@ app.get("/api/users", async (req, res) => {
 const resend = new Resend("re_29KHLZqH_9eEuBgEVfnKXqi5pWoEM6r98");
 const verificationCodes = {};
 
+// --- SEND CODE
 app.post("/api/send-reset-code", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: "Email is required" });
@@ -63,6 +64,7 @@ app.post("/api/send-reset-code", async (req, res) => {
   }
 });
 
+// --- VERIFY CODE
 app.post("/api/verify-code", (req, res) => {
   const { email, code } = req.body;
 
@@ -75,6 +77,7 @@ app.post("/api/verify-code", (req, res) => {
   res.json({ success: true });
 });
 
+// --- RESEND CODE
 app.post("/api/resend-code", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: "Email is required" });
@@ -108,6 +111,33 @@ app.post("/api/resend-code", async (req, res) => {
   }
 });
 
+// --- DASHBOARD DATA ENDPOINT
+app.get("/api/dashboard", async (req, res) => {
+  try {
+    const [sales] = await db.query(
+      "SELECT SUM(amount) AS total FROM sales WHERE DATE(date) = CURDATE()"
+    );
+    const [lowStock] = await db.query(
+      "SELECT COUNT(*) AS count FROM products WHERE stock < reorder_level"
+    );
+    const [stockValue] = await db.query(
+      "SELECT SUM(stock * price) AS value FROM products"
+    );
+    const [forecast] = await db.query(
+      "SELECT SUM(predicted_sales) AS demand FROM forecast_data"
+    );
+
+    res.json({
+      todaySales: sales[0].total || 0,
+      lowStock: lowStock[0].count || 0,
+      stockValue: stockValue[0].value || 0,
+      forecastDemand: forecast[0].demand || 0,
+    });
+  } catch (err) {
+    console.error("Error fetching dashboard data:", err);
+    res.status(500).json({ error: "Failed to fetch dashboard data" });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

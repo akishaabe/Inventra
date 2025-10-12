@@ -1,149 +1,207 @@
-/* === Fonts === */
-@font-face {
-  font-family: 'SF Pro';
-  src: url('/assets/fonts/SFPRODISPLAYREGULAR.OTF') format('opentype');
-}
+@import url('https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap');
 
-@font-face {
-  font-family: 'SF Compact Rounded';
-  src: url('/assets/fonts/SF-Compact-Rounded-Regular.ttf') format('truetype');
-}
-
-/* === General Layout === */
 .dashboard-container {
   display: flex;
-  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
   background-color: #ffffff;
-  color: #4b2e2b;
-  min-height: 100vh;
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  margin: 0;
+  color: #1a1a1a;
+  font-family: 'SF Pro Display', 'Inter', sans-serif;
+}
+
+.sidebar {
+  width: 0;
+  background-color: #f6f3ed;
+  position: fixed;
+  height: 100%;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
   padding: 0;
 }
 
-.dashboard-main {
-  margin-top: 64px;
-  padding: 2rem 3rem;
-  background-color: #fff;
-  animation: fadeIn 0.6s ease-out;
+.sidebar.open {
+  width: 260px;
+  padding: 2rem 1.5rem;
+  animation: fadeIn 0.3s ease forwards;
 }
 
-/* === Title === */
-.dashboard-title {
-  font-family: 'Abhaya Libre ExtraBold', serif;
-  font-size: 5rem;
-  font-weight: 800;
-  margin-bottom: 2.5rem;
-  color: #000000;
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-family: 'Abhaya Libre', serif;
+  font-weight: 700;
+  color: #3b1f1f;
+  font-size: 1.4rem;
   letter-spacing: 0.5px;
-  animation: slideDown 0.8s ease-out;
 }
 
-/* === Grid Layout for Cards === */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
-  width: 100%;
-  max-width: 1080px;
-  margin: 0 auto;
-}
-
-/* === Card Style === */
-.stat-card {
-  background-color: #4B2E2B;
-  border-radius: 20px;
-  padding: 2rem 2.5rem;
-  box-shadow: 4px 6px 12px rgba(0, 0, 0, 0.25);
-  color: #ffffff;
-  position: relative;
-  min-height: 180px;
-  opacity: 0;
-  transform: translateY(20px);
-  transition:
-    transform 0.4s ease,
-    box-shadow 0.4s ease,
-    filter 0.4s ease,
-    background-color 0.5s ease,
-    color 0.5s ease;
-}
-
-/* === Staggered load === */
-.stat-card:nth-child(1) { animation: cardEnter 0.6s ease-out 0.1s forwards; }
-.stat-card:nth-child(2) { animation: cardEnter 0.6s ease-out 0.25s forwards; }
-.stat-card:nth-child(3) { animation: cardEnter 0.6s ease-out 0.4s forwards; }
-.stat-card:nth-child(4) { animation: cardEnter 0.6s ease-out 0.55s forwards; }
-
-/* === Hover Effect with color inversion === */
-.stat-card:hover {
-  transform: translateY(-6px) scale(1.05);
-  box-shadow: 8px 12px 20px rgba(0, 0, 0, 0.35);
-  filter: brightness(1.05);
-  background-color: #ffffff;
-  color: #4B2E2B;
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
   cursor: pointer;
+  color: #3b1f1f;
+  transition: transform 0.2s ease;
 }
 
-/* === Inside text colors adjust dynamically === */
-.stat-card:hover h2 {
-  color: #4B2E2B;
+.close-btn:hover {
+  transform: scale(1.1);
 }
 
-.stat-card:hover .stat-value {
-  color: #4B2E2B;
+.nav-links {
+  margin-top: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
 }
 
-.stat-card:hover a {
-  color: #4B2E2B;
+.nav-links a {
+  text-decoration: none;
+  color: #222;
+  font-size: 1.15rem;
+  font-weight: 500;
+  transition: color 0.25s ease, transform 0.2s ease;
 }
 
-/* === Headings and Values === */
-.stat-card h2 {
-  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #ffffff;
+.nav-links a:hover,
+.nav-links a.active {
+  color: #5a2a2a;
+  transform: translateX(5px);
+}
+
+.main-content {
+  flex: 1;
+  width: 100%;
+  margin-left: 0;
+  transition: margin-left 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background-color: #fff;
+}
+
+.sidebar.open ~ .main-content {
+  margin-left: 260px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  background-color: #d3d0cd;
+  padding: 0.8rem 1.2rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  animation: slideDown 0.4s ease;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #3b1f1f;
+  transition: transform 0.2s ease;
+}
+
+.menu-btn:hover {
+  transform: scale(1.1);
+}
+
+.title {
+  flex: 1;
+  font-family: 'Abhaya Libre', serif;
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin-left: 1rem;
   letter-spacing: 0.3px;
 }
 
-.stat-value {
-  font-family: 'SF Compact Rounded', 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 2.4rem;
+.user {
+  font-family: 'SF Pro Display', sans-serif;
   font-weight: 500;
-  color: #ffffff;
-  transition: color 0.4s ease;
+  color: #2c2c2c;
 }
 
-/* === Footer Links === */
-.stat-card a {
-  position: absolute;
-  bottom: 0.8rem;
-  right: 1rem;
-  font-size: 0.9rem;
-  color: #ffffff;
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 1.8rem;
+  padding: 2rem;
+  animation: fadeInUp 0.6s ease both;
+}
+
+.card {
+  background-color: #4a2727;
+  color: #bcbcbc;
+  border-radius: 1.2rem;
+  padding: 1.8rem 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  position: relative;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  animation: popIn 0.5s ease forwards;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+
+.card h3 {
+  font-family: 'SF Pro Display', sans-serif;
+  font-weight: 500;
+  font-size: 1rem;
+  color: #fff;
+}
+
+.value {
+  font-size: 2rem;
+  margin: 0.6rem 0;
+}
+
+.details {
+  font-size: 0.85rem;
+  color: #ccc;
   text-decoration: underline;
   cursor: pointer;
-  opacity: 0.9;
-  transition: color 0.25s ease, opacity 0.25s ease;
+  transition: color 0.2s ease;
 }
 
-.stat-card a:hover {
-  opacity: 1;
+.details:hover {
+  color: #fff;
 }
 
-/* === Animations === */
+.trend {
+  color: #7fff7f;
+  font-size: 0.85rem;
+  position: absolute;
+  bottom: 1.2rem;
+  right: 1.2rem;
+}
+
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideDown {
-  from { transform: translateY(-20px); opacity: 0; }
+  from { transform: translateY(-10px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
-@keyframes cardEnter {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes popIn {
+  from { transform: scale(0.96); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
