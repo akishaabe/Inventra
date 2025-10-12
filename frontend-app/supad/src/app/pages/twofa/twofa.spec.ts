@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Twofa } from './twofa';
+import { TwoFA } from './twofa';
 
 describe('Twofa', () => {
-  let component: Twofa;
-  let fixture: ComponentFixture<Twofa>;
+  let component: TwoFA;
+  let fixture: ComponentFixture<TwoFA>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Twofa]
+      imports: [TwoFA]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Twofa);
+    fixture = TestBed.createComponent(TwoFA);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

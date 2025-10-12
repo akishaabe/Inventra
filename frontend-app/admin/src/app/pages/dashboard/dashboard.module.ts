@@ -7,7 +7,7 @@ import { DashboardComponent } from './dashboard';
   imports: [
     CommonModule,
     RouterModule,
-    DashboardComponent // ✅ imported since it’s standalone
+    DashboardComponent
   ],
   providers: [DecimalPipe]
 })

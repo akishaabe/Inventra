@@ -1,1 +1,30 @@
-<p>twofa works!</p>
+<div class="twofa-container">
+  <h1>Two-Factor Authentication</h1>
+  <p>Enter the 6-digit code sent to your email</p>
+
+  <form (ngSubmit)="onSubmit()">
+    <div class="code-inputs">
+      <input
+        *ngFor="let digit of codeDigits; let i = index"
+        class="code-box"
+        maxlength="1"
+        [(ngModel)]="code[i]"
+        name="digit{{i}}"
+        (input)="onInput($event, i)"
+        (keydown)="onKeyDown($event, i)"
+      />
+    </div>
+
+    <button type="submit" class="continue-btn" [disabled]="sending">
+      {{ sending ? 'Verifying...' : 'Continue' }}
+    </button>
+
+    <div class="resend-container">
+      <button type="button" (click)="resendCode()" [disabled]="!canResend">
+        Resend Code {{ !canResend ? '(' + timer + 's)' : '' }}
+      </button>
+    </div>
+
+    <p *ngIf="error" class="error">{{ error }}</p>
+  </form>
+</div>

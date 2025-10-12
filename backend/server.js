@@ -2,6 +2,8 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { Resend } from "resend";
+import db from "./db.js";
+import dashboardRoutes from "./routes/dashboard.js";
 
 const app = express();
 const PORT = 4000;
@@ -9,11 +11,27 @@ const PORT = 4000;
 app.use(cors());
 app.use(bodyParser.json());
 
+app.use("/api/dashboard", dashboardRoutes);
+
+app.get("/", (req, res) => {
+  res.send("Backend is running!");
+});
+
+app.get("/api/users", async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT * FROM users");
+    res.json(rows);
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database query failed" });
+  }
+});
+
 const resend = new Resend("re_29KHLZqH_9eEuBgEVfnKXqi5pWoEM6r98");
+const verificationCodes = {};
 
 app.post("/api/send-reset-code", async (req, res) => {
   const { email } = req.body;
-
   if (!email) return res.status(400).json({ error: "Email is required" });
 
   const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -40,12 +58,10 @@ app.post("/api/send-reset-code", async (req, res) => {
 
     res.json({ success: true, message: "Verification code sent!" });
   } catch (err) {
-    console.error(err);
+    console.error("Email sending error:", err);
     res.status(500).json({ error: "Failed to send email" });
   }
 });
-
-const verificationCodes = {};
 
 app.post("/api/verify-code", (req, res) => {
   const { email, code } = req.body;
@@ -59,4 +75,6 @@ app.post("/api/verify-code", (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(PORT, () => console.log(`✅ Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
