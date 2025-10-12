@@ -1,30 +1,56 @@
-<div class="twofa-container">
-  <h1>Two-Factor Authentication</h1>
-  <p>Enter the 6-digit code sent to your email</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In</title>
+  <link rel="stylesheet" href="twofa.css">
+</head>
+<body>
 
-  <form (ngSubmit)="onSubmit()">
-    <div class="code-inputs">
-      <input
-        *ngFor="let digit of codeDigits; let i = index"
-        class="code-box"
-        maxlength="1"
-        [(ngModel)]="code[i]"
-        name="digit{{i}}"
-        (input)="onInput($event, i)"
-        (keydown)="onKeyDown($event, i)"
-      />
+<div class="twofa-page">
+  <div class="logo">inventra</div>
+
+  <div class="twofa-container">
+    <div class="twofa-header">
+      <img src="assets/images/id-icon.png" alt="ID Icon" class="icon" />
+      <h1>Confirm Account</h1>
     </div>
 
-    <button type="submit" class="continue-btn" [disabled]="sending">
-      {{ sending ? 'Verifying...' : 'Continue' }}
-    </button>
+    <p class="instruction">
+     For your security, we’ve sent a 6-digit verification code to your email 
+        <span class="email">({{ maskedEmail }})</span>.
+      <br />Please enter the code below so we can confirm it’s you.
+    </p>
 
-    <div class="resend-container">
-      <button type="button" (click)="resendCode()" [disabled]="!canResend">
-        Resend Code {{ !canResend ? '(' + timer + 's)' : '' }}
+    <form (ngSubmit)="onSubmit()">
+      <div class="code-inputs">
+        <input
+          *ngFor="let digit of codeDigits; let i = index"
+          class="code-box"
+          maxlength="1"
+          [(ngModel)]="code[i]"
+          name="digit{{i}}"
+          (input)="onInput($event, i)"
+          (keydown)="onKeyDown($event, i)"
+        />
+      </div>
+
+      <div class="resend-container">
+        <p>
+          Didn’t receive the code?
+          <button type="button" (click)="resendCode()" [disabled]="!canResend">
+            Resend
+          </button>
+          {{ !canResend ? '(' + timer + 's)' : '' }}
+        </p>
+      </div>
+
+      <button type="submit" class="continue-btn" [disabled]="sending">
+        {{ sending ? 'Verifying...' : 'Continue' }}
       </button>
-    </div>
 
-    <p *ngIf="error" class="error">{{ error }}</p>
-  </form>
+      <p *ngIf="error" class="error">{{ error }}</p>
+    </form>
+  </div>
 </div>

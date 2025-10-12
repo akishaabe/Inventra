@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Resend } from 'resend';
+
 
 @Component({
   selector: 'app-twofa',
@@ -11,7 +11,7 @@ import { Resend } from 'resend';
   templateUrl: './twofa.html',
   styleUrls: ['./twofa.css']
 })
-export class TwoFA implements OnInit {
+export class TwoFA implements OnInit, OnDestroy {
   code: string[] = ['', '', '', '', '', ''];
   codeDigits = Array(6).fill(0);
   error = '';
@@ -20,14 +20,29 @@ export class TwoFA implements OnInit {
   canResend = false;
   interval: any;
   email: string | null = null;
-
-  private resend = new Resend('re_29KHLZqH_9eEuBgEVfnKXqi5pWoEM6r98');
+  maskedEmail: string = '';
 
   constructor(private router: Router) {}
 
-  ngOnInit() {
+    ngOnInit() {
     this.email = localStorage.getItem('twofaEmail');
+    if (!this.email) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.maskedEmail = this.maskEmail(this.email);
     this.startTimer();
+  }
+
+    maskEmail(email: string | null): string {
+    if (!email) return '';
+    const [name, domain] = email.split('@');
+    const maskedName = name[0] + '*'.repeat(Math.max(0, name.length - 2)) + name.slice(-1);
+    return `${maskedName}@${domain}`;
+  }
+
+  ngOnDestroy() {
+    if (this.interval) clearInterval(this.interval);
   }
 
   onInput(event: any, index: number) {
@@ -45,28 +60,42 @@ export class TwoFA implements OnInit {
     }
   }
 
-  onSubmit() {
-    this.sending = true;
-    this.error = '';
+  async onSubmit() {
+  this.sending = true;
+  this.error = '';
 
-    const storedCode = localStorage.getItem('twofaCode');
-    const enteredCode = this.code.join('');
+  const email = localStorage.getItem('twofaEmail');
+  const enteredCode = this.code.join('');
 
-    if (!enteredCode || enteredCode.length < 6) {
-      this.error = 'Please enter all 6 digits.';
-      this.sending = false;
-      return;
-    }
+  if (!enteredCode || enteredCode.length < 6) {
+    this.error = 'Please enter all 6 digits.';
+    this.sending = false;
+    return;
+  }
 
-    if (enteredCode === storedCode) {
-      console.log(`✅ 2FA success for ${this.email}`);
+  try {
+    const response = await fetch('http://localhost:4000/api/verify-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code: enteredCode })
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      console.log(`✅ 2FA success for ${email}`);
       localStorage.removeItem('twofaCode');
       this.router.navigate(['/dashboard']);
     } else {
-      this.error = 'Invalid verification code.';
-      this.sending = false;
+      this.error = data.error || 'Invalid or expired verification code.';
     }
+  } catch (error) {
+    console.error('Verification failed:', error);
+    this.error = 'Failed to connect to the server.';
+  } finally {
+    this.sending = false;
   }
+}
 
   startTimer() {
     this.canResend = false;
@@ -80,19 +109,27 @@ export class TwoFA implements OnInit {
     }, 1000);
   }
 
-  async resendCode() {
-    if (!this.email || !this.canResend) return;
+ async resendCode() {
+  if (!this.email || !this.canResend) return;
 
-    const newCode = Math.floor(100000 + Math.random() * 900000).toString();
-    localStorage.setItem('twofaCode', newCode);
-
-    await this.resend.emails.send({
-      from: 'Inventra <noreply@inventra.com>',
-      to: this.email,
-      subject: 'Your new 2FA Verification Code',
-      html: `<p>Your new verification code is <strong>${newCode}</strong></p>`
+  try {
+    const response = await fetch('http://localhost:4000/api/resend-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: this.email })
     });
 
-    this.startTimer();
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      alert('Verification code resent!');
+      this.startTimer();
+    } else {
+      this.error = data.error || 'Failed to resend verification code.';
+    }
+  } catch (error) {
+    console.error('Error resending code:', error);
+    this.error = 'Failed to connect to the server.';
   }
+}
 }

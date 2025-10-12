@@ -24,40 +24,30 @@ export class Login {
 
   constructor(private router: Router) {}
 
-  async onSubmit() {
-    try {
-      console.log('Email:', this.email);
-      console.log('Password:', this.password);
+ async onSubmit() {
+  this.loading = true;
+  try {
+    const response = await fetch('http://localhost:4000/api/send-reset-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: this.email })
+    });
 
-      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const data = await response.json();
 
+    if (data.success) {
       localStorage.setItem('twofaEmail', this.email);
-      localStorage.setItem('twofaCode', verificationCode);
-
-    
-      await this.resend.emails.send({
-        from: 'Inventra <noreply@inventra.com>',
-        to: this.email,
-        subject: 'Your Inventra 2FA Verification Code',
-        html: `
-          <h2>Two-Factor Authentication</h2>
-          <p>Hello,</p>
-          <p>Your verification code is:</p>
-          <h1 style="letter-spacing: 4px;">${verificationCode}</h1>
-          <p>This code will expire in 5 minutes.</p>
-          <p>- The Inventra Team</p>
-        `
-      });
-
-      // Redirect to TwoFA page
       this.router.navigate(['/twofa']);
-    } catch (error) {
-      console.error('Login failed:', error);
-      alert('Failed to send verification code. Please try again.');
-    } finally {
-      this.loading = false;
+    } else {
+      alert(data.error || 'Failed to send verification code.');
     }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to connect to server.');
+  } finally {
+    this.loading = false;
   }
+}
 
   async loginWithGoogle() {
     this.loading = true;

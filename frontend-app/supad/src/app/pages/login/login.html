@@ -12,7 +12,7 @@
   <a routerLink="/" class="back">← Back</a>
   <h1 class="title">Log In</h1>
 
-  <form (ngSubmit)="onSubmit()" #loginForm="ngForm" novalidate>
+  <form (ngSubmit)="onSubmit(); $event.preventDefault()" #loginForm="ngForm" novalidate>
    <input
   type="email"
   name="email"
