@@ -16,6 +16,7 @@ services:
     image: phpmyadmin/phpmyadmin
     platform: linux/amd64
     container_name: phpmyadmin
+    
     restart: always
     depends_on:
       - mysql
