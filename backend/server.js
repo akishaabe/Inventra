@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import { Resend } from "resend";
 import db from "./db.js";
+import composeDb from "./db.compose.js";
 import dashboardRoutes from "./routes/dashboard.js";
 
 const app = express();
@@ -23,6 +24,17 @@ app.get("/api/users", async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error("Database error:", err);
+    res.status(500).json({ error: "Database query failed" });
+  }
+});
+
+/* amiel db */
+app.get("/api/test-users", async (req, res) => {
+  try {
+    const [rows] = await composeDb.query("SELECT * FROM users");
+    res.json(rows);
+  } catch (err) {
+    console.error("Compose DB error:", err);
     res.status(500).json({ error: "Database query failed" });
   }
 });
@@ -112,3 +124,4 @@ app.post("/api/resend-code", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
