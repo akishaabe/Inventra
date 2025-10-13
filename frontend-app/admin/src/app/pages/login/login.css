@@ -40,6 +40,15 @@ input {
   animation: slideUp 0.8s ease forwards;
 }
 
+.error {
+  color: red;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 4px;
+  text-align: left;
+}
+
+
 .continue-btn,
 .google-btn {
   width: 100%;

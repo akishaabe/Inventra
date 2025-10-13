@@ -5,25 +5,29 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { NavbarComponent } from '../../components/navbar/navbar';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { environment } from '../../../environments/environment';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-forecasting',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, NavbarComponent, SidebarComponent],
+  imports: [CommonModule, FormsModule, HttpClientModule, NavbarComponent, SidebarComponent],
   templateUrl: './forecasting.html',
   styleUrls: ['./forecasting.css']
 })
 export class Forecasting implements OnInit, AfterViewInit {
   @ViewChild('forecastChart') chartRef!: ElementRef<HTMLCanvasElement>;
+
   sidebarOpen = false;
   forecastData: any[] = [];
   recommendations: any[] = [];
   chart: any;
-
   tableLimit = 10;
   recLimit = 4;
   tableExpanded = false;
   recExpanded = false;
+  forecastPeriods = [7, 14, 30, 60, 90];
+selectedPeriod = 14;
+
   dataLoaded = false;
 
   constructor(private http: HttpClient) {}
@@ -35,7 +39,6 @@ export class Forecasting implements OnInit, AfterViewInit {
       this.forecastData = data.map((item: any) => {
         const demand = parseFloat(item.forecasted_demand) || 0;
         const currentQty = parseFloat(item.quantity_available) || 0;
-
         return {
           product: item.product_name,
           weeks: [this.formatWeek(item.forecast_date)],
@@ -47,13 +50,13 @@ export class Forecasting implements OnInit, AfterViewInit {
 
       this.recommendations = this.generateRecommendations(this.forecastData);
       this.dataLoaded = true;
+
       // Build chart only if canvas is ready
       setTimeout(() => this.buildChart(), 100);
     });
   }
 
   ngAfterViewInit() {
-    // If data already loaded, build chart now that canvas is ready
     setTimeout(() => {
       if (this.dataLoaded) this.buildChart();
     }, 100);
@@ -172,4 +175,26 @@ export class Forecasting implements OnInit, AfterViewInit {
     this.recExpanded = !this.recExpanded;
     this.recLimit = this.recExpanded ? this.recommendations.length : 4;
   }
+
+  updateForecastPeriod() {
+  this.http
+    .get<any[]>(`${environment.apiBase}/forecasts?refresh=true&period=${this.selectedPeriod}`)
+    .subscribe(data => {
+      this.forecastData = data.map((item: any) => {
+        const demand = parseFloat(item.forecasted_demand) || 0;
+        const currentQty = parseFloat(item.quantity_available) || 0;
+
+        return {
+          product: item.product_name,
+          weeks: [this.formatWeek(item.forecast_date)],
+          prediction: [`${demand.toFixed(2)}kg`],
+          current: `${currentQty.toFixed(2)}kg`,
+          action: this.getAction(demand, currentQty)
+        };
+      });
+      this.recommendations = this.generateRecommendations(this.forecastData);
+      this.buildChart();
+    });
+}
+
 }
