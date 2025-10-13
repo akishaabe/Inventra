@@ -13,10 +13,10 @@
         </div>
 
 <div class="filters">
-  <span class="forecast-period">
+  <span>
     Forecast Period:
     <select [(ngModel)]="selectedPeriod" (change)="updateForecastPeriod()">
-      <option *ngFor="let p of forecastPeriods" [value]="p">{{ p }} days</option>
+      <option *ngFor="let p of forecastPeriods" [value]="p">Next {{ p }} days</option>
     </select>
   </span>
 
@@ -25,6 +25,7 @@
     <span class="highlight">{{ forecastData[0]?.product || 'All Products' }}</span>
   </span>
 </div>
+
 
 
         <div class="table-container">

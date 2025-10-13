@@ -21,45 +21,70 @@ export class Forecasting implements OnInit, AfterViewInit {
   forecastData: any[] = [];
   recommendations: any[] = [];
   chart: any;
+
+  // table / rec limits & toggles
   tableLimit = 10;
   recLimit = 4;
   tableExpanded = false;
   recExpanded = false;
+
+  // forecasting period dropdown
   forecastPeriods = [7, 14, 30, 60, 90];
-selectedPeriod = 14;
+  selectedPeriod = 14; // default
 
   dataLoaded = false;
 
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.http.get<any[]>(`${environment.apiBase}/forecasts?refresh=true`).subscribe(data => {
-      console.log('API forecasts sample:', data[0]);
-
-      this.forecastData = data.map((item: any) => {
-        const demand = parseFloat(item.forecasted_demand) || 0;
-        const currentQty = parseFloat(item.quantity_available) || 0;
-        return {
-          product: item.product_name,
-          weeks: [this.formatWeek(item.forecast_date)],
-          prediction: [`${demand.toFixed(2)}kg`],
-          current: `${currentQty.toFixed(2)}kg`,
-          action: this.getAction(demand, currentQty)
-        };
-      });
-
-      this.recommendations = this.generateRecommendations(this.forecastData);
-      this.dataLoaded = true;
-
-      // Build chart only if canvas is ready
-      setTimeout(() => this.buildChart(), 100);
-    });
+    // initial load
+    this.loadForecast(this.selectedPeriod);
   }
 
   ngAfterViewInit() {
+    // if data was already loaded before view init, build chart
     setTimeout(() => {
       if (this.dataLoaded) this.buildChart();
-    }, 100);
+    }, 120);
+  }
+
+  /**
+   * Load forecast from backend (period = number of days)
+   */
+  loadForecast(period: number) {
+    this.http
+      .get<any[]>(`${environment.apiBase}/forecasts?refresh=true&period=${period}`)
+      .subscribe({
+        next: (data) => {
+          console.log(`API forecasts (${period} days):`, data[0]);
+
+          this.forecastData = data.map((item: any) => {
+            const demand = parseFloat(item.forecasted_demand) || 0;
+            const currentQty = parseFloat(item.quantity_available) || 0;
+            return {
+              product: item.product_name,
+              weeks: [this.formatWeek(item.forecast_date)],
+              prediction: [`${demand.toFixed(2)}kg`],
+              current: `${currentQty.toFixed(2)}kg`,
+              action: this.getAction(demand, currentQty)
+            };
+          });
+
+          // update recommendations, chart, and limits
+          this.recommendations = this.generateRecommendations(this.forecastData);
+          this.dataLoaded = true;
+
+          // if table expanded, keep full length; otherwise ensure 10
+          this.tableLimit = this.tableExpanded ? this.forecastData.length : 10;
+          this.recLimit = this.recExpanded ? this.recommendations.length : 4;
+
+          // rebuild chart after small delay (ensures canvas mounted)
+          setTimeout(() => this.buildChart(), 80);
+        },
+        error: (err) => {
+          console.error('Failed to load forecasts', err);
+        }
+      });
   }
 
   formatWeek(dateStr: string): string {
@@ -177,24 +202,7 @@ selectedPeriod = 14;
   }
 
   updateForecastPeriod() {
-  this.http
-    .get<any[]>(`${environment.apiBase}/forecasts?refresh=true&period=${this.selectedPeriod}`)
-    .subscribe(data => {
-      this.forecastData = data.map((item: any) => {
-        const demand = parseFloat(item.forecasted_demand) || 0;
-        const currentQty = parseFloat(item.quantity_available) || 0;
-
-        return {
-          product: item.product_name,
-          weeks: [this.formatWeek(item.forecast_date)],
-          prediction: [`${demand.toFixed(2)}kg`],
-          current: `${currentQty.toFixed(2)}kg`,
-          action: this.getAction(demand, currentQty)
-        };
-      });
-      this.recommendations = this.generateRecommendations(this.forecastData);
-      this.buildChart();
-    });
-}
-
+    // called from template select -> simply load new period
+    this.loadForecast(this.selectedPeriod);
+  }
 }
