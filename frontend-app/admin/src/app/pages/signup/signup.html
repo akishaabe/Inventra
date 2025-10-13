@@ -1,0 +1,32 @@
+<div class="signup-page">
+  <div class="logo">Inventra</div>
+
+  <div class="signup-box">
+    <h2>Sign up</h2>
+
+    <form (submit)="signUp(); $event.preventDefault()">
+      <div class="name-group">
+        <input type="text" placeholder="First Name" [(ngModel)]="firstName" name="firstName" required />
+        <input type="text" placeholder="Last Name" [(ngModel)]="lastName" name="lastName" required />
+      </div>
+
+      <input type="email" placeholder="Email" [(ngModel)]="email" name="email" required />
+      <input type="password" placeholder="Password" [(ngModel)]="password" name="password" required />
+
+      <button type="submit" class="continue-btn">Continue</button>
+    </form>
+
+    <div class="divider">
+      <span>or</span>
+    </div>
+
+    <button class="google-btn" (click)="signUpWithGoogle()">
+      <img src="assets/google-icon.png" alt="Google" /> Sign up with Google
+    </button>
+
+    <p class="login-text">
+      Already have an account?
+      <a routerLink="/login">Log in</a>
+    </p>
+  </div>
+</div>

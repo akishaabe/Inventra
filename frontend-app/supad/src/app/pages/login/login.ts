@@ -27,7 +27,7 @@ export class Login {
  async onSubmit() {
   this.loading = true;
   try {
-    const response = await fetch('http://localhost:4000/api/send-reset-code', {
+    const response = await fetch('http://localhost:4000/api/resend-code', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: this.email })
@@ -57,7 +57,6 @@ export class Login {
       const result = await signInWithPopup(this.auth, provider);
       const email = result.user.email || '';
 
-      // Generate 6-digit code
       const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
       localStorage.setItem('twofaEmail', email);

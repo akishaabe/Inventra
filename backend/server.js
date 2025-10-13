@@ -4,7 +4,9 @@ import cors from "cors";
 import { Resend } from "resend";
 import db from "./db.js";
 import composeDb from "./db.compose.js";
+import inventoryRoutes from './routes/inventory.js';
 import dashboardRoutes from "./routes/dashboard.js";
+import authRoutes from "./routes/auth.js";
 
 const app = express();
 const PORT = 4000;
@@ -12,6 +14,7 @@ const PORT = 4000;
 app.use(cors());
 app.use(bodyParser.json());
 
+app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
 app.get("/", (req, res) => {
@@ -28,7 +31,6 @@ app.get("/api/users", async (req, res) => {
   }
 });
 
-/* amiel db */
 app.get("/api/test-users", async (req, res) => {
   try {
     const [rows] = await composeDb.query("SELECT * FROM users");
@@ -39,10 +41,11 @@ app.get("/api/test-users", async (req, res) => {
   }
 });
 
+app.use('/api/inventory', inventoryRoutes);
+
 const resend = new Resend("re_29KHLZqH_9eEuBgEVfnKXqi5pWoEM6r98");
 const verificationCodes = {};
 
-// --- SEND CODE
 app.post("/api/send-reset-code", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: "Email is required" });
@@ -76,7 +79,6 @@ app.post("/api/send-reset-code", async (req, res) => {
   }
 });
 
-// --- VERIFY CODE
 app.post("/api/verify-code", (req, res) => {
   const { email, code } = req.body;
 
@@ -89,7 +91,6 @@ app.post("/api/verify-code", (req, res) => {
   res.json({ success: true });
 });
 
-// --- RESEND CODE
 app.post("/api/resend-code", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: "Email is required" });
@@ -123,7 +124,6 @@ app.post("/api/resend-code", async (req, res) => {
   }
 });
 
-// --- DASHBOARD DATA ENDPOINT
 app.get("/api/dashboard", async (req, res) => {
   try {
     const [sales] = await db.query(
@@ -154,4 +154,3 @@ app.get("/api/dashboard", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
-
