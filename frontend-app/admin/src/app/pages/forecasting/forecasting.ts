@@ -23,8 +23,8 @@ export class Forecasting implements OnInit, AfterViewInit {
   chart: any;
 
   // table / rec limits & toggles
-  tableLimit = 10;
-  recLimit = 4;
+  tableLimit = 5;
+  recLimit = 2;
   tableExpanded = false;
   recExpanded = false;
 
