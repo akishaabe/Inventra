@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In</title>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+<div class="login-container">
+  <a routerLink="/" class="back">← Back</a>
+  <h1 class="title">Log In</h1>
+
+  <form (ngSubmit)="onSubmit(); $event.preventDefault()" #loginForm="ngForm" novalidate>
+   <input
+  type="email"
+  name="email"
+  placeholder="Enter Email"
+  [(ngModel)]="email"
+  #emailCtrl="ngModel"
+  required
+/>
+<div *ngIf="emailCtrl.invalid && emailCtrl.touched" class="error">
+  Please enter a valid email.
+</div>
+
+<input
+  type="password"
+  name="password"
+  placeholder="Enter Password"
+  [(ngModel)]="password"
+  #passwordCtrl="ngModel"
+  required
+/>
+<div *ngIf="passwordCtrl.invalid && passwordCtrl.touched" class="error">
+  Password is required.
+</div>
+
+    <a routerLink="/forgot-password" class="forgot">Forgot password?</a>
+
+    <button type="submit" class="continue-btn" [disabled]="loading">
+      {{ loading ? 'Signing in...' : 'Continue' }}
+    </button>
+  </form>
+
+  <div class="divider">or Log In with</div>
+
+  <button type="button" class="google-btn" (click)="loginWithGoogle()">
+    <img src="assets/images/google-icon.png" alt="Google Logo" />
+    Continue with Google
+  </button>
+</div>
