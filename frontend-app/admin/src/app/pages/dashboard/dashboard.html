@@ -18,45 +18,181 @@
   <!-- Header -->
   <header class="dashboard-header">
     <div class="header-left">
-      <button class="menu-btn" (click)="toggleSidebar()"*ngIf="!sidebarOpen">☰</button>
-      <h2 class="brand-name"*ngIf="!sidebarOpen">inventra</h2>
+      <button class="menu-btn" (click)="toggleSidebar()" *ngIf="!sidebarOpen">☰</button>
+      <h2 class="brand-name" *ngIf="!sidebarOpen">inventra</h2>
     </div>
 
     <div class="header-right">
       <span class="user-name">Café Pèdro</span>
-      <img src="assets/images/profile icon.png" alt="Profile" class="profile-icon"   (click)="goToSettings()"
-  style="cursor: pointer;"/>
+      <img
+        src="assets/images/profile icon.png"
+        alt="Profile"
+        class="profile-icon"
+        (click)="goToSettings()"
+        style="cursor: pointer;"
+      />
     </div>
   </header>
 
   <!-- Main Content -->
   <main class="dashboard-main">
-    <h1 class="dashboard-title">Dashboard</h1>
+    <h1 class="inventory-title">Inventory</h1>
 
-        <!-- Stats Grid -->
-    <div class="stats-grid">
-      <div class="stat-card sales">
-        <h2>Today's Sales</h2>
-        <p class="stat-value">₱{{ dashboardData.todaySales | number: '1.2-2' }}</p>
+    <!-- Controls: search, sort selector and action buttons -->
+    <div class="controls-row">
+      <input
+        class="search"
+        type="text"
+        placeholder="Search products..."
+        [(ngModel)]="searchQuery"
+        name="search"
+      />
+
+      <div class="sort-wrapper">
+        <label>Sort:</label>
+        <select [(ngModel)]="sortColumn" (ngModelChange)="sortBy(sortColumn)" name="sortSelect">
+          <option value="id">Product ID</option>
+          <option value="name">Name</option>
+          <option value="category">Category</option>
+          <option value="quantity">Qty</option>
+          <option value="expiry">Expiry</option>
+        </select>
       </div>
 
-      <div class="stat-card low-stock">
-        <h2>Low-Stock Items</h2>
-        <p class="stat-value">{{ dashboardData.lowStock }} item(s)</p>
-        <a class="stat-link"  (click)="goToInventory()" style="cursor: pointer;">See Full Details...</a>
-      </div>
-
-      <div class="stat-card stock-value">
-        <h2>Current Stock Value</h2>
-        <p class="stat-value">₱{{ dashboardData.stockValue | number: '1.2-2' }}</p>
-        <small class="stat-trend">↑ 2.3%</small>
-      </div>
-
-      <div class="stat-card forecast">
-        <h2>Forecast Demand</h2>
-        <p class="stat-value">₱{{ dashboardData.forecastDemand | number: '1.2-2' }}</p>
-        <a class="stat-link">Generate Report</a>
+      <div class="action-buttons">
+        <button class="btn add" (click)="openAddModal()">ADD</button>
+        <button
+          class="btn edit"
+          [disabled]="selectedProducts.length !== 1"
+          (click)="openEditModal()"
+        >
+          EDIT
+        </button>
+        <button
+          class="btn delete"
+          [disabled]="selectedProducts.length === 0"
+          (click)="openDeleteModal()"
+        >
+          DELETE
+        </button>
       </div>
     </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table class="inventory-table">
+        <thead>
+          <tr>
+            <th class="col-check">
+              <input
+                type="checkbox"
+                [checked]="isAllSelected()"
+                (change)="toggleSelectAll($event)"
+              />
+            </th>
+            <th (click)="sortBy('id')" class="sortable">
+              Product ID <span class="sort-indicator">{{ sortIndicator('id') }}</span>
+            </th>
+            <th (click)="sortBy('name')" class="sortable">
+              Name <span class="sort-indicator">{{ sortIndicator('name') }}</span>
+            </th>
+            <th (click)="sortBy('category')" class="sortable">
+              Category <span class="sort-indicator">{{ sortIndicator('category') }}</span>
+            </th>
+            <th (click)="sortBy('quantity')" class="sortable">
+              Qty <span class="sort-indicator">{{ sortIndicator('quantity') }}</span>
+            </th>
+            <th>Unit</th>
+            <th (click)="sortBy('expiry')" class="sortable">
+              Expiry <span class="sort-indicator">{{ sortIndicator('expiry') }}</span>
+            </th>
+            <th>Supplier</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr
+            *ngFor="let item of visibleProducts"
+            (click)="toggleSelect(item)"
+            [class.selected]="selectedProducts.includes(item)"
+          >
+            <td class="col-check">
+              <input
+                type="checkbox"
+                [checked]="selectedProducts.includes(item)"
+                (click)="$event.stopPropagation(); toggleSelect(item)"
+              />
+            </td>
+            <td>{{ item.id }}</td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.category }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.unit }}</td>
+            <td>{{ item.expiry }}</td>
+            <td>{{ item.supplier }}</td>
+          </tr>
+          <tr *ngIf="visibleProducts.length === 0">
+            <td colspan="8" class="empty">No results</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </main>
+
+  <!-- Add/Edit Modal -->
+  <div class="modal" *ngIf="showModal">
+    <div class="modal-card">
+      <a class="back-btn" (click)="closeModal()">← Back</a>
+      <h2>{{ isEditing ? 'Edit Item' : 'Add Item' }}</h2>
+
+      <form #itemForm="ngForm" (ngSubmit)="saveItem(itemForm)">
+        <label>Product ID</label>
+        <input name="id" [(ngModel)]="currentItem.id" #idModel="ngModel" required maxlength="30" />
+        <div class="error" *ngIf="idModel.invalid && (idModel.touched || itemForm.submitted)">
+          Required Field!
+        </div>
+
+        <label>Name</label>
+        <input name="name" [(ngModel)]="currentItem.name" #nameModel="ngModel" required maxlength="100" />
+        <div class="error" *ngIf="nameModel.invalid && (nameModel.touched || itemForm.submitted)">
+          Required Field!
+        </div>
+
+        <label>Category</label>
+        <input name="category" [(ngModel)]="currentItem.category" />
+
+        <label>Quantity</label>
+        <input name="quantity" type="number" min="0" [(ngModel)]="currentItem.quantity" />
+
+        <label>Unit</label>
+        <input name="unit" [(ngModel)]="currentItem.unit" />
+
+        <label>Expiry</label>
+        <input name="expiry" type="date" [(ngModel)]="currentItem.expiry" #expiryModel="ngModel" />
+        <div class="error" *ngIf="expiryModel.invalid && (expiryModel.touched || itemForm.submitted)">
+          Please enter the date in the format: YYYY-MM-DD
+        </div>
+
+        <label>Supplier</label>
+        <input name="supplier" [(ngModel)]="currentItem.supplier" />
+
+        <div class="modal-actions">
+          <button class="continue-btn" type="submit" [disabled]="itemForm.invalid">
+            Continue
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal" *ngIf="showDeleteModal">
+    <div class="modal-card delete">
+      <p>DELETE THIS ITEM(S)?</p>
+      <div class="modal-buttons">
+        <button class="confirm-delete" (click)="confirmDelete()">Yes</button>
+        <button (click)="closeDeleteModal()">No</button>
+      </div>
+    </div>
+  </div>
 </div>

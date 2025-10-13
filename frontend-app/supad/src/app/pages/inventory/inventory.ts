@@ -1,9 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Navbar } from '../../components/navbar/navbar';
-import { Sidebar } from '../../components/sidebar/sidebar';
-import { Router, RouterModule  } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 type Product = {
   id: string;
@@ -18,36 +16,70 @@ type Product = {
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [CommonModule, FormsModule, Navbar, Sidebar, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './inventory.html',
   styleUrls: ['./inventory.css']
 })
 export class Inventory implements OnInit {
-  /* data */
+
+  constructor(private router: Router) {}
+
+    logout() {
+    localStorage.clear();
+    this.router.navigate(['/login']);
+  }
+
+  goToSettings() {
+  this.router.navigate(['/settings']);
+}
+
+  /* ========== State ========== */
   products: Product[] = [];
   selectedProducts: Product[] = [];
   currentItem: Product = { id: '', name: '' };
 
-  /* ui state */
   sidebarOpen = false;
   showModal = false;
   showDeleteModal = false;
   isEditing = false;
 
-  /* filters & sorting */
   searchQuery = '';
   sortColumn: keyof Product = 'id';
   sortDir: 1 | -1 = 1; // 1 = ascending, -1 = descending
 
-  
-
+  /* ========== Lifecycle ========== */
   ngOnInit() {
     this.loadProducts();
   }
 
-  /* =======================
-     CRUD (connected to backend)
-  ========================== */
+  /* ========== Sidebar Logic ========== */
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
+    if (this.sidebarOpen) {
+      document.body.classList.add('sidebar-active');
+    } else {
+      document.body.classList.remove('sidebar-active');
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.querySelector('.menu-toggle');
+
+    if (
+      this.sidebarOpen &&
+      sidebar &&
+      !sidebar.contains(event.target as Node) &&
+      toggleBtn &&
+      !toggleBtn.contains(event.target as Node)
+    ) {
+      this.sidebarOpen = false;
+      document.body.classList.remove('sidebar-active');
+    }
+  }
+
+  /* ========== CRUD Methods ========== */
   async loadProducts() {
     try {
       const res = await fetch('http://localhost:4000/api/inventory');
@@ -97,9 +129,7 @@ export class Inventory implements OnInit {
     }
   }
 
-  /* =======================
-     Selection logic
-  ========================== */
+  /* ========== Selection Logic ========== */
   toggleSelect(item: Product) {
     const idx = this.selectedProducts.indexOf(item);
     if (idx === -1) this.selectedProducts.push(item);
@@ -118,13 +148,11 @@ export class Inventory implements OnInit {
     );
   }
 
-  /* =======================
-     Filtering + Sorting
-  ========================== */
+  /* ========== Filtering + Sorting ========== */
   get visibleProducts(): Product[] {
     const query = this.searchQuery.trim().toLowerCase();
 
-    // filter
+    // Filter
     let list = this.products.filter(p => {
       if (!query) return true;
       const allValues = Object.values(p)
@@ -134,7 +162,7 @@ export class Inventory implements OnInit {
       return allValues.includes(query);
     });
 
-    // sort
+    // Sort
     if (this.sortColumn) {
       const col = this.sortColumn;
       list = list.slice().sort((a, b) => {
@@ -171,9 +199,7 @@ export class Inventory implements OnInit {
     return this.sortDir === 1 ? '▲' : '▼';
   }
 
-  /* =======================
-     Modals
-  ========================== */
+  /* ========== Modals ========== */
   openAddModal() {
     this.isEditing = false;
     this.currentItem = {
