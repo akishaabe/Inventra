@@ -269,7 +269,8 @@ DROP TABLE IF EXISTS `users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `user_id` int NOT NULL AUTO_INCREMENT,
-  `full_name` varchar(150) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `role` enum('SUPERADMIN','ADMIN','STAFF') NOT NULL DEFAULT 'STAFF',
@@ -288,7 +289,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'Jericho Leanard Mendoza','jericho.mendoza@inventra.com','hashed_pw_1','SUPERADMIN',1,'2025-09-01 09:00:00','2025-09-05 09:00:00'),(2,'Maria Santos','maria.santos@inventra.com','hashed_pw_2','ADMIN',1,'2025-09-03 10:30:00','2025-09-08 11:00:00'),(3,'Carlos Dizon','carlos.dizon@inventra.com','hashed_pw_3','STAFF',0,'2025-09-05 08:15:00','2025-09-07 09:45:00'),(4,'Anne Rivera','anne.rivera@inventra.com','hashed_pw_4','STAFF',0,'2025-09-06 13:40:00',NULL),(5,'John Cruz','john.cruz@inventra.com','hashed_pw_5','ADMIN',1,'2025-09-07 15:10:00','2025-09-09 17:00:00'),(6,'Paula Reyes','paula.reyes@inventra.com','hashed_pw_6','STAFF',0,'2025-09-09 08:00:00',NULL),(7,'Miguel Ramos','miguel.ramos@inventra.com','hashed_pw_7','STAFF',0,'2025-09-10 10:00:00',NULL),(8,'Sofia Lim','sofia.lim@inventra.com','hashed_pw_8','ADMIN',1,'2025-09-12 14:30:00','2025-09-14 10:00:00'),(9,'Nathaniel Bautista','nathan.bautista@inventra.com','hashed_pw_9','STAFF',0,'2025-09-15 16:45:00',NULL),(10,'Ella De Leon','ella.deleon@inventra.com','hashed_pw_10','STAFF',0,'2025-09-17 09:20:00',NULL);
+INSERT INTO `users` VALUES (1,'Jericho Leanard','Mendoza','jericho.mendoza@inventra.com','hashed_pw_1','SUPERADMIN',1,'2025-09-01 09:00:00','2025-09-05 09:00:00'),(2,'Maria','Santos','maria.santos@inventra.com','hashed_pw_2','ADMIN',1,'2025-09-03 10:30:00','2025-09-08 11:00:00'),(3,'Carlos','Dizon','carlos.dizon@inventra.com','hashed_pw_3','STAFF',0,'2025-09-05 08:15:00','2025-09-07 09:45:00'),(4,'Anne','Rivera','anne.rivera@inventra.com','hashed_pw_4','STAFF',0,'2025-09-06 13:40:00',NULL),(5,'John','Cruz','john.cruz@inventra.com','hashed_pw_5','ADMIN',1,'2025-09-07 15:10:00','2025-09-09 17:00:00'),(6,'Paula','Reyes','paula.reyes@inventra.com','hashed_pw_6','STAFF',0,'2025-09-09 08:00:00',NULL),(7,'Miguel','Ramos','miguel.ramos@inventra.com','hashed_pw_7','STAFF',0,'2025-09-10 10:00:00',NULL),(8,'Sofia','Lim','sofia.lim@inventra.com','hashed_pw_8','ADMIN',1,'2025-09-12 14:30:00','2025-09-14 10:00:00'),(9,'Nathaniel','Bautista','nathan.bautista@inventra.com','hashed_pw_9','STAFF',0,'2025-09-15 16:45:00',NULL),(10,'Ella','De Leon','ella.deleon@inventra.com','hashed_pw_10','STAFF',0,'2025-09-17 09:20:00',NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -301,4 +302,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-10-11 18:04:40
+-- Dump completed on 2025-10-13  9:56:41

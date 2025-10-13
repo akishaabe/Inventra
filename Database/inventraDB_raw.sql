@@ -261,7 +261,8 @@ DROP TABLE IF EXISTS `users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `user_id` int NOT NULL AUTO_INCREMENT,
-  `full_name` varchar(150) NOT NULL,
+  `first_name VARCHAR(100) NOT NULL,
+  `last_name VARCHAR(100) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `role` enum('SUPERADMIN','ADMIN','STAFF') NOT NULL DEFAULT 'STAFF',
@@ -293,3 +294,4 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-10-11 17:54:43
+

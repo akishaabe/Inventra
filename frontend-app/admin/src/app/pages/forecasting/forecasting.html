@@ -1,4 +1,4 @@
-<div class="forecasting-container">
+<div class="forecasting-container fade-in">
   <app-navbar (toggleSidebar)="sidebarOpen = !sidebarOpen"></app-navbar>
   <app-sidebar [isOpen]="sidebarOpen"></app-sidebar>
 
@@ -7,15 +7,26 @@
 
     <div class="forecasting-content">
       <!-- LEFT PANEL -->
-      <div class="left-panel">
+      <div class="left-panel fade-in-delayed">
         <div class="chart-container">
-          <canvas id="forecastChart"></canvas>
+          <canvas #forecastChart></canvas>
         </div>
 
-        <div class="filters">
-          <span>Forecast Period: <a href="#" class="link">Next 2 weeks</a></span>
-          <span>Product: <a href="#" class="link">All Products</a></span>
-        </div>
+<div class="filters">
+  <span>
+    Forecast Period:
+    <select [(ngModel)]="selectedPeriod" (change)="updateForecastPeriod()">
+      <option *ngFor="let p of forecastPeriods" [value]="p">Next {{ p }} days</option>
+    </select>
+  </span>
+
+  <span>
+    Product:
+    <span class="highlight">{{ forecastData[0]?.product || 'All Products' }}</span>
+  </span>
+</div>
+
+
 
         <div class="table-container">
           <h3>DETAILED FORECAST</h3>
@@ -30,7 +41,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let item of forecastData">
+              <tr *ngFor="let item of forecastData | slice:0:tableLimit">
                 <td>{{ item.product }}</td>
                 <td>
                   <div *ngFor="let week of item.weeks">{{ week }}</div>
@@ -43,21 +54,41 @@
               </tr>
             </tbody>
           </table>
+
+          <div *ngIf="forecastData.length > 10" class="show-more">
+            <button class="btn-toggle" (click)="toggleTable()">
+              {{ tableExpanded ? 'Show Less' : 'Show More' }}
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- RIGHT PANEL -->
-      <div class="right-panel">
+      <div class="right-panel fade-in-delayed">
         <h3>AI RECOMMENDATIONS</h3>
-        <div
-          class="card"
-          *ngFor="let rec of recommendations"
-          (click)="openRecommendation(rec)"
-        >
-          <h4 [class]="rec.priority">{{ rec.title }} ({{ rec.count }})</h4>
-          <p>{{ rec.description }}</p>
-          <small>{{ rec.subtext }}</small>
-          <a href="#" class="link">{{ rec.actionText }}</a>
+
+        <div class="recommendations-container">
+          <div
+            class="recommendation-card"
+            *ngFor="let rec of recommendations | slice:0:recLimit"
+            (click)="openRecommendation(rec)"
+          >
+            <h4 [class]="rec.priority">{{ rec.title }} ({{ rec.count }})</h4>
+            <p>{{ rec.description }}</p>
+            <small>{{ rec.subtext }}</small>
+            <a href="#" class="link" (click)="$event.preventDefault()">
+              {{ rec.actionText }}
+            </a>
+          </div>
+
+          <!-- View All / View Less button always at bottom -->
+          <button
+            *ngIf="recommendations.length > 4"
+            class="view-all-btn"
+            (click)="toggleRecs()"
+          >
+            {{ recExpanded ? 'View Less' : 'View All' }}
+          </button>
         </div>
       </div>
     </div>
