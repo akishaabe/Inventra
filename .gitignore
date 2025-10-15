@@ -4,3 +4,21 @@ mysql-data/
 node_modules/
 .env
 *.log
+
+# Virtual environment
+venv/
+backend/venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
+
+# Environment variables
+.env
+
+# Node.js dependencies (if you have a frontend)
+node_modules/
+dist/
