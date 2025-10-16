@@ -4,9 +4,10 @@ import cors from "cors";
 import { Resend } from "resend";
 import db from "./db.js";
 import composeDb from "./db.compose.js";
-import inventoryRoutes from './routes/inventory.js';
+import inventoryRoutes from "./routes/inventory.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import authRoutes from "./routes/auth.js";
+import forecastsRoute from "./routes/forecasts.js";
 
 const app = express();
 const PORT = 4000;
@@ -16,6 +17,8 @@ app.use(bodyParser.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/inventory", inventoryRoutes);
+app.use("/api/forecasts", forecastsRoute);
 
 app.get("/", (req, res) => {
   res.send("Backend is running!");
@@ -41,11 +44,12 @@ app.get("/api/test-users", async (req, res) => {
   }
 });
 
-app.use('/api/inventory', inventoryRoutes);
-
 const resend = new Resend("re_29KHLZqH_9eEuBgEVfnKXqi5pWoEM6r98");
 const verificationCodes = {};
 
+// ===============================
+// SEND RESET CODE
+// ===============================
 app.post("/api/send-reset-code", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: "Email is required" });
@@ -56,13 +60,24 @@ app.post("/api/send-reset-code", async (req, res) => {
     await resend.emails.send({
       from: "Inventra <onboarding@resend.dev>",
       to: email,
-      subject: "Your Inventra Verification Code",
+      subject: "🔐 Your Inventra Verification Code",
       html: `
-        <div style="font-family: sans-serif; color: #333;">
-          <h2>Your Verification Code</h2>
-          <p>Please use the following 6-digit code to reset your password:</p>
-          <h1 style="letter-spacing: 4px;">${code}</h1>
-          <p>This code will expire in 10 minutes.</p>
+        <div style="font-family: Arial, sans-serif; background-color: #f7f8fa; padding: 30px;">
+          <div style="max-width: 500px; margin: auto; background: #ffffff; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
+            <div style="background-color: #2563eb; color: white; padding: 15px 20px; text-align: center;">
+              <h2 style="margin: 0;">Inventra Verification</h2>
+            </div>
+            <div style="padding: 25px; color: #333;">
+              <p style="font-size: 15px;">Hi there,</p>
+              <p style="font-size: 15px;">Please use the verification code below to reset your password:</p>
+              <div style="text-align: center; margin: 25px 0;">
+                <h1 style="font-size: 32px; letter-spacing: 6px; color: #2563eb; margin: 0;">${code}</h1>
+              </div>
+              <p style="font-size: 14px; color: #666;">⚠️ This code will expire in <b>10 minutes</b>.</p>
+              <p style="font-size: 14px; color: #666;">If you didn’t request this, you can ignore this email.</p>
+              <p style="margin-top: 30px;">– The Inventra Team</p>
+            </div>
+          </div>
         </div>
       `,
     });
@@ -79,6 +94,9 @@ app.post("/api/send-reset-code", async (req, res) => {
   }
 });
 
+// ===============================
+// VERIFY CODE
+// ===============================
 app.post("/api/verify-code", (req, res) => {
   const { email, code } = req.body;
 
@@ -91,6 +109,9 @@ app.post("/api/verify-code", (req, res) => {
   res.json({ success: true });
 });
 
+// ===============================
+// RESEND CODE
+// ===============================
 app.post("/api/resend-code", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: "Email is required" });
@@ -101,13 +122,24 @@ app.post("/api/resend-code", async (req, res) => {
     await resend.emails.send({
       from: "Inventra <onboarding@resend.dev>",
       to: email,
-      subject: "Your new Inventra Verification Code",
+      subject: "🔄 Your New Inventra Verification Code",
       html: `
-        <div style="font-family: sans-serif; color: #333;">
-          <h2>Your New Verification Code</h2>
-          <p>Please use the following 6-digit code to verify your login:</p>
-          <h1 style="letter-spacing: 4px;">${code}</h1>
-          <p>This code will expire in 10 minutes.</p>
+        <div style="font-family: Arial, sans-serif; background-color: #f7f8fa; padding: 30px;">
+          <div style="max-width: 500px; margin: auto; background: #ffffff; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
+            <div style="background-color: #2563eb; color: white; padding: 15px 20px; text-align: center;">
+              <h2 style="margin: 0;">Inventra Verification</h2>
+            </div>
+            <div style="padding: 25px; color: #333;">
+              <p style="font-size: 15px;">Hi again,</p>
+              <p style="font-size: 15px;">Here’s your new verification code:</p>
+              <div style="text-align: center; margin: 25px 0;">
+                <h1 style="font-size: 32px; letter-spacing: 6px; color: #2563eb; margin: 0;">${code}</h1>
+              </div>
+              <p style="font-size: 14px; color: #666;">⚠️ This code will expire in <b>10 minutes</b>.</p>
+              <p style="font-size: 14px; color: #666;">If you didn’t request this, please ignore this message.</p>
+              <p style="margin-top: 30px;">– The Inventra Team</p>
+            </div>
+          </div>
         </div>
       `,
     });
@@ -124,6 +156,9 @@ app.post("/api/resend-code", async (req, res) => {
   }
 });
 
+// ===============================
+// DASHBOARD DATA
+// ===============================
 app.get("/api/dashboard", async (req, res) => {
   try {
     const [sales] = await db.query(
@@ -154,8 +189,3 @@ app.get("/api/dashboard", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
-
-
-/* forecast */
-import forecastsRoute from "./routes/forecasts.js";
-app.use("/api/forecasts", forecastsRoute);
