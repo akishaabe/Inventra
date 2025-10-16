@@ -1,0 +1,14 @@
+term,product_id,product_name,match_method,notes
+latte,1,Latte,exact,Direct match from product_name
+hot chocolate,2,Hot Chocolate,exact,Direct match from product_name
+americano,3,Americano,exact,Direct match from product_name
+cocoa,4,Cocoa,exact,Direct match from product_name
+espresso,5,Espresso,exact,Direct match from product_name
+cappuccino,6,Cappuccino,exact,Direct match from product_name
+americano with milk,7,Americano with milk,exact,Direct match from product_name
+cortado,8,Cortado,exact,Direct match from product_name
+cold brew,3,Americano,approximate,Closest equivalent to brewed black coffee
+mocha,1,Latte,approximate,Usually based on latte with chocolate
+macchiato,5,Espresso,approximate,Espresso-based drink
+flat white,6,Cappuccino,approximate,Similar milk-foam ratio
+matcha,4,Cocoa,approximate,Closest non-coffee beverage in menu
