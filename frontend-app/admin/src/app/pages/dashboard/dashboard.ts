@@ -1,11 +1,11 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule  } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
@@ -62,10 +62,29 @@ export class Dashboard implements OnInit {
     }
   }
 
+  /* edit 3
   logout() {
     localStorage.clear();
     this.router.navigate(['/login']);
   }
+    */
+
+  showLogoutModal = false;
+
+openLogoutModal() {
+  this.showLogoutModal = true;
+}
+
+closeLogoutModal() {
+  this.showLogoutModal = false;
+}
+
+confirmLogout() {
+  localStorage.clear();
+  this.showLogoutModal = false;
+  this.router.navigate(['/home']);
+}
+
 
   goToSettings() {
   this.router.navigate(['/settings']);
