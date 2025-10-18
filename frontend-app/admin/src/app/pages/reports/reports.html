@@ -1,1 +1,93 @@
-<p>reports works!</p>
+<div class="reports-container">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="sidebarOpen">
+    <div class="sidebar-header">
+      <h2 class="logo">inventra</h2>
+      <button class="close-btn" (click)="toggleSidebar()">☰</button>
+    </div>
+    <nav class="nav-links">
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
+      <a routerLink="/forecasting" routerLinkActive="active">Forecasting</a>
+      <a routerLink="/reports" routerLinkActive="active">Reports</a>
+      <a routerLink="/settings" routerLinkActive="active">Settings</a>
+      <a (click)="logout()">Logout</a>
+    </nav>
+  </aside>
+
+  <!-- Header -->
+  <header class="reports-header">
+    <div class="header-left">
+      <button class="menu-btn" (click)="toggleSidebar()" *ngIf="!sidebarOpen">☰</button>
+      <h2 class="brand-name" *ngIf="!sidebarOpen">inventra</h2>
+    </div>
+
+    <div class="header-right">
+      <span class="user-name">Café Pèdro</span>
+      <img src="assets/images/profile icon.png" alt="Profile" class="profile-icon"   (click)="goToSettings()"
+  style="cursor: pointer;"/>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="reports-main">
+    <h1 class="reports-title">Reports</h1>
+
+    <div class="reports-buttons">
+      <button [class.active]="activeTab === 'sales'" (click)="setActiveTab('sales')">Sales</button>
+      <button [class.active]="activeTab === 'inventory'" (click)="setActiveTab('inventory')">Inventory</button>
+      <button [class.active]="activeTab === 'forecasting'" (click)="setActiveTab('forecasting')">Forecasting</button>
+    </div>
+
+    <section *ngIf="activeTab === 'sales'" class="reports-section">
+      <h2>Sales Report</h2>
+      <table class="reports-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Units Sold</th>
+            <th>Revenue (₱)</th>
+            <th>Percentage of Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of reportData">
+            <td>{{ item.product_name }}</td>
+            <td>{{ item.units_sold }}</td>
+            <td>{{ item.revenue | number: '1.2-2' }}</td>
+            <td>{{ item.percentage }}%</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section *ngIf="activeTab === 'inventory'" class="reports-section">
+      <h2>Inventory Summary</h2>
+      <table class="reports-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Stock</th>
+            <th>Reorder Level</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of inventoryData">
+            <td>{{ item.item_name }}</td>
+            <td>{{ item.stock }}</td>
+            <td>{{ item.reorder_level }}</td>
+            <td [ngClass]="{ 'low-stock': item.stock < item.reorder_level }">
+              {{ item.stock < item.reorder_level ? 'Low' : 'Sufficient' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section *ngIf="activeTab === 'forecasting'" class="reports-section">
+      <h2>Forecasting Overview</h2>
+      <p>Coming soon...</p>
+    </section>
+  </main>
+</div>
