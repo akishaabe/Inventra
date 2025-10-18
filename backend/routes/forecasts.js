@@ -5,29 +5,10 @@ import composeDb from "../db.compose.js";
 const router = express.Router();
 
 const ML_URL = process.env.ML_SERVICE_URL || "http://ml_service:5000/forecast";
-const FORECAST_PRODUCT_SKU = process.env.FORECAST_PRODUCT_SKU || "TOTAL_SALES_PLACEHOLDER";
 
-async function ensurePlaceholderProduct() {
-  const [rows] = await composeDb.query(
-    "SELECT product_id FROM products WHERE sku = ? LIMIT 1",
-    [FORECAST_PRODUCT_SKU]
-  );
-
-  if (rows.length) return rows[0].product_id;
-
-  const [res] = await composeDb.query(
-    "INSERT INTO products (sku, product_name, unit, category) VALUES (?, ?, ?, ?)",
-    [FORECAST_PRODUCT_SKU, "Total Sales (placeholder)", "kg", "system"]
-  );
-
-  await composeDb.query(
-    "INSERT INTO inventory (product_id, quantity_available) VALUES (?, ?)",
-    [res.insertId, 0]
-  );
-
-  return res.insertId;
-}
-
+/**
+ * Persist forecasts for given product_id
+ */
 async function persistForecasts(productId, mlData) {
   const insertValues = mlData.map(item => [
     productId,
@@ -53,9 +34,13 @@ router.get("/", async (req, res) => {
     const refresh = req.query.refresh === "true";
     const horizon = parseInt(req.query.period) || 14;
 
-
+    // Fetch existing forecasts
     const [rows] = await composeDb.query(`
-      SELECT f.forecast_id, f.forecast_date, f.forecasted_demand, p.product_name,
+      SELECT f.forecast_id,
+             f.forecast_date,
+             f.forecasted_demand,
+             p.product_id,
+             p.product_name,
              IFNULL(i.quantity_available, 0) AS quantity_available
       FROM forecasts f
       JOIN products p ON f.product_id = p.product_id
@@ -63,60 +48,32 @@ router.get("/", async (req, res) => {
       ORDER BY f.forecast_date ASC
     `);
 
+    // If forecasts exist and not refreshing, return them
     if (rows.length > 0 && !refresh) return res.json(rows);
 
-    const placeholderProductId = await ensurePlaceholderProduct();
+    // Optional: refresh from ML service for all products
+    const [products] = await composeDb.query("SELECT product_id FROM products");
 
-    if (refresh)
-      await composeDb.query("DELETE FROM forecasts WHERE product_id = ?", [placeholderProductId]);
-
-    const mlResponse = await axios.post(ML_URL, { horizon });
-
-    let mlData = mlResponse.data;
-
-    // If ML service returns nothing, create placeholder rows
-    if (!Array.isArray(mlData) || mlData.length === 0) {
-      console.warn("ML service returned empty data — using placeholders.");
-      const today = new Date();
-      mlData = Array.from({ length: 14 }, (_, i) => ({
-        ds: new Date(today.getTime() + i * 86400000).toISOString().split("T")[0],
-        yhat: Math.random() * 100, // fake forecast values
-        yhat_lower: null,
-        yhat_upper: null,
-      }));
+    for (const product of products) {
+      const mlResponse = await axios.post(ML_URL, { horizon, product_id: product.product_id });
+      const mlData = Array.isArray(mlResponse.data) ? mlResponse.data : [];
+      if (mlData.length > 0) await persistForecasts(product.product_id, mlData);
     }
 
-    await persistForecasts(placeholderProductId, mlData);
-
-
-    /*
+    // Fetch fresh forecasts after update
     const [freshRows] = await composeDb.query(`
-      SELECT f.forecast_id, f.forecast_date, f.forecasted_demand, p.product_name,
+      SELECT f.forecast_id,
+             f.forecast_date,
+             f.forecasted_demand,
+             p.product_id,
+             p.product_name,
              IFNULL(i.quantity_available, 0) AS quantity_available
       FROM forecasts f
       JOIN products p ON f.product_id = p.product_id
       LEFT JOIN inventory i ON p.product_id = i.product_id
-      WHERE p.sku != 'TOTAL_SALES_PLACEHOLDER'
-      ORDER BY f.forecast_date ASC
-    `);
-    */
-
-
-    const [freshRows] = await composeDb.query(`
-      SELECT 
-        f.forecast_id,
-        f.forecast_date,
-        f.forecasted_demand,
-        p.product_name,
-        IFNULL(i.quantity_available, 0) AS quantity_available
-      FROM forecasts f
-      JOIN products p ON f.product_id = p.product_id
-      LEFT JOIN inventory i ON p.product_id = i.product_id
-      WHERE p.sku != 'TOTAL_SALES_PLACEHOLDER'
       ORDER BY f.forecast_date ASC
       LIMIT ?
     `, [horizon]);
-
 
     return res.json(freshRows);
   } catch (err) {
