@@ -1,0 +1,221 @@
+@import url('https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@700&family=Archivo+Black&family=SF+Pro+Display:wght@400&display=swap');
+
+/* ====== Base Container ====== */
+.reports-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #fff;
+  font-family: 'SF Pro Display', sans-serif;
+  color: #3c2321;
+  overflow: hidden;
+}
+
+/* ====== Sidebar ====== */
+.sidebar {
+  background-color: #d9d9d9;
+  width: 240px;
+  height: 100vh;
+  position: fixed;
+  left: -240px;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.4s ease;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 200;
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 1.4rem;
+}
+
+.logo {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 1.5rem;
+  color: #3c2321;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #3c2321;
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  margin-top: -0.5rem;
+}
+
+.nav-links a {
+  padding: 1rem 1.6rem;
+  text-decoration: none;
+  color: #3c2321;
+  font-size: 1.5rem;
+  font-family: 'SF Pro Display', sans-serif;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  background-color: #3c2321;
+  color: #fff;
+  border-left: 4px solid #fff;
+}
+
+/* ====== Header ====== */
+.reports-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background-color: #f7f4f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 150;
+  transition: left 0.4s ease;
+}
+
+.sidebar.open ~ .reports-header {
+  left: 240px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  color: #3c2321;
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+
+.brand-name {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 1.5rem;
+  color: #3c2321;
+  letter-spacing: 1px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #3c2321;
+}
+
+.profile-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* ====== Main Content ====== */
+.reports-main {
+  margin-left: 0;
+  margin-top: 80px;
+  padding: 2.5rem 3rem;
+  background-color: #fff;
+  flex: 1;
+  animation: fadeIn 0.6s ease-in;
+  transition: margin-left 0.4s ease;
+  min-height: 100vh;
+}
+
+.sidebar.open ~ .reports-main {
+  margin-left: 240px;
+}
+
+.reports-title {
+  font-family: 'Abhaya Libre', serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 2rem;
+  letter-spacing: 0.5px;
+}
+
+.reports-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.reports-buttons button {
+  padding: 0.6rem 1.5rem;
+  border: 2px solid #3c2321;
+  background: none;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  color: #3c2321;
+  transition: all 0.3s ease;
+}
+
+.reports-buttons button.active {
+  background-color: #3c2321;
+  color: white;
+}
+
+/* ====== Table ====== */
+.reports-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.reports-table th,
+.reports-table td {
+  border: 1px solid #3c2321;
+  padding: 0.8rem;
+  text-align: left;
+}
+
+.reports-table th {
+  background-color: #3c2321;
+  color: white;
+}
+
+.low-stock {
+  color: red;
+  font-weight: 600;
+}
+
+.sidebar-active .reports-main {
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
