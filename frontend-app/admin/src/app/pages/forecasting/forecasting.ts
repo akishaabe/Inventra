@@ -56,7 +56,11 @@ export class Forecasting implements OnInit, AfterViewInit {
       .get<any[]>(`${environment.apiBase}/forecasts?refresh=true&period=${period}`)
       .subscribe({
         next: (data) => {
+          console.log('Raw API data:', data);
           console.log(`API forecasts (${period} days):`, data[0]);
+          console.log(environment.apiBase); 
+
+
 
           this.forecastData = data.map((item: any) => {
             const demand = parseFloat(item.forecasted_demand) || 0;
@@ -69,6 +73,8 @@ export class Forecasting implements OnInit, AfterViewInit {
               action: this.getAction(demand, currentQty)
             };
           });
+
+          console.log('Loaded forecastData:', this.forecastData);
 
           // update recommendations, chart, and limits
           this.recommendations = this.generateRecommendations(this.forecastData);

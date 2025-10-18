@@ -4,16 +4,28 @@ import pandas as pd
 from prophet import Prophet
 import mysql.connector
 import os
+from datetime import datetime
 
 app = FastAPI()
 
+# ===== Database Config =====
 DB_HOST = os.getenv("ML_DB_HOST", "mysql")
 DB_USER = os.getenv("ML_DB_USER", "root")
 DB_PASS = os.getenv("ML_DB_PASS", "irino")
 DB_NAME = os.getenv("ML_DB_NAME", "inventra")
 
+# ===== Helper: Connect to DB =====
+def get_db_connection():
+    return mysql.connector.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASS,
+        database=DB_NAME
+    )
+
+# ===== Get Sales Data =====
 def get_sales_df():
-    conn = mysql.connector.connect(host=DB_HOST, user=DB_USER, password=DB_PASS, database=DB_NAME)
+    conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
         SELECT DATE(sale_date) AS ds, SUM(total_amount) AS y
@@ -24,40 +36,78 @@ def get_sales_df():
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
+
     if not rows:
         return None
+
     df = pd.DataFrame(rows)
-    df['ds'] = pd.to_datetime(df['ds'])
-    df = df.sort_values('ds')
+    df["ds"] = pd.to_datetime(df["ds"])
+    df = df.sort_values("ds")
     return df
 
+# ===== Request Model =====
 class ForecastRequest(BaseModel):
     horizon: int = 14
+    product_id: int | None = None  # optional
 
+# ===== Persist Forecasts =====
+def persist_forecasts(product_id, forecast_df):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    insert_sql = """
+        INSERT INTO forecasts (product_id, forecast_date, forecasted_demand, model_meta, created_at)
+        VALUES (%s, %s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+            forecasted_demand = VALUES(forecasted_demand),
+            created_at = VALUES(created_at)
+    """
+
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    data = [
+        (
+            product_id if product_id else 1,  # fallback if not given
+            row["ds"].strftime("%Y-%m-%d"),
+            float(row["yhat"]),
+            "Prophet Model v1.1.5",
+            now
+        )
+        for _, row in forecast_df.iterrows()
+    ]
+
+    cursor.executemany(insert_sql, data)
+    conn.commit()
+    cursor.close()
+    conn.close()
+    print(f"✅ Saved {len(data)} forecast rows to database.")
+
+# ===== API: /forecast =====
 @app.post("/forecast")
 def forecast(req: ForecastRequest):
     df = get_sales_df()
 
-    # 🧠 Debug print to confirm if data exists
-    if df is not None:
-        print("DEBUG: Sales DataFrame length =", len(df))
-        print(df.head())
-
     if df is None or df.empty:
-        print("DEBUG: No sales data found.")
+        print("⚠️ No sales data found.")
         return []
 
+    # ---- Prophet Forecast ----
     model = Prophet()
-    model.fit(df.rename(columns={"ds":"ds","y":"y"}))
+    model.fit(df)
     future = model.make_future_dataframe(periods=req.horizon)
     forecast = model.predict(future)
-    result = forecast[["ds","yhat","yhat_lower","yhat_upper"]].tail(req.horizon)
-    records = []
-    for _, r in result.iterrows():
-        records.append({
+
+    result = forecast[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail(req.horizon)
+
+    # ---- Save to DB ----
+    persist_forecasts(req.product_id or 1, result)
+
+    # ---- Return JSON ----
+    return [
+        {
             "ds": r["ds"].strftime("%Y-%m-%d"),
             "yhat": float(r["yhat"]),
             "yhat_lower": float(r["yhat_lower"]) if pd.notna(r["yhat_lower"]) else None,
             "yhat_upper": float(r["yhat_upper"]) if pd.notna(r["yhat_upper"]) else None
-        })
-    return records
+        }
+        for _, r in result.iterrows()
+    ]

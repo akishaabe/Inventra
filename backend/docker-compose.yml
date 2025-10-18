@@ -1,3 +1,5 @@
+version: '3.9'
+
 services:
   mysql:
     image: arm64v8/mysql:8.0
@@ -6,10 +8,12 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: irino
       MYSQL_DATABASE: inventra
+      MYSQL_USER: inventra
+      MYSQL_PASSWORD: "@Inventra123"
     ports:
       - "3406:3306"
     volumes:
-      - ../mysql-data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -47,11 +51,16 @@ services:
       - ml_service
     environment:
       - DB_HOST=mysql
-      - DB_USER=inventra
-      - DB_PASS=@Inventra123
+      - DB_USER=root
+      - DB_PASS=irino
       - DB_NAME=inventra
       - RESEND_API_KEY=re_29KHLZqH_9eEuBgEVfnKXqi5pWoEM6r98
       - ML_SERVICE_URL=http://ml_service:5000/forecast
       - FORECAST_PRODUCT_SKU=TOTAL_SALES_PLACEHOLDER
     ports:
       - "4000:4000"
+
+# 🔒 Define persistent named volume for MySQL
+volumes:
+  mysql_data:
+    driver: local
