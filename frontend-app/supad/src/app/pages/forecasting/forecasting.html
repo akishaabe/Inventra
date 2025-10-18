@@ -1,1 +1,123 @@
-<p>forecasting works!</p>
+<div class="forecasting-container">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="sidebarOpen">
+    <div class="sidebar-header">
+      <h2 class="logo">inventra</h2>
+      <button class="close-btn" (click)="toggleSidebar()">☰</button>
+    </div>
+    <nav class="nav-links">
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
+      <a routerLink="/forecasting" routerLinkActive="active">Forecasting</a>
+      <a routerLink="/reports" routerLinkActive="active">Reports</a>
+      <a routerLink="/settings" routerLinkActive="active">Settings</a>
+      <a (click)="logout()">Logout</a>
+    </nav>
+  </aside>
+
+  <!-- Header -->
+  <header class="forecasting-header">
+    <div class="header-left">
+      <button class="menu-btn" (click)="toggleSidebar()" *ngIf="!sidebarOpen">☰</button>
+      <h2 class="brand-name" *ngIf="!sidebarOpen">inventra</h2>
+    </div>
+
+    <div class="header-right">
+      <span class="user-name">Café Pèdro</span>
+    <img src="assets/images/profile icon.png" alt="Profile" class="profile-icon"   (click)="goToSettings()">
+    </div>
+  </header>
+
+
+  <main class="forecasting-main">
+    <h1 class="page-title">Forecasting</h1>
+
+    <div class="forecasting-content">
+      <!-- LEFT PANEL -->
+      <div class="left-panel fade-in-delayed">
+        <div class="chart-container">
+          <canvas #forecastChart></canvas>
+        </div>
+
+<div class="filters">
+  <span>
+    Forecast Period:
+    <select [(ngModel)]="selectedPeriod" (change)="updateForecastPeriod()">
+      <option *ngFor="let p of forecastPeriods" [value]="p">Next {{ p }} days</option>
+    </select>
+  </span>
+
+  <span>
+    Product:
+    <span class="highlight">{{ forecastData[0]?.product || 'All Products' }}</span>
+  </span>
+</div>
+
+
+
+        <div class="table-container">
+          <h3>DETAILED FORECAST</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Week(s)</th>
+                <th>Prediction</th>
+                <th>Current</th>
+                <th>Action Needed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of forecastData | slice:0:tableLimit">
+                <td>{{ item.product }}</td>
+                <td>
+                  <div *ngFor="let week of item.weeks">{{ week }}</div>
+                </td>
+                <td>
+                  <div *ngFor="let pred of item.prediction">{{ pred }}</div>
+                </td>
+                <td>{{ item.current }}</td>
+                <td>{{ item.action }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div *ngIf="forecastData.length > 10" class="show-more">
+            <button class="btn-toggle" (click)="toggleTable()">
+              {{ tableExpanded ? 'Show Less' : 'Show More' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="right-panel fade-in-delayed">
+        <h3>AI RECOMMENDATIONS</h3>
+
+        <div class="recommendations-container">
+          <div
+            class="recommendation-card"
+            *ngFor="let rec of recommendations | slice:0:recLimit"
+            (click)="openRecommendation(rec)"
+          >
+            <h4 [class]="rec.priority">{{ rec.title }} ({{ rec.count }})</h4>
+            <p>{{ rec.description }}</p>
+            <small>{{ rec.subtext }}</small>
+            <a href="#" class="link" (click)="$event.preventDefault()">
+              {{ rec.actionText }}
+            </a>
+          </div>
+
+          <!-- View All / View Less button always at bottom -->
+          <button
+            *ngIf="recommendations.length > 4"
+            class="view-all-btn"
+            (click)="toggleRecs()"
+          >
+            {{ recExpanded ? 'View Less' : 'View All' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
