@@ -9,6 +9,7 @@ import dashboardRoutes from "./routes/dashboard.js";
 import authRoutes from "./routes/auth.js";
 import forecastsRoute from "./routes/forecasts.js";
 import adminSettingsRoutes from "./routes/admin_settings.js";
+import adminDashboardRoutes from "./routes/admin_dashboard.js";
 
 
 const app = express();
@@ -22,6 +23,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/forecasts", forecastsRoute);
 app.use("/api/admin/settings", adminSettingsRoutes);
+app.use("/api/dashboard", adminDashboardRoutes);
 
 
 app.get("/", (req, res) => {

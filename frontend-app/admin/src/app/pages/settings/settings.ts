@@ -48,25 +48,25 @@ export class Settings implements OnInit {
   }
 
   // === Load All Users ===
-  loadUsers() {
-    this.settingsService.getAllUsers().subscribe({
-      next: (res) => {
-        // backend returns { success: true, data: [...] }
-        // but just in case backend returns raw array, handle both
-        const data = Array.isArray(res) ? res : (res && res.data ? res.data : []);
-        this.users = data.map((u: any) => ({
-          id: u.user_id, // use user_id (DB column)
-          name: `${u.first_name} ${u.last_name}`,
-          role: u.role,
-          email: u.email
-        }));
-      },
-      error: (err) => {
-        console.error('Error loading users:', err);
-        // optionally show an error message in the UI
+loadUsers() {
+  this.settingsService.getAllUsers().subscribe({
+    next: (res) => {
+      if (res.success && Array.isArray(res.data)) {
+        this.users = res.data
+          // 🔹 Filter out SUPERADMIN users
+          .filter((u: any) => u.role !== 'SUPERADMIN')
+          .map((u: any) => ({
+            id: u.user_id, // backend sends user_id, not id
+            name: `${u.first_name} ${u.last_name}`,
+            role: u.role,
+            email: u.email
+          }));
       }
-    });
-  }
+    },
+    error: (err) => console.error('Error loading users:', err)
+  });
+}
+
 
   // === Load Admin Profile ===
   loadAdminProfile() {
