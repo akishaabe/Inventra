@@ -6,12 +6,12 @@ import mysql.connector
 import os
 from datetime import datetime
 
-app = FastAPI()
+app = FastAPI(title="ML Forecasting Service")
 
 # ===== Database Config =====
-DB_HOST = os.getenv("ML_DB_HOST", "mysql")
-DB_USER = os.getenv("ML_DB_USER", "root")
-DB_PASS = os.getenv("ML_DB_PASS", "irino")
+DB_HOST = os.getenv("ML_DB_HOST", "localhost")
+DB_USER = os.getenv("ML_DB_USER", "inventra")
+DB_PASS = os.getenv("ML_DB_PASS", "@Inventra123")
 DB_NAME = os.getenv("ML_DB_NAME", "inventra")
 
 # ===== Helper: Connect to DB =====
@@ -66,10 +66,10 @@ def persist_forecasts(product_id, forecast_df):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     data = [
         (
-            product_id if product_id else 1,  # fallback if not given
+            product_id if product_id else 1,
             row["ds"].strftime("%Y-%m-%d"),
             float(row["yhat"]),
-            "Prophet Model v1.1.5",
+            "Prophet Model v1.1.7",
             now
         )
         for _, row in forecast_df.iterrows()
@@ -81,25 +81,40 @@ def persist_forecasts(product_id, forecast_df):
     conn.close()
     print(f"✅ Saved {len(data)} forecast rows to database.")
 
-# ===== API: /forecast =====
+# ===== Root Endpoint =====
+@app.get("/")
+def root():
+    return {
+        "message": "Welcome to the ML Forecasting Service! Use POST /forecast with JSON or GET /forecast?horizon=14&product_id=0"
+    }
+
+# ===== Forecast Endpoint (POST) =====
 @app.post("/forecast")
-def forecast(req: ForecastRequest):
+def forecast_post(req: ForecastRequest):
+    return generate_forecast(req.horizon, req.product_id or 1)
+
+# ===== Forecast Endpoint (GET) =====
+@app.get("/forecast")
+def forecast_get(horizon: int = 14, product_id: int = 0):
+    return generate_forecast(horizon, product_id or 1)
+
+# ===== Forecast Logic =====
+def generate_forecast(horizon: int, product_id: int):
     df = get_sales_df()
 
     if df is None or df.empty:
-        print("⚠️ No sales data found.")
-        return []
+        return {"error": "No sales data found."}
 
     # ---- Prophet Forecast ----
     model = Prophet()
     model.fit(df)
-    future = model.make_future_dataframe(periods=req.horizon)
-    forecast = model.predict(future)
+    future = model.make_future_dataframe(periods=horizon)
+    forecast_df = model.predict(future)
 
-    result = forecast[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail(req.horizon)
+    result = forecast_df[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail(horizon)
 
     # ---- Save to DB ----
-    persist_forecasts(req.product_id or 1, result)
+    persist_forecasts(product_id, result)
 
     # ---- Return JSON ----
     return [

@@ -2,6 +2,8 @@ import { Component, AfterViewInit, OnInit, ElementRef, ViewChild } from '@angula
 import { Chart } from 'chart.js/auto';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { NavbarComponent } from '../../components/navbar/navbar';
+import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { environment } from '../../../environments/environment';
 import { FormsModule } from '@angular/forms';
 
@@ -32,7 +34,7 @@ interface RecommendationCard {
 @Component({
   selector: 'app-forecasting',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, NavbarComponent, SidebarComponent],
   templateUrl: './forecasting.html',
   styleUrls: ['./forecasting.css']
 })
