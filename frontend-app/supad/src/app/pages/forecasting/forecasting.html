@@ -1,34 +1,3 @@
-<div class="forecasting-container">
-  <!-- Sidebar -->
-  <aside class="sidebar" [class.open]="sidebarOpen">
-    <div class="sidebar-header">
-      <h2 class="logo">inventra</h2>
-      <button class="close-btn" (click)="toggleSidebar()">☰</button>
-    </div>
-    <nav class="nav-links">
-      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-      <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
-      <a routerLink="/forecasting" routerLinkActive="active">Forecasting</a>
-      <a routerLink="/reports" routerLinkActive="active">Reports</a>
-      <a routerLink="/settings" routerLinkActive="active">Settings</a>
-      <a (click)="logout()">Logout</a>
-    </nav>
-  </aside>
-
-  <!-- Header -->
-  <header class="forecasting-header">
-    <div class="header-left">
-      <button class="menu-btn" (click)="toggleSidebar()" *ngIf="!sidebarOpen">☰</button>
-      <h2 class="brand-name" *ngIf="!sidebarOpen">inventra</h2>
-    </div>
-
-    <div class="header-right">
-      <span class="user-name">Café Pèdro</span>
-    <img src="assets/images/profile icon.png" alt="Profile" class="profile-icon"   (click)="goToSettings()">
-    </div>
-  </header>
-
-
   <main class="forecasting-main">
     <h1 class="page-title">Forecasting</h1>
 
@@ -39,21 +8,18 @@
           <canvas #forecastChart></canvas>
         </div>
 
-<div class="filters">
-  <span>
-    Forecast Period:
-    <select [(ngModel)]="selectedPeriod" (change)="updateForecastPeriod()">
-      <option *ngFor="let p of forecastPeriods" [value]="p">Next {{ p }} days</option>
-    </select>
-  </span>
-
-  <span>
-    Product:
-    <span class="highlight">{{ forecastData[0]?.product || 'All Products' }}</span>
-  </span>
-</div>
-
-
+        <div class="filters">
+          <span>
+            Forecast Period:
+            <select [(ngModel)]="selectedPeriod" (change)="updateForecastPeriod()">
+              <option *ngFor="let p of forecastPeriods" [value]="p">Next {{ p }} days</option>
+            </select>
+          </span>
+          <span>
+            Product:
+            <span class="highlight">{{ forecastData[0]?.product || 'All Products' }}</span>
+          </span>
+        </div>
 
         <div class="table-container">
           <h3>DETAILED FORECAST</h3>
@@ -92,32 +58,43 @@
 
       <!-- RIGHT PANEL -->
       <div class="right-panel fade-in-delayed">
-        <h3>AI RECOMMENDATIONS</h3>
+        <h3>AI RECOMMENDATIONS FOR TODAY</h3>
 
-        <div class="recommendations-container">
-          <div
-            class="recommendation-card"
-            *ngFor="let rec of recommendations | slice:0:recLimit"
-            (click)="openRecommendation(rec)"
-          >
-            <h4 [class]="rec.priority">{{ rec.title }} ({{ rec.count }})</h4>
-            <p>{{ rec.description }}</p>
-            <small>{{ rec.subtext }}</small>
-            <a href="#" class="link" (click)="$event.preventDefault()">
-              {{ rec.actionText }}
-            </a>
+        <ng-container *ngIf="groupedRecommendations && groupedRecommendations.length; else noRecs">
+          <div class="recommendations-group" *ngFor="let group of groupedRecommendations">
+            <div class="group-header" (click)="toggleGroup(group.priority)">
+              <h4 [style.color]="getPriorityColor(group.priority)">
+                {{ group.priority | titlecase }} ({{ group.items.length }})
+              </h4>
+              <span class="arrow" [class.open]="group.expanded">▾</span>
+            </div>
+
+            <div
+              class="group-content"
+              [class.open]="group.expanded"
+              [style.maxHeight]="group.expanded ? '400px' : '0px'"
+            >
+              <div class="group-scroll">
+                <div
+                  class="recommendation-card"
+                  *ngFor="let rec of group.items"
+                  (click)="openRecommendation(rec)"
+                >
+                  <h4 [style.color]="getPriorityColor(rec.priority)">{{ rec.title }}</h4>
+                  <div class="hover-content">
+                    <p>{{ rec.description }}</p>
+                    <small class="reason-text">{{ rec.subtext }}</small>
+                  </div>
+                  <div class="action-text">{{ rec.actionText }}</div>
+                </div>
+              </div>
+            </div>
           </div>
+        </ng-container>
 
-          <!-- View All / View Less button always at bottom -->
-          <button
-            *ngIf="recommendations.length > 4"
-            class="view-all-btn"
-            (click)="toggleRecs()"
-          >
-            {{ recExpanded ? 'View Less' : 'View All' }}
-          </button>
-        </div>
+        <ng-template #noRecs>
+          <div class="no-recommendations">No AI recommendations for this period.</div>
+        </ng-template>
       </div>
     </div>
   </main>
-</div>
