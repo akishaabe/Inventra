@@ -1,9 +1,50 @@
-<div class="forecasting-container fade-in">
-  <app-navbar (toggleSidebar)="sidebarOpen = !sidebarOpen"></app-navbar>
-  <app-sidebar [isOpen]="sidebarOpen"></app-sidebar>
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="sidebarOpen">
+    <div class="sidebar-header">
+      <h2 class="logo">inventra</h2>
+      <button class="close-btn" (click)="toggleSidebar()">☰</button>
+    </div>
+    <nav class="nav-links">
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
+      <a routerLink="/forecasting" routerLinkActive="active">Forecasting</a>
+      <a routerLink="/reports" routerLinkActive="active">Reports</a>
+      <a routerLink="/settings" routerLinkActive="active">Settings</a>
+      <a (click)="openLogoutModal()">Logout</a>
+    </nav>
+  </aside>
 
-  <main class="forecasting-main">
-    <h1 class="page-title">Forecasting</h1>
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-left">
+      <button class="menu-btn" (click)="toggleSidebar()" *ngIf="!sidebarOpen">☰</button>
+      <h2 class="brand-name" *ngIf="!sidebarOpen">inventra</h2>
+    </div>
+
+    <div class="header-right">
+      <span class="user-name">Café Pèdro</span>
+      <img
+        src="assets/images/profile icon.png"
+        alt="Profile"
+        class="profile-icon"
+        (click)="goToSettings()"
+        style="cursor: pointer;"
+      />
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="dashboard-main">
+    <h1 class="dashboard-title">Forecasting</h1>
+
+    <!-- Paste your existing forecasting content (charts, cards, tables) BELOW THIS LINE -->
+
+
+
+  <!-- Main Content !!!!!!!!!!!!!!!!
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
 
     <div class="forecasting-content">
       <!-- LEFT PANEL -->
@@ -38,7 +79,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let item of forecastData | slice:0:tableLimit">
+              <tr *ngFor="let item of forecastData">
                 <td>{{ item.product }}</td>
                 <td>
                   <div *ngFor="let week of item.weeks">{{ week }}</div>
@@ -51,12 +92,6 @@
               </tr>
             </tbody>
           </table>
-
-          <div *ngIf="forecastData.length > 10" class="show-more">
-            <button class="btn-toggle" (click)="toggleTable()">
-              {{ tableExpanded ? 'Show Less' : 'Show More' }}
-            </button>
-          </div>
         </div>
       </div>
 
@@ -64,42 +99,60 @@
       <div class="right-panel fade-in-delayed">
         <h3>AI RECOMMENDATIONS FOR TODAY</h3>
 
-        <ng-container *ngIf="groupedRecommendations && groupedRecommendations.length; else noRecs">
-          <div class="recommendations-group" *ngFor="let group of groupedRecommendations">
-            <div class="group-header" (click)="toggleGroup(group.priority)">
-              <h4 [style.color]="getPriorityColor(group.priority)">
-                {{ group.priority | titlecase }} ({{ group.items.length }})
-              </h4>
-              <span class="arrow" [class.open]="group.expanded">▾</span>
-            </div>
+        <div class="recommendations-container">
+          <ng-container *ngIf="hasAnyRecommendations(); else noRecs">
+            <!-- Iterate groups in fixed order -->
+            <ng-container *ngFor="let g of groupOrder">
+              <div class="reco-group" *ngIf="groupedRecs[g] && groupedRecs[g].length > 0">
+                <div class="reco-group-header" (click)="toggleGroup(g)">
+                  <h4>{{ prettyGroupTitle(g) }}</h4>
+                  <div class="count">{{ groupedRecs[g].length }}</div>
+                </div>
 
-            <div
-              class="group-content"
-              [class.open]="group.expanded"
-              [style.maxHeight]="group.expanded ? '400px' : '0px'"
-            >
-              <div class="group-scroll">
                 <div
-                  class="recommendation-card"
-                  *ngFor="let rec of group.items"
-                  (click)="openRecommendation(rec)"
+                  class="reco-group-body"
+                  [ngClass]="{ 'collapsed': !groupStates[g], 'expanded': groupStates[g] }"
                 >
-                  <h4 [style.color]="getPriorityColor(rec.priority)">{{ rec.title }}</h4>
-                  <div class="hover-content">
+                  <!-- show all items always (if group collapsed, CSS will limit view & allow internal scroll) -->
+                  <div
+                    class="recommendation-card"
+                    *ngFor="let rec of groupedRecs[g]; trackBy: trackByRec"
+                    (click)="openRecommendation(rec)"
+                    [title]="rec.description"
+                  >
+                    <h5 class="reco-title" [ngClass]="rec.keyClass">{{ rec.title }}</h5>
                     <p>{{ rec.description }}</p>
                     <small class="reason-text">{{ rec.subtext }}</small>
+                    <div class="action-text">{{ rec.actionText || getActionText(rec.keyClass) }}</div>
                   </div>
-                  <div class="action-text">{{ rec.actionText }}</div>
                 </div>
               </div>
-            </div>
-          </div>
-        </ng-container>
+            </ng-container>
+          </ng-container>
 
-        <ng-template #noRecs>
-          <div class="no-recommendations">No AI recommendations for this period.</div>
-        </ng-template>
+          <ng-template #noRecs>
+            <div class="no-recommendations">No AI recommendations for this period.</div>
+          </ng-template>
+        </div>
       </div>
     </div>
+  
+
+
+  <!-- Logout Modal
+   !!!!!!!!!!!!!!!!!!!!!!
+   !!!!!!!!!!!!!!!!!!!!!!
+   !!!!!!!!!!!!!!!!!!!!!! -->
   </main>
+
+  <div class="logout-modal-overlay" *ngIf="showLogoutModal">
+    <div class="logout-modal">
+      <h2>LOG OUT</h2>
+      <p>Are you sure you want to log out?</p>
+      <div class="logout-buttons">
+        <button class="yes-btn" (click)="confirmLogout()">Yes</button>
+        <button class="no-btn" (click)="closeLogoutModal()">No</button>
+      </div>
+    </div>
+  </div>
 </div>

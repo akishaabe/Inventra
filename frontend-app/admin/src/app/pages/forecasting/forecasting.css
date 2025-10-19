@@ -18,8 +18,8 @@
 }
 .forecasting-main {
   flex: 1;
-  margin-left: 250px;
-  margin-top: 64px;
+  margin-left: 0;   /* removed hard sidebar margin (you'll integrate sidebar later) */
+  margin-top: 0;    /* removed top navbar margin for now */
   padding: 2rem 3rem;
   animation: fadeIn 0.6s ease-out;
 }
@@ -39,7 +39,8 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
-  align-items: start;
+  align-items: stretch; /* both panels same height */
+  height: 100%;
 }
 
 /* === Left Panel === */
@@ -47,6 +48,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  height: 100%;
 }
 .chart-container {
   background: #fff;
@@ -59,12 +61,53 @@
   height: 400px !important;
 }
 
+/* Filters */
+.filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #444;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+.filters select {
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
 /* === Table === */
 .table-container {
   background: #fafafa;
   border-radius: 12px;
   padding: 1rem 1.5rem;
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  /* make the table container scrollable internally */
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.table-container h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: #333;
+}
+.table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.table-container th,
+.table-container td {
+  border-bottom: 1px solid #ddd;
+  padding: 8px 6px;
+}
+.table-container th {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: #666;
 }
 
 /* === Right Panel === */
@@ -75,88 +118,140 @@
   box-shadow: 0 1px 6px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
-  height: fit-content;
+  overflow-y: auto;        /* scrolls inside */
+  max-height: 100%;        /* don’t exceed table height */
 }
 
-/* === Accordion === */
-.recommendations-group {
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  margin-bottom: 12px;
-  background: #fff;
-  overflow: hidden;
-  transition: all 0.3s ease;
+.right-panel h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
 }
-.group-header {
-  cursor: pointer;
-  padding: 10px 14px;
-  background: #f5f5f5;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-}
-.group-header:hover {
-  background: #ececec;
-}
-.group-content {
-  transition: max-height 0.4s ease;
-  overflow: hidden;
-}
-.group-scroll {
+
+/* AI Recommendations - container houses multiple groups */
+.recommendations-container {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  overflow-y: auto;
-  max-height: 380px;
-  padding: 12px;
+  gap: 12px;
 }
-.group-scroll::-webkit-scrollbar {
+
+/* Group header (accordion title row) */
+.reco-group {
+  background: #e9e9e9;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* header row */
+.reco-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.reco-group-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+.reco-group-header .count {
+  font-size: 0.9rem;
+  color: #8b1e1e;
+  font-weight: 700;
+}
+
+/* group body is scrollable when collapsed; expands when open */
+.reco-group-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: max-height 0.28s ease;
+  overflow: hidden;
+  padding: 6px 2px 2px 2px;
+  border-radius: 8px;
+}
+
+/* collapsed: show a fixed height with internal scroll if many cards */
+.reco-group-body.collapsed {
+  max-height: 260px; /* approx 3-4 cards height */
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* expanded: show everything (no internal scrollbar) */
+.reco-group-body.expanded {
+  max-height: 2000px;
+  overflow: visible;
+}
+
+/* scrollbar style for group body */
+.reco-group-body.collapsed::-webkit-scrollbar {
   width: 6px;
 }
-.group-scroll::-webkit-scrollbar-thumb {
+.reco-group-body.collapsed::-webkit-scrollbar-thumb {
   background: #8b1e1e;
   border-radius: 4px;
 }
 
-/* === Cards === */
+/* Recommendation card */
 .recommendation-card {
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 10px;
+  padding: 12px;
+  margin-bottom: 6px;
   background-color: #fff;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 .recommendation-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+.recommendation-card h5 {
+  margin: 0 0 6px 0;
+  font-weight: 700;
+}
+.recommendation-card p {
+  margin: 0;
+  font-size: 0.95rem;
 }
 
-/* Hover reveal reason text */
-.hover-content .reason-text {
-  display: none;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-.recommendation-card:hover .hover-content .reason-text {
+/* reason text hidden by default, revealed on hover */
+.recommendation-card .reason-text {
   display: block;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.18s ease, opacity 0.18s ease;
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 8px;
+}
+.recommendation-card:hover .reason-text {
+  max-height: 200px;
   opacity: 1;
-  margin-top: 6px;
-  color: #555;
 }
 
-/* === Misc === */
-.action-text {
-  font-weight: 600;
+/* Action text styling */
+.recommendation-card .action-text {
+  margin-top: 8px;
+  font-weight: 700;
   color: #8b1e1e;
-  margin-top: 4px;
 }
-.arrow {
-  transition: transform 0.3s ease;
-}
-.arrow.open {
-  transform: rotate(180deg);
-}
+
+/* Priority colors (applied to titles) */
+.reco-title.high { color: #8b1e1e; }
+.reco-title.medium { color: #d66d1a; }
+.reco-title.low { color: #9a9a2b; }
+.reco-title.opportunity { color: #2b7a3a; }
+
+/* Fallback for no recommendations */
 .no-recommendations {
   font-style: italic;
   color: #666;
@@ -164,12 +259,252 @@
   text-align: center;
 }
 
-/* Priority colors */
-.high-priority { color: #8b1e1e; }
-.reduce { color: #8b1e4f; }
-.opportunity { color: #8b3f1e; }
-
+/* === Animations === */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {opacity:0;transform:translateY(15px);}
+  to {opacity:1;transform:translateY(0);}
 }
+.fade-in { animation: fadeIn .8s ease forwards; }
+
+/* === Responsive === */
+@media (max-width: 1024px) {
+  .forecasting-content {
+    grid-template-columns: 1fr;
+  }
+  .forecasting-main {
+    margin-left: 0;
+    padding: 1.5rem;
+  }
+}
+@media (max-width: 768px) {
+  .page-title { font-size: 2rem; text-align: center; }
+  .filters { flex-direction: column; align-items: flex-start; }
+}
+
+/* === header navbar === */
+
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #fff;
+  font-family: 'SF Pro Display', sans-serif;
+  color: #3c2321;
+  overflow: hidden;
+}
+
+.sidebar {
+  background-color: #d9d9d9;
+  width: 230px;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 1.4rem;
+}
+
+.logo {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 1.5rem;
+  color: #3c2321;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #3c2321;
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  margin-top: -0.5rem;
+}
+
+.nav-links a {
+  padding: 1rem 1.6rem;
+  text-decoration: none;
+  color: #3c2321;
+  font-size: 1.5rem;
+  font-family: 'SF Pro Display', sans-serif;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  background-color: #3c2321;
+  color: #fff;
+  border-left: 4px solid #fff;
+}
+
+.dashboard-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background-color: #f7f4f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  z-index: 150;
+  transition: left 0.4s ease;
+}
+
+.sidebar.open ~ .dashboard-header {
+  left: 240px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  color: #3c2321;
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+
+.brand-name {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 1.5rem;
+  color: #3c2321;
+  letter-spacing: 1px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #3c2321;
+}
+
+.profile-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.dashboard-main {
+  margin-left: 0;
+  margin-top: 25px;
+  padding: 2rem 3rem;
+  background-color: #ffffff;
+  min-height: 100vh;
+  transition: margin-left 0.4s ease;
+  position: relative;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* centers horizontally */
+}
+
+
+
+
+.sidebar.open ~ .dashboard-main {
+  margin-left: 240px;
+}
+
+.dashboard-title {
+  font-family: 'Abhaya Libre', serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 2rem;
+  letter-spacing: 0.5px;
+  text-align: left;
+  width: 100%;
+}
+
+/*  edit 4
+=== Logout Modal === */
+.logout-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.logout-modal {
+  background-color: #e0dedb;
+  padding: 2rem 3rem;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  width: 400px;
+  max-width: 90%;
+}
+
+.logout-modal h2 {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 1.8rem;
+  color: #3c2321;
+  margin-bottom: 1rem;
+}
+
+.logout-modal p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.logout-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.logout-buttons button {
+  font-family: 'SF Pro Display', sans-serif;
+  padding: 0.5rem 1.5rem;
+  border: 1px solid #3c2321;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: #f5f0eb;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.logout-buttons button:hover {
+  background-color: #3c2321;
+  color: #fff;
+}
+
+
