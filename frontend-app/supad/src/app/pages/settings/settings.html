@@ -1,1 +1,219 @@
-<p>settings works!</p>
+<div class="settings-container">
+  <!-- Global Sidebar (same across all pages) -->
+  <aside class="sidebar" [class.open]="sidebarOpen">
+    <div class="sidebar-header">
+      <h2 class="logo">inventra</h2>
+      <button class="close-btn" (click)="toggleSidebar()">☰</button>
+    </div>
+    <nav class="nav-links">
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
+      <a routerLink="/forecasting" routerLinkActive="active">Forecasting</a>
+      <a routerLink="/reports" routerLinkActive="active">Reports</a>
+      <a routerLink="/settings" routerLinkActive="active">Settings</a>
+      <a (click)="logout()">Logout</a>
+    </nav>
+  </aside>
+
+  <!-- Header -->
+  <header class="settings-header">
+    <div class="header-left">
+      <button class="menu-btn" (click)="toggleSidebar()" *ngIf="!sidebarOpen">☰</button>
+      <h2 class="brand-name" *ngIf="!sidebarOpen">inventra</h2>
+    </div>
+    <div class="header-right">
+      <span class="user-name">Café Pèdro</span>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="settings-main">
+    <div class="settings-layout">
+      <!-- Profile Card + Inner Navigation -->
+      <section class="settings-left">
+        <div class="user-card">
+          <div class="profile-pic"></div>
+          <h3 class="user-name1">Juana Dela Cruz</h3>
+          <p class="label">Email</p>
+          <p class="value">juandelacruz123@gmail.com</p>
+          <p class="label">Role</p>
+          <p class="value">Super Admin</p>
+          <a class="change-pass" (click)="openChangePassword()">Change Password</a>
+        </div>
+
+        <nav class="inner-nav">
+          <a [class.active]="selectedTab === 'users'" (click)="selectTab('users')">Manage Users</a>
+          <a [class.active]="selectedTab === 'audit'" (click)="selectTab('audit')">Audit Log</a>
+          <a [class.active]="selectedTab === 'deleted'" (click)="selectTab('deleted')">Recently Deleted</a>
+          <a [class.active]="selectedTab === 'security'" (click)="selectTab('security')">Security Settings</a>
+        </nav>
+      </section>
+
+      <!-- Right Panel -->
+      <section class="settings-right">
+        <!-- MANAGE USERS -->
+        <div *ngIf="selectedTab === 'users'" class="panel fade-in">
+          <div class="panel-header">
+            <h2>Manage Users</h2>
+            <a class="add-link" (click)="openAddUser()">Add a user</a>
+          </div>
+
+          <div class="user-section">
+            <h4>SUPER ADMINS</h4>
+            <div class="user-grid">
+              <div class="user-card-mini" *ngFor="let u of superAdmins">
+                <div class="user-icon"></div>
+                <p class="user-name1">{{ u.name }}</p>
+                <p class="user-role">{{ u.role }}</p>
+              </div>
+            </div>
+
+            <h4>ADMINS</h4>
+            <div class="user-grid">
+              <div class="user-card-mini" *ngFor="let u of admins">
+                <div class="user-icon"></div>
+                <p class="user-name1">{{ u.name }}</p>
+                <p class="user-role">{{ u.role }}</p>
+                <button class="remove-btn" (click)="openRemoveUser(u)">👤-</button>
+              </div>
+            </div>
+
+            <h4>STAFF</h4>
+            <div class="user-grid">
+              <div class="user-card-mini" *ngFor="let u of staffList">
+                <div class="user-icon"></div>
+                <p class="user-name1">{{ u.name }}</p>
+                <p class="user-role">{{ u.role }}</p>
+                <button class="remove-btn" (click)="openRemoveUser(u)">👤-</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AUDIT LOG -->
+        <div *ngIf="selectedTab === 'audit'" class="panel fade-in">
+          <h2>Audit Logs</h2>
+          <table class="audit-table">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>User</th>
+                <th>Role</th>
+                <th>Action</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let log of auditLogs">
+                <td>{{ log.date }}</td>
+                <td>{{ log.user }}</td>
+                <td>{{ log.role }}</td>
+                <td>{{ log.action }}</td>
+                <td>{{ log.details }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- RECENTLY DELETED -->
+        <div *ngIf="selectedTab === 'deleted'" class="panel fade-in">
+          <h2>Recently Deleted</h2>
+          <table class="audit-table">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Type</th>
+                <th>Name / Item</th>
+                <th>Role / Category</th>
+                <th>Deleted By</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let d of deletedItems">
+                <td>{{ d.date }}</td>
+                <td>{{ d.type }}</td>
+                <td>{{ d.name }}</td>
+                <td>{{ d.role }}</td>
+                <td>{{ d.deletedBy }}</td>
+                <td>
+                  <a class="restore">Restore</a><br />
+                  <a class="delete">Permanently Delete</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- SECURITY SETTINGS -->
+        <div *ngIf="selectedTab === 'security'" class="panel fade-in">
+          <h2>Security Settings</h2>
+          <div class="security-block">
+            <h4>Password Policy</h4>
+            <ul>
+              <li><input type="checkbox" /> Minimum of 8 characters</li>
+              <li><input type="checkbox" /> Must include uppercase, lowercase, number, and special character</li>
+              <li><input type="checkbox" /> Password expiry: 90 days</li>
+              <li><input type="checkbox" /> Prevent reuse of last 5 passwords</li>
+            </ul>
+
+            <h4>Two-Factor Authentication (2FA)</h4>
+            <ul>
+              <li><input type="checkbox" /> Enforce 2FA for all Admins/Staff</li>
+              <li><input type="checkbox" /> Require 2FA for Super Admin</li>
+            </ul>
+
+            <h4>Session & Access Control</h4>
+            <ul>
+              <li><input type="checkbox" /> Auto-logout after 15 minutes of inactivity</li>
+              <li><input type="checkbox" /> Restrict concurrent logins (1 device per user)</li>
+              <li><input type="checkbox" /> Device recognition</li>
+            </ul>
+
+            <h4>Audit & Monitoring Controls</h4>
+            <ul>
+              <li><input type="checkbox" /> Log all login attempts (success & failure)</li>
+              <li><input type="checkbox" /> Set alerts for suspicious activity</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- MODALS -->
+  <div class="modal" *ngIf="showAddUser">
+    <div class="modal-content">
+      <h2>Add User</h2>
+      <form (ngSubmit)="saveUser()">
+        <input placeholder="Enter Email" [(ngModel)]="newUser.email" name="email" required />
+        <input placeholder="Enter Temporary Password" [(ngModel)]="newUser.tempPass" name="tempPass" required />
+        <input placeholder="First Name" [(ngModel)]="newUser.firstName" name="firstName" required />
+        <input placeholder="Last Name" [(ngModel)]="newUser.lastName" name="lastName" required />
+        <button type="submit" class="save">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" *ngIf="showRemoveUser">
+    <div class="modal-content small">
+      <h2>Remove User?</h2>
+      <div class="buttons">
+        <button class="yes" (click)="confirmRemoveUser()">Yes</button>
+        <button class="no" (click)="closeRemoveUser()">No</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" *ngIf="showChangePassword">
+    <div class="modal-content">
+      <h2>Change Password</h2>
+      <form (ngSubmit)="savePassword()">
+        <input placeholder="Current Password" type="password" [(ngModel)]="passwords.current" name="current" required />
+        <input placeholder="New Password" type="password" [(ngModel)]="passwords.new" name="new" required />
+        <input placeholder="Confirm Password" type="password" [(ngModel)]="passwords.confirm" name="confirm" required />
+        <button type="submit" class="save">Save</button>
+      </form>
+    </div>
+  </div>
+</div>
