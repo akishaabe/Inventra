@@ -1,11 +1,11 @@
-# Ignore MySQL container data
-mysql-data/
+# =====================================
+# 🔧 BACKEND / NODE / PYTHON
+# =====================================
 
+# Node dependencies
 node_modules/
-.env
-*.log
 
-# Virtual environment
+# Python virtual environment
 venv/
 backend/venv/
 
@@ -13,12 +13,42 @@ backend/venv/
 __pycache__/
 *.pyc
 
+# Log files
+*.log
+
+# Environment files
+.env
+
+# =====================================
+# 🐳 DOCKER / MYSQL
+# =====================================
+
+# MySQL container volume data
+mysql-data/
+
+# Docker build outputs (optional)
+*.pid
+*.sock
+
+# =====================================
+# 🧠 FRONTEND (Angular / Build)
+# =====================================
+
+# Build outputs
+dist/
+build/
+
+# Cache and temporary files
+.tmp/
+.cache/
+
+# =====================================
+# 💻 EDITOR / OS FILES
+# =====================================
+
 # VS Code
 .vscode/
 
-# Environment variables
-.env
-
-# Node.js dependencies (if you have a frontend)
-node_modules/
-dist/
+# macOS / Windows system files
+.DS_Store
+Thumbs.db
