@@ -8,6 +8,8 @@ import inventoryRoutes from "./routes/inventory.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import authRoutes from "./routes/auth.js";
 import forecastsRoute from "./routes/forecasts.js";
+import adminSettingsRoutes from "./routes/admin_settings.js";
+
 
 const app = express();
 const PORT = 4000;
@@ -19,6 +21,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/forecasts", forecastsRoute);
+app.use("/api/admin/settings", adminSettingsRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("Backend is running!");
