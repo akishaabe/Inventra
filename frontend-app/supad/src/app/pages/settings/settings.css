@@ -372,6 +372,7 @@
 }
 
 /* === Animations === */
+/* === Animations === */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -386,6 +387,41 @@
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* === Responsive Design (Tablet & Mobile) === */
+@media (max-width: 992px) {
+  /* Make main layout stack vertically instead of side-by-side */
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  /* Reduce padding for smaller screens */
+  .settings-main {
+    padding: 20px;
+  }
+
+  /* Adjust chart size (if any chart containers exist) */
+  .chart-container {
+    height: 260px;
+  }
+
+  /* Example: make filters stack vertically if you have filters section */
+  .filters {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  /* Optional: make sidebar take full width when open */
+  .sidebar {
+    width: 200px;
+  }
+
+  .sidebar.open ~ .settings-header {
+    left: 200px;
+  }
+}
+
 
 .sidebar {
   width: 240px;

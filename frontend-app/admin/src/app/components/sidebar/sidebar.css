@@ -1,10 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap');
+/** @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap'); */
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/assets/fonts/SF-Pro-Display-Regular.otf') format('opentype');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/assets/fonts/SF-Pro-Display-Medium.otf') format('opentype');
+  font-weight: 500;
+}
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/assets/fonts/SF-Pro-Display-Semibold.otf') format('opentype');
+  font-weight: 600;
+}
 
 .sidebar {
   position: fixed;
   top: 64px; /* aligned with navbar height */
   left: 0;
   width: 240px;
+  font-family: 'SF Pro Display', sans-serif;
   height: calc(100vh - 64px);
   background-color: #F8F8F8;
   border-right: 1px solid #ddd;
