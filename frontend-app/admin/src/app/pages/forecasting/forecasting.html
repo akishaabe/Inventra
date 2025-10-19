@@ -38,10 +38,6 @@
   <main class="dashboard-main">
     <h1 class="dashboard-title">Forecasting</h1>
 
-    <!-- Paste your existing forecasting content (charts, cards, tables) BELOW THIS LINE -->
-
-
-
   <!-- Main Content !!!!!!!!!!!!!!!!
    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
@@ -79,18 +75,17 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let item of forecastData">
-                <td>{{ item.product }}</td>
-                <td>
-                  <div *ngFor="let week of item.weeks">{{ week }}</div>
-                </td>
-                <td>
-                  <div *ngFor="let pred of item.prediction">{{ pred }}</div>
-                </td>
-                <td>{{ item.current }}</td>
-                <td>{{ item.action }}</td>
-              </tr>
-            </tbody>
+  <ng-container *ngFor="let item of forecastData; let i = index">
+    <tr *ngFor="let week of item.weeks; let j = index">
+      <td *ngIf="j === 0" [attr.rowspan]="item.weeks.length">{{ item.product }}</td>
+      <td>{{ week }}</td>
+      <td>{{ item.prediction[j] }}</td>
+      <td *ngIf="j === 0" [attr.rowspan]="item.weeks.length">{{ item.current }}</td>
+      <td *ngIf="j === 0" [attr.rowspan]="item.weeks.length">{{ item.action }}</td>
+    </tr>
+  </ng-container>
+</tbody>
+
           </table>
         </div>
       </div>
