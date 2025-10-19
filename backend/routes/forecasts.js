@@ -36,22 +36,30 @@ router.get("/", async (req, res) => {
 
     // Fetch existing forecasts
     const [rows] = await composeDb.query(`
-      
-  SELECT f.forecast_id,
-       f.forecast_date,
-       f.forecasted_demand,
-       p.product_id,
-       p.product_name,
-       IFNULL(i.quantity_available, 0) AS quantity_available,
-       a.recommendation_text AS ai_recommendation,
-       a.priority AS ai_priority,
-       a.reason AS ai_reason
+SELECT 
+  p.product_id,
+  p.product_name,
+  MAX(f.forecast_date) AS forecast_date,
+  ANY_VALUE(f.forecasted_demand) AS forecasted_demand,
+  IFNULL(i.quantity_available, 0) AS quantity_available,
+  IFNULL(
+    JSON_ARRAYAGG(
+      JSON_OBJECT(
+        'text', a.recommendation_text,
+        'priority', a.priority,
+        'reason', a.reason
+      )
+    ), JSON_ARRAY()
+  ) AS ai_recommendations
 FROM forecasts f
 JOIN products p ON f.product_id = p.product_id
 LEFT JOIN inventory i ON p.product_id = i.product_id
-LEFT JOIN ai_recommendations a 
-       ON p.product_id = a.product_id AND a.is_active = 1
-ORDER BY f.forecast_date ASC
+LEFT JOIN ai_recommendations a ON p.product_id = a.product_id AND a.is_active = 1
+GROUP BY p.product_id
+ORDER BY p.product_name;
+
+
+
     `);
 
     // If forecasts exist and not refreshing, return them
@@ -68,22 +76,27 @@ ORDER BY f.forecast_date ASC
 
     // Fetch fresh forecasts after update
     const [freshRows] = await composeDb.query(`
-SELECT f.forecast_id,
-       f.forecast_date,
-       f.forecasted_demand,
-       p.product_id,
-       p.product_name,
-       IFNULL(i.quantity_available, 0) AS quantity_available,
-       a.recommendation_text AS ai_recommendation,
-       a.priority AS ai_priority,
-       a.reason AS ai_reason
+SELECT 
+  p.product_id,
+  p.product_name,
+  MAX(f.forecast_date) AS forecast_date,
+  ANY_VALUE(f.forecasted_demand) AS forecasted_demand,
+  IFNULL(i.quantity_available, 0) AS quantity_available,
+  IFNULL(
+    JSON_ARRAYAGG(
+      JSON_OBJECT(
+        'text', a.recommendation_text,
+        'priority', a.priority,
+        'reason', a.reason
+      )
+    ), JSON_ARRAY()
+  ) AS ai_recommendations
 FROM forecasts f
 JOIN products p ON f.product_id = p.product_id
 LEFT JOIN inventory i ON p.product_id = i.product_id
-LEFT JOIN ai_recommendations a 
-       ON p.product_id = a.product_id AND a.is_active = 1
-ORDER BY f.forecast_date ASC
-
+LEFT JOIN ai_recommendations a ON p.product_id = a.product_id AND a.is_active = 1
+GROUP BY p.product_id
+ORDER BY p.product_name;
     `, [horizon]);
 
     return res.json(freshRows);
