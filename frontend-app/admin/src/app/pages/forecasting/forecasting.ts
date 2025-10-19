@@ -77,7 +77,21 @@ export class Forecasting implements OnInit, AfterViewInit {
           console.log('Loaded forecastData:', this.forecastData);
 
           // update recommendations, chart, and limits
-          this.recommendations = this.generateRecommendations(this.forecastData);
+          // Use only recommendations from backend (DB) for testing
+          // Commented out Prophet mock generation
+          // this.recommendations = this.generateRecommendations(this.forecastData);
+          // Map database AI recommendations directly
+this.recommendations = data
+  .filter(item => item.ai_recommendation)  // only include products with AI rec
+  .map(item => ({
+    title: item.ai_priority || 'Recommendation',
+    count: 1,
+    description: item.ai_recommendation,
+    subtext: item.ai_reason || '',
+    actionText: 'Act Now',
+    priority: this.mapPriorityClass(item.ai_priority)
+  }));
+
           this.dataLoaded = true;
 
           // if table expanded, keep full length; otherwise ensure 10
@@ -104,7 +118,7 @@ export class Forecasting implements OnInit, AfterViewInit {
     if (diff < -10) return `Reduce ${Math.abs(diff).toFixed(2)}kg`;
     return 'No action';
   }
-
+/*
   generateRecommendations(data: any[]): any[] {
     return data.map(item => {
       const predicted = parseFloat(item.prediction[0]) || 0;
@@ -141,6 +155,45 @@ export class Forecasting implements OnInit, AfterViewInit {
       }
     });
   }
+    */
+
+  generateRecommendations(data: any[]): any[] {
+  // map database-driven AI recommendations
+  return data
+    .map((item: any) => {
+      if (!item.ai_recommendation) return null; // skip if no recommendation
+      return {
+        title: item.ai_priority || 'Recommendation',
+        count: 1,
+        description: item.ai_recommendation,
+        subtext: item.ai_reason || '',
+        actionText: 'Take Action',
+        priority:
+          item.ai_priority === 'high-priority'
+            ? 'high-priority'
+            : item.ai_priority === 'reduce'
+            ? 'reduce'
+            : 'opportunity'
+      };
+    })
+    .filter(Boolean); // remove nulls
+}
+
+mapPriorityClass(priority: string) {
+  switch ((priority || '').toLowerCase()) {
+    case 'high':
+    case 'high-priority':
+      return 'high-priority';
+    case 'reduce':
+      return 'reduce';
+    case 'opportunity':
+      return 'opportunity';
+    default:
+      return '';
+  }
+}
+
+
 
   buildChart() {
     const ctx = this.chartRef?.nativeElement?.getContext('2d');
