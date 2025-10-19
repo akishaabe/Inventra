@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NavbarComponent } from '../../components/navbar/navbar';
-import { SidebarComponent } from '../../components/sidebar/sidebar';
 
 type Product = {
   id: string;
@@ -17,7 +15,7 @@ type Product = {
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent, SidebarComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './inventory.html',
   styleUrls: ['./inventory.css']
 })
