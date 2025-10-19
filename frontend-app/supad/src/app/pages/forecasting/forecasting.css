@@ -2,11 +2,8 @@
 
 /* ====== Base Container ====== */
 .forecasting-container {
-  display: flex;
-  min-height: 100vh;
   background-color: #fff;
   font-family: 'SF Pro Display', sans-serif;
-  overflow-x: hidden;
 }
 
 /* ====== Sidebar ====== */
@@ -15,17 +12,13 @@
   width: 240px;
   height: 100vh;
   position: fixed;
-  left: -240px;
+  left: 0;
   top: 0;
   display: flex;
   flex-direction: column;
   transition: all 0.4s ease;
   box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 200;
-}
-
-.sidebar.open {
-  left: 0;
+  z-index: 100;
 }
 
 .sidebar-header {
@@ -75,7 +68,7 @@
 .forecasting-header {
   position: fixed;
   top: 0;
-  left: 0;
+  left: 230px;
   right: 0;
   height: 70px;
   background-color: #f7f4f0;
@@ -131,21 +124,20 @@
 
 /* ====== Main Layout ====== */
 .forecasting-main {
-  margin-top: 10rem;
-  padding: 2.5rem 3rem;
-  flex: 1;
+  margin-top: 84px;
+  padding: 28px 60px;
   background: #ffffff;
-  transition: margin-left 0.4s ease;
-  animation: fadeIn 0.6s ease-in;
+  min-height: calc(100vh - 84px);
 }
 
 .page-title {
   font-family: 'Abhaya Libre', serif;
-  font-size: 3.5rem;
-  font-weight: 700;
-  color: #000;
-  margin-bottom: 2rem;
+  font-size: 5rem;
+  color: #000000;
+  margin: 4px 0 18px 0;
   letter-spacing: 0.5px;
+  font-weight: 800;
+  animation: slideDown 0.8s ease-out;
 }
 
 /* ====== Content Grid ====== */
@@ -335,6 +327,15 @@ tbody tr:hover {
 }
 
 /* ====== Animations ====== */
+
+.forecasting-page {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.page-title {
+  animation: slideDown 0.8s ease-out;
+}
+
 .fade-in-delayed {
   animation: fadeInUp 0.5s ease both;
 }
@@ -347,6 +348,17 @@ tbody tr:hover {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
