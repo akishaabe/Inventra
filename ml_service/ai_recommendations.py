@@ -47,7 +47,7 @@ def fetch_products_with_trends():
         results = cursor.fetchall()
         return results
     except Error as e:
-        print(f"❌ Database error: {e}")
+        print(f"Database error: {e}")
         return []
     finally:
         if conn.is_connected():
@@ -119,11 +119,11 @@ def generate_ai_recommendations(products):
             if isinstance(recs, list):
                 return recs
         except json.JSONDecodeError:
-            print("⚠️ Could not parse AI JSON output. Storing fallback.")
+            print("Could not parse AI JSON output. Storing fallback.")
             return []
 
     except Exception as e:
-        print("❌ OpenAI failed:", e)
+        print("OpenAI failed:", e)
         return []
 
 # ---------------------------------------------
@@ -156,9 +156,9 @@ def save_recommendations_to_db(recommendations):
             count += 1
 
         conn.commit()
-        print(f"✅ Saved {count} AI recommendations.")
+        print(f"Saved {count} AI recommendations.")
     except Error as e:
-        print(f"❌ Database insert error: {e}")
+        print(f"Database insert error: {e}")
     finally:
         if conn.is_connected():
             cursor.close()
@@ -172,11 +172,11 @@ if __name__ == "__main__":
     products = fetch_products_with_trends()
 
     if not products:
-        print("⚠️ No data retrieved. Exiting.")
+        print("No data retrieved. Exiting.")
     else:
         ai_recs = generate_ai_recommendations(products)
         if ai_recs:
             save_recommendations_to_db(ai_recs)
             print(f"\n✨ Processed {len(ai_recs)} recommendations successfully.")
         else:
-            print("⚠️ No valid recommendations generated.")
+            print("No valid recommendations generated.")

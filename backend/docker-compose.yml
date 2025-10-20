@@ -59,6 +59,8 @@ services:
       - FORECAST_PRODUCT_SKU=TOTAL_SALES_PLACEHOLDER
     ports:
       - "4000:4000"
+    volumes:
+      - .:/app 
 
 # 🔒 Define persistent named volume for MySQL
 volumes:

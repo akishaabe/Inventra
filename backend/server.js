@@ -11,6 +11,9 @@ import userRoutes from "./routes/users.js";
 import auditRoutes from "./routes/auditLogs.js";
 import deletedRoutes from "./routes/deletedItems.js";
 import forecastsRoute from "./routes/forecasts.js";
+import adminSettingsRoutes from "./routes/admin_settings.js";
+import adminDashboardRoutes from "./routes/admin_dashboard.js";
+
 
 const app = express();
 const PORT = 4000;
@@ -25,7 +28,8 @@ app.use("/api/forecasts", forecastsRoute);
 app.use("/api/users", userRoutes);
 app.use("/api/audit-logs", auditRoutes);
 app.use("/api/deleted-items", deletedRoutes);
-
+app.use("/api/admin/settings", adminSettingsRoutes);
+app.use("/api/admin/dashboard", adminDashboardRoutes);
 app.get("/", (req, res) => {
   res.send("Backend is running!");
 });

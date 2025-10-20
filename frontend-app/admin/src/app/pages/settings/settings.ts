@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
+import { SettingsService } from './settings.service';
 
 @Component({
   selector: 'app-settings',
@@ -11,42 +12,84 @@ import { SidebarComponent } from '../../components/sidebar/sidebar';
   templateUrl: './settings.html',
   styleUrls: ['./settings.css']
 })
-export class Settings {
+export class Settings implements OnInit {
   sidebarOpen = false;
 
-  // profile fields
-  firstName = 'Juan';
-  lastName = 'Dela Cruz';
-  email = 'jdelacruz123@gmail.com';
+  constructor(private settingsService: SettingsService) {}
 
-  // users list (demo seed)
-  users = [
-    { name: 'Jose Cruz', role: 'Staff', email: 'jose@example.com' },
-    { name: 'Lui Perez', role: 'Cashier', email: 'lui@example.com' },
-    { name: 'Jun Garcia', role: 'Staff', email: 'jun@example.com' }
-  ];
+  // === Profile fields ===
+  adminId: number | null = null; // store logged-in admin id when we load profile
+  firstName = '';
+  lastName = '';
+  email = '';
+  role = '';
+  is2FA = 0;
 
-  // Add-user modal state + model
+  // === User list ===
+  users: any[] = [];
+
+  // === Modals and temp models ===
   showAddUser = false;
-  newUser = { email: '', password: '', firstName: '', lastName: '' };
-
-  // Confirmation / result modals
+  showRemoveModal = false;
   showConfirmModal = false;
   confirmMessage = '';
-
-  // Remove user confirmation
-  showRemoveModal = false;
   removeCandidate: any = null;
 
-  // Password regex
+  newUser = { email: '', password: '', firstName: '', lastName: '' };
   passwordPattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};:"\\|,.<>\/?]).{8,}$/;
 
-  // Sidebar toggle (triggered by navbar)
+  ngOnInit() {
+    this.loadUsers();
+    this.loadAdminProfile();
+  }
+
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
   }
 
-  // === Add User modal handling ===
+  // === Load All Users ===
+loadUsers() {
+  this.settingsService.getAllUsers().subscribe({
+    next: (res) => {
+      if (res.success && Array.isArray(res.data)) {
+        this.users = res.data
+          // 🔹 Filter out SUPERADMIN users
+          .filter((u: any) => u.role !== 'SUPERADMIN')
+          .map((u: any) => ({
+            id: u.user_id, // backend sends user_id, not id
+            name: `${u.first_name} ${u.last_name}`,
+            role: u.role,
+            email: u.email
+          }));
+      }
+    },
+    error: (err) => console.error('Error loading users:', err)
+  });
+}
+
+
+  // === Load Admin Profile ===
+  loadAdminProfile() {
+    const adminId = 6; // temp: replace later with actual logged-in id
+    this.settingsService.getAdminProfile(adminId).subscribe({
+      next: (res) => {
+        const payload = res && res.data ? res.data : res;
+        if (payload) {
+          this.adminId = payload.user_id ?? adminId;
+          this.firstName = payload.first_name ?? '';
+          this.lastName = payload.last_name ?? '';
+          this.email = payload.email ?? '';
+          this.role = payload.role ?? '';
+          this.is2FA = payload.is_2fa_enabled ?? 0;
+        }
+      },
+      error: (err) => {
+        console.error('Error loading admin profile:', err);
+      }
+    });
+  }
+
+  // === Add User ===
   openAddUserModal(event?: Event) {
     if (event) event.preventDefault();
     this.resetNewUser();
@@ -57,61 +100,90 @@ export class Settings {
     this.showAddUser = false;
   }
 
-submitNewUser(form: any) {
-  // If invalid, mark all controls as touched and stop
-  if (!form || form.invalid) {
-    Object.values(form.controls).forEach((ctrl: any) => ctrl.markAsTouched());
-    return;
+  submitNewUser(form: any) {
+    if (!form || form.invalid) {
+      Object.values(form.controls).forEach((ctrl: any) => ctrl.markAsTouched());
+      return;
+    }
+
+    const newUserData = {
+      first_name: this.newUser.firstName,
+      last_name: this.newUser.lastName,
+      email: this.newUser.email,
+      password_hash: this.newUser.password,
+      role: 'STAFF'
+    };
+
+    this.settingsService.addUser(newUserData).subscribe({
+      next: (res) => {
+        this.confirmMessage = res.message || 'User added!';
+        this.showConfirmModal = true;
+        this.showAddUser = false;
+        this.loadUsers();
+        this.resetNewUser();
+      },
+      error: (err) => {
+        console.error('Error adding user:', err);
+        this.confirmMessage = 'Error adding user!';
+        this.showConfirmModal = true;
+      }
+    });
   }
-
-  // Simple extra check to ensure email looks valid
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailPattern.test(this.newUser.email)) {
-    form.controls['email'].setErrors({ invalid: true });
-    return;
-  }
-
-  // Add new user to list
-  this.users.push({
-    name: `${this.newUser.firstName} ${this.newUser.lastName}`,
-    role: 'Staff',
-    email: this.newUser.email
-  });
-
-  // Show confirmation modal
-  this.showAddUser = false;
-  this.confirmMessage = 'User added!';
-  this.showConfirmModal = true;
-
-  this.resetNewUser();
-}
-
 
   resetNewUser() {
     this.newUser = { email: '', password: '', firstName: '', lastName: '' };
   }
 
-  // === Edit Profile ===
+  // === Save Admin Changes ===
   saveChanges() {
-    // pretend saving
-    this.confirmMessage = 'Changes Saved!';
-    this.showConfirmModal = true;
+    const idToUse = this.adminId ?? 1;
+    const updateData: any = {
+      first_name: this.firstName,
+      last_name: this.lastName,
+      email: this.email,
+      role: this.role || undefined,
+      is_2fa_enabled: this.is2FA
+    };
+
+    // call the admin-specific endpoint (updateAdminProfile)
+    this.settingsService.updateAdminProfile(idToUse, updateData).subscribe({
+      next: (res) => {
+        this.confirmMessage = res.message || 'Changes saved!';
+        this.showConfirmModal = true;
+        // reload users & profile so UI reflects changes
+        this.loadAdminProfile();
+        this.loadUsers();
+      },
+      error: (err) => {
+        console.error('Error updating admin:', err);
+        this.confirmMessage = 'Error saving changes!';
+        this.showConfirmModal = true;
+      }
+    });
   }
 
-  // === Remove User flow ===
+  // === Remove User ===
   promptRemoveUser(user: any) {
     this.removeCandidate = user;
     this.showRemoveModal = true;
   }
 
   confirmRemove() {
-    if (this.removeCandidate) {
-      this.users = this.users.filter(u => u !== this.removeCandidate);
-      this.removeCandidate = null;
-      this.showRemoveModal = false;
-      this.confirmMessage = 'User removed!';
-      this.showConfirmModal = true;
-    }
+    if (!this.removeCandidate) return;
+
+    this.settingsService.deleteUser(this.removeCandidate.id).subscribe({
+      next: (res) => {
+        this.confirmMessage = res.message || 'User removed!';
+        this.showConfirmModal = true;
+        this.showRemoveModal = false;
+        this.loadUsers();
+      },
+      error: (err) => {
+        console.error('Error removing user:', err);
+        this.confirmMessage = 'Error removing user!';
+        this.showConfirmModal = true;
+      }
+    });
   }
 
   cancelRemove() {
@@ -119,7 +191,6 @@ submitNewUser(form: any) {
     this.showRemoveModal = false;
   }
 
-  // Close confirmation modal
   closeConfirmModal() {
     this.showConfirmModal = false;
   }

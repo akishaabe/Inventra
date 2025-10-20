@@ -1,6 +1,7 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule  } from '@angular/router';
+import { DashboardService } from './dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,7 +19,7 @@ export class Dashboard implements OnInit {
     forecastDemand: 0
   };
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private dashboardService: DashboardService) {}
 
   ngOnInit() {
     this.fetchDashboardData();
@@ -52,15 +53,16 @@ export class Dashboard implements OnInit {
   }
 
   
-  async fetchDashboardData() {
-    try {
-      const res = await fetch('http://localhost:4000/api/dashboard');
-      const data = await res.json();
+fetchDashboardData() {
+  this.dashboardService.getDashboardData().subscribe({
+    next: (data) => {
       this.dashboardData = data;
-    } catch (err) {
+    },
+    error: (err) => {
       console.error('Error fetching dashboard data:', err);
     }
-  }
+  });
+}
 
   /* edit 3
   logout() {
