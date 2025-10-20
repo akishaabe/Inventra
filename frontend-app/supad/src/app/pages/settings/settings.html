@@ -1,5 +1,5 @@
 <div class="settings-container">
-  <!-- Global Sidebar (same across all pages) -->
+  <!-- Sidebar -->
   <aside class="sidebar" [class.open]="sidebarOpen">
     <div class="sidebar-header">
       <h2 class="logo">inventra</h2>
@@ -181,39 +181,29 @@
     </div>
   </main>
 
-  <!-- MODALS -->
+  <!-- ADD USER MODAL -->
   <div class="modal" *ngIf="showAddUser">
-    <div class="modal-content">
-      <h2>Add User</h2>
-      <form (ngSubmit)="saveUser()">
+    <div class="modal-content add-user">
+      <button class="back-btn" (click)="closeAddUser()">← Back</button>
+      <h2 class="modal-title">Add User</h2>
+
+      <!-- 🔹 FIXED FORM -->
+      <form novalidate (ngSubmit)="saveUser()" #userForm="ngForm" class="modal-form">
         <input placeholder="Enter Email" [(ngModel)]="newUser.email" name="email" required />
         <input placeholder="Enter Temporary Password" [(ngModel)]="newUser.tempPass" name="tempPass" required />
         <input placeholder="First Name" [(ngModel)]="newUser.firstName" name="firstName" required />
         <input placeholder="Last Name" [(ngModel)]="newUser.lastName" name="lastName" required />
-        <button type="submit" class="save">Save</button>
+        <button type="submit" class="save-btn" [disabled]="userForm.invalid">Save</button>
       </form>
     </div>
   </div>
 
-  <div class="modal" *ngIf="showRemoveUser">
-    <div class="modal-content small">
-      <h2>Remove User?</h2>
-      <div class="buttons">
-        <button class="yes" (click)="confirmRemoveUser()">Yes</button>
-        <button class="no" (click)="closeRemoveUser()">No</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal" *ngIf="showChangePassword">
-    <div class="modal-content">
-      <h2>Change Password</h2>
-      <form (ngSubmit)="savePassword()">
-        <input placeholder="Current Password" type="password" [(ngModel)]="passwords.current" name="current" required />
-        <input placeholder="New Password" type="password" [(ngModel)]="passwords.new" name="new" required />
-        <input placeholder="Confirm Password" type="password" [(ngModel)]="passwords.confirm" name="confirm" required />
-        <button type="submit" class="save">Save</button>
-      </form>
+  <!-- USER ADDED MODAL -->
+  <div class="modal" *ngIf="showUserAdded">
+    <div class="modal-content user-added">
+      <h2 class="success-title">User added!</h2>
+      <p class="success-text">User has been added into the system!</p>
+      <button class="ok-btn" (click)="closeUserAdded()">Okay</button>
     </div>
   </div>
 </div>

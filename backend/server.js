@@ -7,6 +7,9 @@ import composeDb from "./db.compose.js";
 import inventoryRoutes from "./routes/inventory.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import authRoutes from "./routes/auth.js";
+import userRoutes from "./routes/users.js";
+import auditRoutes from "./routes/auditLogs.js";
+import deletedRoutes from "./routes/deletedItems.js";
 import forecastsRoute from "./routes/forecasts.js";
 
 const app = express();
@@ -19,6 +22,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/forecasts", forecastsRoute);
+app.use("/api/users", userRoutes);
+app.use("/api/audit-logs", auditRoutes);
+app.use("/api/deleted-items", deletedRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend is running!");

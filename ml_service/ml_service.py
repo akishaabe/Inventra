@@ -66,7 +66,7 @@ def persist_forecasts(product_id, forecast_df):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     data = [
         (
-            product_id if product_id else 1,
+            product_id if product_id else 1,  # fallback if not given
             row["ds"].strftime("%Y-%m-%d"),
             float(row["yhat"]),
             "Prophet Model v1.1.7",
@@ -81,40 +81,25 @@ def persist_forecasts(product_id, forecast_df):
     conn.close()
     print(f"✅ Saved {len(data)} forecast rows to database.")
 
-# ===== Root Endpoint =====
-@app.get("/")
-def root():
-    return {
-        "message": "Welcome to the ML Forecasting Service! Use POST /forecast with JSON or GET /forecast?horizon=14&product_id=0"
-    }
-
-# ===== Forecast Endpoint (POST) =====
+# ===== API: /forecast =====
 @app.post("/forecast")
-def forecast_post(req: ForecastRequest):
-    return generate_forecast(req.horizon, req.product_id or 1)
-
-# ===== Forecast Endpoint (GET) =====
-@app.get("/forecast")
-def forecast_get(horizon: int = 14, product_id: int = 0):
-    return generate_forecast(horizon, product_id or 1)
-
-# ===== Forecast Logic =====
-def generate_forecast(horizon: int, product_id: int):
+def forecast(req: ForecastRequest):
     df = get_sales_df()
 
     if df is None or df.empty:
-        return {"error": "No sales data found."}
+        print("⚠️ No sales data found.")
+        return []
 
     # ---- Prophet Forecast ----
     model = Prophet()
     model.fit(df)
-    future = model.make_future_dataframe(periods=horizon)
+    future = model.make_future_dataframe(periods=req.horizon)
     forecast_df = model.predict(future)
 
-    result = forecast_df[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail(horizon)
+    result = forecast_df[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail(req.horizon)
 
     # ---- Save to DB ----
-    persist_forecasts(product_id, result)
+    persist_forecasts(req.product_id or 1, result)
 
     # ---- Return JSON ----
     return [
@@ -126,3 +111,8 @@ def generate_forecast(horizon: int, product_id: int):
         }
         for _, r in result.iterrows()
     ]
+
+# ===== Root Endpoint =====
+@app.get("/")
+def root():
+    return {"message": "Welcome to the ML Forecasting Service! Use POST /forecast with JSON or GET /forecast?horizon=14&product_id=0"}
