@@ -1,10 +1,13 @@
 import mysql from "mysql2/promise";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const db = mysql.createPool({
-  host: "localhost",
-  user: "inventra",
-  password: "@Inventra123",
-  database: "inventra",
+  host: process.env.DB_HOST || "localhost",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "",
+  database: process.env.DB_NAME || "inventra",
 });
 
 export default db;

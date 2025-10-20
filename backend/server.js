@@ -13,6 +13,8 @@ import deletedRoutes from "./routes/deletedItems.js";
 import forecastsRoute from "./routes/forecasts.js";
 import adminSettingsRoutes from "./routes/admin_settings.js";
 import adminDashboardRoutes from "./routes/admin_dashboard.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 
 const app = express();

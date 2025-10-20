@@ -1,195 +1,544 @@
-@import url('https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@700&family=Archivo+Black&family=SF+Pro+Display:wght@400&display=swap');
-
-.dashboard-main {
-  margin-left: 0;
-  margin-top: 80px;
-  padding: 2rem 3rem;
-  background-color: #fff;
-  min-height: 100vh;
-  transition: margin-left 0.4s ease;
+/* === Page layout ===== */
+:root {
+  --bg: #f4f4f4;
+  --card-gray: #dedede;
+  --accent: #4b2e2b;
 }
 
-.sidebar.open ~ .dashboard-main {
-  margin-left: 240px;
+.settings-main {
+  margin-top: 64px;
+  min-height: calc(100vh - 64px);
+  background: #f4f4f4;
+  font-family: 'SF Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  padding: 40px 60px;
 }
 
+/* Title */
 .settings-title {
-  font-family: 'Abhaya Libre', serif;
-  font-size: 3rem;
-  font-weight: 700;
-  color: #000;
-  margin-bottom: 2rem;
+  display: none;
 }
 
-/* === GRID LAYOUT === */
-.settings-grid {
+.user-management {
   display: grid;
   grid-template-columns: 320px 1fr;
-  gap: 2rem;
-  max-width: 1300px;
+  gap: 24px;
+  align-items: stretch;
+  width: 100%;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
-/* === PROFILE CARD === */
-.profile-card {
-  background-color: #dedede;
+/* profile summary (left) */
+.profile-summary {
+  background: #dedede;
   border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  padding: 30px 24px;
+  text-align: left;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  height: 93.99%;
 }
 
 .profile-pic {
-  width: 140px;
-  height: 140px;
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
-  background-color: #fff;
-  border: 2px solid #bcbcbc;
-  margin: 0 auto 1rem;
+  margin: 8px auto 18px auto;
+  background: #fff;
+  border: 2px solid #bdbdbd;
 }
 
 .profile-name {
-  font-size: 1.5rem;
+  text-align: center;
+  font-size: 28px;
+  margin: 12px 0 18px 0;
   font-weight: 700;
-  margin-bottom: 1rem;
 }
 
-.profile-info p {
-  text-align: left;
-  margin: 0.5rem 0;
-  font-size: 0.95rem;
-  color: #3c2321;
+.settings-left {
+  flex: 1;
 }
 
-/* === RIGHT COLUMN === */
-.right-column {
+/* right panel */
+.settings-right {
+  flex: 2;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  justify-content: space-between;
+  gap: 24px;
 }
 
-/* === EDIT PROFILE === */
-.edit-profile {
-  background-color: #dedede;
+/* Edit profile card */
+.edit-profile,
+.manage-users {
+  background: #dedede;
   border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+  padding: 28px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .edit-profile h3 {
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
+  font-size: 28px;
+  margin-bottom: 14px;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
 .form-grid input,
-.email-input {
+.form-row-single input {
   width: 100%;
-  padding: 0.8rem 1rem;
+  padding: 12px 1px;
+  padding-right: 5px;
+  border-radius: 12px;
   border: none;
-  border-radius: 10px;
-  background: #f7f4f0;
-  font-size: 1rem;
+  background: #fbf6f4;
+  font-size: 16px;
+  box-shadow: inset 0 3px 8px rgba(0,0,0,0.03);
 }
 
-.email-input {
-  margin-top: 1rem;
+.form-row-single {
+  margin-bottom: 18px;
 }
 
 .save-row {
-  margin-top: 1.2rem;
-  text-align: center;
+  display: flex;
+  justify-content: center;
 }
 
 .save-btn {
-  background-color: #fffaf6;
-  border: 1px solid #4b2e2b;
-  color: #4b2e2b;
-  padding: 0.6rem 1.8rem;
-  border-radius: 12px;
+  background: #fffaf6;
+  border: 1px solid #3e2723;
+  color: #3e2723;
+  padding: 10px 22px;
+  border-radius: 18px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
 }
 
 .save-btn:hover {
-  background-color: #4b2e2b;
+  background: #3e2723;
   color: #fffaf6;
-}
-
-/* === MANAGE USERS === */
-.manage-users {
-  background-color: #dedede;
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
 }
 
 .manage-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.2rem;
+  margin-bottom: 16px;
 }
 
 .manage-header h3 {
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: 28px;
 }
 
 .manage-header a {
-  color: #000;
-  font-weight: 600;
   text-decoration: underline;
+  color: black;
+  font-weight: 600;
   cursor: pointer;
 }
 
-.user-list {
+.user-cards {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  gap: 20px;
+  justify-content: flex-start;
 }
 
 .user-card {
   width: 180px;
   background: #fff;
-  border-radius: 16px;
-  padding: 1rem;
+  border-radius: 14px;
+  padding: 18px;
   text-align: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  transition: transform 0.15s ease;
+}
+
+.user-card:hover {
+  transform: translateY(-3px);
 }
 
 .user-avatar {
   width: 70px;
   height: 70px;
   border-radius: 50%;
+  margin: 8px auto 14px auto;
   background: #eaeaea;
-  margin: 0 auto 1rem;
-  border: 2px solid #ccc;
+  border: 3px solid #cfcfcf;
 }
 
 .user-name {
   font-weight: 700;
-  font-size: 1.1rem;
-  margin-bottom: 0.2rem;
+  margin-bottom: 6px;
+  font-size: 18px;
 }
 
 .user-role {
-  font-size: 0.9rem;
-  color: #555;
-  margin-bottom: 0.6rem;
+  color: #777;
+  margin-bottom: 12px;
 }
 
-.remove-btn {
+.remove-image-btn {
   background: none;
   border: none;
-  color: red;
-  font-size: 1.3rem;
   cursor: pointer;
+  margin-top: 6px;
+}
+
+.remove-image-btn img {
+  width: 28px;
+  height: 28px;
+  filter: none;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(61,31,27,0.7);
+  z-index: 400;
+  animation: fadeIn 0.18s ease;
+}
+
+.modal-card {
+  width: 620px;
+  max-width: 92%;
+  background: #e7e7e7;
+  border-radius: 22px;
+  padding: 28px 34px;
+  position: relative;
+  box-shadow: 0 18px 36px rgba(0,0,0,0.25);
+  max-height: 86vh;
+  overflow: auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+.modal-card.small { width: 420px; }
+.modal-card.delete { width: 480px; text-align: center; border-radius: 16px; padding: 28px 20px; }
+
+.modal-card h2 {
+  font-family: 'Abhaya Libre', serif;
+  font-size: 2rem;
+  color: #3e2723;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.back-btn {
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  cursor: pointer;
+  color: #3e2723;
+}
+
+.modal-card label {
+  display: block;
+  margin-top: 10px;
+  color: #3e2723;
+  font-weight: 600;
+}
+
+.modal-card input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 6px;
+  border-radius: 10px;
+  border: none;
+  background: #fbf6f4;
+  font-size: 1rem;
+  color: #3e2723;
+  box-shadow: inset 0 3px 8px rgba(0,0,0,0.06);
+}
+
+.error {
+  color: #bb3b3b;
+  font-size: 0.85rem;
+  margin-top: 6px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.modal-buttons button {
+  min-width: 120px;
+  text-align: center;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* confirm delete (yes) */
+.confirm-delete {
+  background: #3e2723;
+  color: #fffaf6;
+  border: 1px solid #3e2723;
+}
+
+.confirm-delete:hover {
+  background: #fffaf6;
+  color: #3e2723;
+}
+
+/* cancel (no) */
+.continue-btn.cancel {
+  background: #fffaf6;
+  color: #3e2723;
+  border: 1px solid #3e2723;
+}
+
+.continue-btn.cancel:hover {
+  background: #3e2723;
+  color: #fffaf6;
+}
+
+.modal-card.small .continue-btn {
+  display: block;
+  margin: 16px auto 0;
+}
+
+.modal-card.delete .modal-buttons {
+  justify-content: center;
+}
+
+.settings-main {
+  background: #f4f4f4;
+}
+
+.profile-summary,
+.edit-profile,
+.manage-users {
+  background: #dedede;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.modal-card.small .modal-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.modal-card.small .modal-buttons .continue-btn {
+  width: 160px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #3e2723;
+  background: #fffaf6;
+  color: #3e2723;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-card.small .modal-buttons .continue-btn:hover {
+  background: #3e2723;
+  color: #fffaf6;
+}
+
+
+
+/* Keyframes */
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+
+
+
+
+/* === Page Animations === */
+
+/* Apply fade + slide animation when settings page loads */
+.settings-main {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Profile, Edit Profile, and Manage Users cards */
+.profile-summary,
+.edit-profile,
+.manage-users {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: cardEnter 0.6s ease-out forwards;
+}
+
+.profile-summary { animation-delay: 0.1s; }
+.edit-profile { animation-delay: 0.25s; }
+.manage-users { animation-delay: 0.4s; }
+
+.profile-summary:hover,
+.edit-profile:hover,
+.manage-users:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 6px 10px 20px rgba(0, 0, 0, 0.15);
+  background: #ffffff;
+  color: #3e2723;
+  transition: all 0.35s ease;
+}
+
+/* Adjust inner text color on hover */
+.profile-summary:hover h3,
+.edit-profile:hover h3,
+.manage-users:hover h3 {
+  color: #3e2723;
+}
+
+/* === Animations === */
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes zoomFade {
+  from { transform: scale(0.94) translateY(10px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.modal-card.add-user {
+  animation: zoomFade 0.35s ease-out;
+}
+
+
+
+/* === ADD USER MODAL (Figma-style) === */
+.modal-card.add-user {
+  background: #5D4037;
+  color: #FFF9F0;
+  border-radius: 30px;
+  padding: 40px 50px;
+  width: 540px;
+  max-width: 92%;
+  text-align: center;
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Header + Back */
+.modal-card.add-user h2 {
+  font-family: 'Abhaya Libre', serif;
+  font-size: 2.5rem;
+  color: #FFF9F0;
+  margin-bottom: 28px;
+}
+
+.modal-card.add-user .back-btn {
+  color: #FFF9F0;
+  left: 24px;
+  top: 20px;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+/* Inputs */
+.modal-card.add-user input {
+  width: 100%;
+  padding: 14px 18px;
+  margin: 10px 0;
+  border-radius: 14px;
+  border: none;
+  background: #FAF8F5;
+  font-size: 1rem;
+  color: #3E2723;
+  box-shadow: none;
+  outline: none;
+  display: block;
+}
+
+/* placeholder styling */
+.modal-card.add-user input::placeholder {
+  color: #8D6E63;
+  opacity: 1;
+}
+
+
+/* Validation text */
+.modal-card.add-user .error {
+  color: #F9CFCF;
+  text-align: left;
+  font-size: 0.85rem;
+  margin: 4px 0 8px 2px;
+}
+
+/* Save + Cancel buttons */
+.modal-card.add-user .modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.modal-card.add-user .continue-btn {
+  background: #FFF9F0;
+  color: #5D4037;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.modal-card.add-user .continue-btn:hover {
+  background: #5D4037;
+  color: #FFF9F0;
+  border: 1px solid #FFF9F0;
+}
+
+.modal-card.add-user .continue-btn.cancel {
+  background: transparent;
+  border: 1px solid #FFF9F0;
+  color: #FFF9F0;
+}
+
+.modal-card.add-user .continue-btn.cancel:hover {
+  background: #FFF9F0;
+  color: #5D4037;
+}
+
+
+.modal-card.add-user input {
+  width: 100%;
+  padding: 14px 18px;
+  margin: 10px 0;
+  border-radius: 14px;
+  border: none;
+  background: #FAF8F5;
+  font-size: 1rem;
+  color: #3E2723;
+  box-shadow: none;
+  outline: none;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Placeholder styling */
+.modal-card.add-user input::placeholder {
+  color: #8D6E63;
+  opacity: 1;
+  position: static;
+}
+
+.modal-card.add-user label,
+.modal-card.add-user h2,
+.modal-card.add-user p {
+  color: #FFF9F0;
 }
