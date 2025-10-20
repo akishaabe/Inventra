@@ -2,8 +2,6 @@
 
 /* ====== Base Container ====== */
 .reports-container {
-  display: flex;
-  min-height: 100vh;
   background-color: #fff;
   font-family: 'SF Pro Display', sans-serif;
   color: #3c2321;
