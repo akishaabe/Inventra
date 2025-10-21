@@ -5,6 +5,7 @@
       <h2 class="logo">inventra</h2>
       <button class="close-btn" (click)="toggleSidebar()">☰</button>
     </div>
+
     <nav class="nav-links">
       <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
       <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
@@ -14,6 +15,9 @@
       <a (click)="openLogoutModal()">Logout</a>
     </nav>
   </aside>
+
+  <!-- Overlay for sidebar animation -->
+  <div class="sidebar-overlay" *ngIf="sidebarOpen" (click)="toggleSidebar()"></div>
 
   <!-- Header -->
   <header class="dashboard-header">
@@ -37,10 +41,6 @@
   <!-- Main Content -->
   <main class="dashboard-main">
     <h1 class="dashboard-title">Forecasting</h1>
-
-  <!-- Main Content !!!!!!!!!!!!!!!!
-   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
 
     <div class="forecasting-content">
       <!-- LEFT PANEL -->
@@ -97,7 +97,6 @@
 
         <div class="recommendations-container">
           <ng-container *ngIf="hasAnyRecommendations(); else noRecs">
-            <!-- Iterate groups in fixed order -->
             <ng-container *ngFor="let g of groupOrder">
               <div class="reco-group" *ngIf="groupedRecs[g] && groupedRecs[g].length > 0">
                 <div class="reco-group-header" (click)="toggleGroup(g)">
@@ -109,7 +108,6 @@
                   class="reco-group-body"
                   [ngClass]="{ 'collapsed': !groupStates[g], 'expanded': groupStates[g] }"
                 >
-                  <!-- show all items always (if group collapsed, CSS will limit view & allow internal scroll) -->
                   <div
                     class="recommendation-card"
                     *ngFor="let rec of groupedRecs[g]; trackBy: trackByRec"
@@ -132,15 +130,9 @@
         </div>
       </div>
     </div>
-  
-
-
-  <!-- Logout Modal
-   !!!!!!!!!!!!!!!!!!!!!!
-   !!!!!!!!!!!!!!!!!!!!!!
-   !!!!!!!!!!!!!!!!!!!!!! -->
   </main>
 
+  <!-- Logout Modal -->
   <div class="logout-modal-overlay" *ngIf="showLogoutModal">
     <div class="logout-modal">
       <h2>LOG OUT</h2>

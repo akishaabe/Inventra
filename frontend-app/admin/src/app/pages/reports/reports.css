@@ -2,12 +2,8 @@
 
 /* ====== Base Container ====== */
 .reports-container {
-  display: flex;
-  min-height: 100vh;
   background-color: #fff;
   font-family: 'SF Pro Display', sans-serif;
-  color: #3c2321;
-  overflow: hidden;
 }
 
 /* ====== Sidebar ====== */
@@ -152,11 +148,12 @@
 
 .reports-title {
   font-family: 'Abhaya Libre', serif;
-  font-size: 3.5rem;
-  font-weight: 700;
-  color: #000;
-  margin-bottom: 2rem;
+  font-size: 5rem;
+  color: #000000;
+  margin: 4px 0 18px 0;
   letter-spacing: 0.5px;
+  font-weight: 800;
+  animation: slideDown 0.8s ease-out;
 }
 
 .reports-buttons {
@@ -216,6 +213,12 @@
 }
 
 @keyframes slideDown {
-  from { transform: translateY(-20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@700&family=Archivo+Black&family=SF+Pro+Display:wght@400&display=swap');
+
 /* === Fonts === */
 @font-face {
   font-family: 'SF Pro';
@@ -18,8 +20,8 @@
 }
 .forecasting-main {
   flex: 1;
-  margin-left: 0;   /* removed hard sidebar margin (you'll integrate sidebar later) */
-  margin-top: 0;    /* removed top navbar margin for now */
+  margin-left: 0;
+  margin-top: 0;
   padding: 2rem 3rem;
   animation: fadeIn 0.6s ease-out;
 }
@@ -39,7 +41,7 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
-  align-items: stretch; /* both panels same height */
+  align-items: stretch;
   height: 100%;
 }
 
@@ -84,7 +86,6 @@
   border-radius: 8px;
   padding: 1rem 1.5rem;
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  /* make the table container scrollable internally */
   max-height: 400px;
   overflow-y: auto;
 }
@@ -113,11 +114,9 @@
   color: #333;
   text-transform: uppercase;
 }
-
 .table-container tr:nth-child(even) {
   background-color: #f9f9f9;
 }
-
 .table-container tr:hover {
   background-color: #f1f1f1;
   transition: background 0.2s ease;
@@ -131,24 +130,19 @@
   box-shadow: 0 1px 6px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
-  overflow-y: auto;        /* scrolls inside */
-  max-height: 100%;        /* don’t exceed table height */
+  overflow-y: auto;
+  max-height: 100%;
 }
-
 .right-panel h3 {
   font-size: 0.9rem;
   font-weight: 700;
   margin-bottom: 1rem;
 }
-
-/* AI Recommendations - container houses multiple groups */
 .recommendations-container {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-
-/* Group header (accordion title row) */
 .reco-group {
   background: #e9e9e9;
   border-radius: 12px;
@@ -158,8 +152,6 @@
   gap: 8px;
   border: 1px solid rgba(0,0,0,0.06);
 }
-
-/* header row */
 .reco-group-header {
   display: flex;
   align-items: center;
@@ -176,8 +168,6 @@
   color: #8b1e1e;
   font-weight: 700;
 }
-
-/* group body is scrollable when collapsed; expands when open */
 .reco-group-body {
   display: flex;
   flex-direction: column;
@@ -187,21 +177,15 @@
   padding: 6px 2px 2px 2px;
   border-radius: 8px;
 }
-
-/* collapsed: show a fixed height with internal scroll if many cards */
 .reco-group-body.collapsed {
-  max-height: 260px; /* approx 3-4 cards height */
+  max-height: 260px;
   overflow-y: auto;
   padding-right: 6px;
 }
-
-/* expanded: show everything (no internal scrollbar) */
 .reco-group-body.expanded {
   max-height: 2000px;
   overflow: visible;
 }
-
-/* scrollbar style for group body */
 .reco-group-body.collapsed::-webkit-scrollbar {
   width: 6px;
 }
@@ -209,8 +193,6 @@
   background: #8b1e1e;
   border-radius: 4px;
 }
-
-/* Recommendation card */
 .recommendation-card {
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -234,8 +216,6 @@
   margin: 0;
   font-size: 0.95rem;
 }
-
-/* reason text hidden by default, revealed on hover */
 .recommendation-card .reason-text {
   display: block;
   max-height: 0;
@@ -250,21 +230,15 @@
   max-height: 200px;
   opacity: 1;
 }
-
-/* Action text styling */
 .recommendation-card .action-text {
   margin-top: 8px;
   font-weight: 700;
   color: #8b1e1e;
 }
-
-/* Priority colors (applied to titles) */
 .reco-title.high { color: #8b1e1e; }
 .reco-title.medium { color: #d66d1a; }
 .reco-title.low { color: #9a9a2b; }
 .reco-title.opportunity { color: #2b7a3a; }
-
-/* Fallback for no recommendations */
 .no-recommendations {
   font-style: italic;
   color: #666;
@@ -273,11 +247,7 @@
 }
 
 /* === Animations === */
-@keyframes fadeIn {
-  from {opacity:0;transform:translateY(15px);}
-  to {opacity:1;transform:translateY(0);}
-}
-.fade-in { animation: fadeIn .8s ease forwards; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 /* === Responsive === */
 @media (max-width: 1024px) {
@@ -294,8 +264,7 @@
   .filters { flex-direction: column; align-items: flex-start; }
 }
 
-/* === header navbar === */
-
+/* === header navbar & sidebar === */
 .dashboard-container {
   display: flex;
   min-height: 100vh;
@@ -305,38 +274,38 @@
   overflow: hidden;
 }
 
+/* === SIDEBAR (animated) === */
 .sidebar {
   background-color: #d9d9d9;
   width: 230px;
   height: 100vh;
   position: fixed;
-  left: 0;
   top: 0;
+  left: -260px;
   display: flex;
   flex-direction: column;
+  transition: left 0.4s ease, opacity 0.3s ease;
   box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 100;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
+  z-index: 200;
+  opacity: 0;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
-
 .sidebar.open {
-  transform: translateX(0);
+  left: 0;
+  opacity: 1;
 }
-
 .sidebar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.2rem 1.4rem;
+  padding: 1rem 1.6rem;
 }
-
 .logo {
   font-family: 'Archivo Black', sans-serif;
   font-size: 1.5rem;
   color: #3c2321;
 }
-
 .close-btn {
   background: none;
   border: none;
@@ -344,13 +313,11 @@
   cursor: pointer;
   color: #3c2321;
 }
-
 .nav-links {
   display: flex;
   flex-direction: column;
   margin-top: -0.5rem;
 }
-
 .nav-links a {
   padding: 1rem 1.6rem;
   text-decoration: none;
@@ -359,8 +326,19 @@
   font-family: 'SF Pro Display', sans-serif;
   transition: all 0.3s ease;
   border-left: 4px solid transparent;
+  transform: translateX(-10px);
+  opacity: 0;
 }
-
+.sidebar.open .nav-links a {
+  animation: linkFadeIn 0.4s forwards;
+  animation-delay: calc(0.05s * var(--i));
+}
+@keyframes linkFadeIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
 .nav-links a:hover,
 .nav-links a.active {
   background-color: #3c2321;
@@ -368,6 +346,7 @@
   border-left: 4px solid #fff;
 }
 
+/* === HEADER === */
 .dashboard-header {
   position: fixed;
   top: 0;
@@ -380,20 +359,17 @@
   align-items: center;
   padding: 0 2rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  z-index: 150;
+  z-index: 300;
   transition: left 0.4s ease;
 }
-
 .sidebar.open ~ .dashboard-header {
-  left: 240px;
+  left: 230px;
 }
-
 .header-left {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
-
 .menu-btn {
   background: none;
   border: none;
@@ -401,26 +377,22 @@
   font-size: 1.6rem;
   cursor: pointer;
 }
-
 .brand-name {
   font-family: 'Archivo Black', sans-serif;
   font-size: 1.5rem;
   color: #3c2321;
   letter-spacing: 1px;
 }
-
 .header-right {
   display: flex;
   align-items: center;
   gap: 0.8rem;
 }
-
 .user-name {
   font-weight: 600;
   font-size: 1.1rem;
   color: #3c2321;
 }
-
 .profile-icon {
   width: 36px;
   height: 36px;
@@ -428,6 +400,7 @@
   object-fit: cover;
 }
 
+/* === MAIN === */
 .dashboard-main {
   margin-left: 0;
   margin-top: 25px;
@@ -439,16 +412,11 @@
   z-index: 100;
   display: flex;
   flex-direction: column;
-  align-items: center; /* centers horizontally */
+  align-items: center;
 }
-
-
-
-
 .sidebar.open ~ .dashboard-main {
-  margin-left: 240px;
+  margin-left: 230px;
 }
-
 .dashboard-title {
   font-family: 'Abhaya Libre', serif;
   font-size: 3.5rem;
@@ -460,8 +428,7 @@
   width: 100%;
 }
 
-/*  edit 4
-=== Logout Modal === */
+/* === LOGOUT MODAL === */
 .logout-modal-overlay {
   position: fixed;
   top: 0;
@@ -475,7 +442,6 @@
   justify-content: center;
   z-index: 999;
 }
-
 .logout-modal {
   background-color: #e0dedb;
   padding: 2rem 3rem;
@@ -485,25 +451,21 @@
   width: 400px;
   max-width: 90%;
 }
-
 .logout-modal h2 {
   font-family: 'Archivo Black', sans-serif;
   font-size: 1.8rem;
   color: #3c2321;
   margin-bottom: 1rem;
 }
-
 .logout-modal p {
   font-size: 1.1rem;
   margin-bottom: 2rem;
 }
-
 .logout-buttons {
   display: flex;
   justify-content: center;
   gap: 1.5rem;
 }
-
 .logout-buttons button {
   font-family: 'SF Pro Display', sans-serif;
   padding: 0.5rem 1.5rem;
@@ -514,10 +476,7 @@
   font-size: 1rem;
   transition: all 0.2s ease;
 }
-
 .logout-buttons button:hover {
   background-color: #3c2321;
   color: #fff;
 }
-
-
