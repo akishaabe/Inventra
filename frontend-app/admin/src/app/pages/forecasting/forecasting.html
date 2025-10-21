@@ -75,15 +75,16 @@
               </tr>
             </thead>
             <tbody>
-  <ng-container *ngFor="let item of forecastData; let i = index">
-    <tr *ngFor="let week of item.weeks; let j = index">
-      <td *ngIf="j === 0" [attr.rowspan]="item.weeks.length">{{ item.product }}</td>
-      <td>{{ week }}</td>
-      <td>{{ item.prediction[j] }}</td>
-      <td *ngIf="j === 0" [attr.rowspan]="item.weeks.length">{{ item.current }}</td>
-      <td *ngIf="j === 0" [attr.rowspan]="item.weeks.length">{{ item.action }}</td>
-    </tr>
-  </ng-container>
+<ng-container *ngFor="let item of forecastData">
+  <tr>
+    <td>{{ item.product }}</td>
+    <td>{{ item.weeks.join(', ') }}</td>
+    <td>{{ item.prediction.join(', ') }}</td>
+    <td>{{ item.current }}</td>
+    <td>{{ item.action }}</td>
+  </tr>
+</ng-container>
+
 </tbody>
 
           </table>

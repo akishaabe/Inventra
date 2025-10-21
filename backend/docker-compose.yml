@@ -41,6 +41,8 @@ services:
       - ML_DB_NAME=inventra
     ports:
       - "5000:5000"
+    volumes:
+      - ../ml_service:/app
 
   backend:
     build: .

@@ -44,6 +44,8 @@ export class Forecasting implements OnInit, AfterViewInit {
   forecastData: ForecastItem[] = [];
   recommendations: RecommendationCard[] = [];
   chart: any;
+  chartData: any[] = [];
+
 
   // grouping
   groupedRecs: { [k: string]: RecommendationCard[] } = {
@@ -77,79 +79,92 @@ export class Forecasting implements OnInit, AfterViewInit {
     }, 120);
   }
 
-  loadForecast(period: number) {
-    this.http
-      .get<any[]>(`${environment.apiBase}/forecasts?refresh=true&period=${period}`)
-      .subscribe({
-        next: (data) => {
-          // Process forecast data for table
-          this.forecastData = data.map((item: any) => {
-            const demand = parseFloat(item.forecasted_demand) || 0;
-            const currentQty = parseFloat(item.quantity_available) || 0;
+loadForecast(period: number) {
+  this.http
+    .get<any[]>(`${environment.apiBase}/forecasts?refresh=true&period=${period}`)
+    .subscribe({
+      next: (data) => {
+        // Filter out Beverage products for both table + chart
+        const filteredData = data.filter(item => 
+          !item.product_name || !item.product_name.toLowerCase().includes('beverage')
+        );
 
+        // Process forecast data for table (non-beverage only)
+        this.forecastData = filteredData.map((item: any) => {
+          const demand = parseFloat(item.forecasted_demand) || 0;
+          const currentQty = parseFloat(item.quantity_available) || 0;
+
+          return {
+            product: item.product_name,
+            weeks: [this.formatWeek(item.forecast_date)],
+            prediction: [`${demand.toFixed(2)}kg`],
+            current: `${currentQty.toFixed(2)}kg`,
+            action: this.getAction(demand, currentQty),
+            ai_recommendations: Array.isArray(item.ai_recommendations) ? item.ai_recommendations : []
+          };
+        });
+
+        // Flatten AI recs from forecastData (unchanged)
+        const flatRecs: RecommendationCard[] = this.forecastData
+          .flatMap(fd => (fd.ai_recommendations || []).map((r: AiRecommendation) => {
+            const key = this.getKeyFromPriority(r.priority);
             return {
-              product: item.product_name,
-              weeks: [this.formatWeek(item.forecast_date)],
-              prediction: [`${demand.toFixed(2)}kg`],
-              current: `${currentQty.toFixed(2)}kg`,
-              action: this.getAction(demand, currentQty),
-              ai_recommendations: Array.isArray(item.ai_recommendations) ? item.ai_recommendations : []
-            };
-          });
+              title: this.prettyTitleFromKey(key),
+              description: r.text || '',
+              subtext: r.reason || '',
+              actionText: '',
+              keyClass: key
+            } as RecommendationCard;
+          }))
+          .filter(r => r.description && r.description.trim() !== '');
 
-          // Flatten AI recs from forecastData (if present), otherwise optionally map custom fields
-          const flatRecs: RecommendationCard[] = this.forecastData
-            .flatMap(fd => (fd.ai_recommendations || []).map((r: AiRecommendation) => {
-              const key = this.getKeyFromPriority(r.priority);
+        // Fallback for alternate API fields (unchanged)
+        if (flatRecs.length === 0 && data && data.length > 0) {
+          const alt = data
+            .map((it: any) => {
+              if (!it.ai_recommendation) return null;
+              const key = this.getKeyFromPriority(it.ai_priority || '');
               return {
                 title: this.prettyTitleFromKey(key),
-                description: r.text || '',
-                subtext: r.reason || '',
-                actionText: '', // keep generic
+                description: it.ai_recommendation,
+                subtext: it.ai_reason || '',
+                actionText: '',
                 keyClass: key
               } as RecommendationCard;
-            }))
-            .filter(r => r.description && r.description.trim() !== '');
-
-          // As fallback, if API uses different fields (ai_recommendation, ai_priority) try to map them
-          if (flatRecs.length === 0 && data && data.length > 0) {
-            const alt = data
-              .map((it: any) => {
-                if (!it.ai_recommendation) return null;
-                const key = this.getKeyFromPriority(it.ai_priority || '');
-                return {
-                  title: this.prettyTitleFromKey(key),
-                  description: it.ai_recommendation,
-                  subtext: it.ai_reason || '',
-                  actionText: '',
-                  keyClass: key
-                } as RecommendationCard;
-              })
-              .filter(Boolean) as RecommendationCard[];
-            this.recommendations = alt;
-          } else {
-            this.recommendations = flatRecs;
-          }
-
-          // group them
-          this.resetGroups();
-          this.recommendations.forEach(r => {
-            const k = (r.keyClass || 'low') as string;
-            if (!this.groupedRecs[k]) this.groupedRecs[k] = [];
-            // avoid duplicates by description
-            if (!this.groupedRecs[k].some(x => x.description === r.description)) {
-              this.groupedRecs[k].push(r);
-            }
-          });
-
-          this.dataLoaded = true;
-          setTimeout(() => this.buildChart(), 80);
-        },
-        error: (err) => {
-          console.error('Failed to load forecasts', err);
+            })
+            .filter(Boolean) as RecommendationCard[];
+          this.recommendations = alt;
+        } else {
+          this.recommendations = flatRecs;
         }
-      });
-  }
+
+        // Group AI recs (unchanged)
+        this.resetGroups();
+        this.recommendations.forEach(r => {
+          const k = (r.keyClass || 'low') as string;
+          if (!this.groupedRecs[k]) this.groupedRecs[k] = [];
+          if (!this.groupedRecs[k].some(x => x.description === r.description)) {
+            this.groupedRecs[k].push(r);
+          }
+        });
+
+        // Use the filtered dataset for chart, too
+        this.chartData = filteredData;
+
+
+        this.dataLoaded = true;
+        if (this.chart instanceof Chart) {
+  this.chart.destroy();
+}
+
+        setTimeout(() => this.buildChart(), 80);
+      },
+      error: (err) => {
+        console.error('Failed to load forecasts', err);
+      }
+    });
+}
+
 
   /* Helpers */
 
@@ -200,13 +215,17 @@ export class Forecasting implements OnInit, AfterViewInit {
   }
 
   buildChart() {
+    console.log('Building chart for forecastData:', this.forecastData);
     const ctx = this.chartRef?.nativeElement?.getContext('2d');
     if (!ctx) {
       console.warn('Chart context not ready yet.');
       return;
     }
 
-    if (this.chart) this.chart.destroy();
+    if (this.chart instanceof Chart) {
+  this.chart.destroy();
+}
+
 
     // Combine multiple weeks if any
     const labels = this.forecastData.map(d => d.weeks.join(', '));
