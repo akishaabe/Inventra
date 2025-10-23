@@ -54,7 +54,7 @@ services:
     environment:
       - DB_HOST=mysql
       - DB_USER=root
-      - DB_PASS=irino
+      - DB_PASSWORD=irino
       - DB_NAME=inventra
       - RESEND_API_KEY=re_29KHLZqH_9eEuBgEVfnKXqi5pWoEM6r98
       - ML_SERVICE_URL=http://ml_service:5000/forecast

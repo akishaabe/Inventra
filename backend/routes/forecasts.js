@@ -1,6 +1,6 @@
 import express from "express";
 import axios from "axios";
-import composeDb from "../db.js";
+import composeDb from "../db.compose.js";
 
 const router = express.Router();
 

@@ -2,6 +2,8 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { InventoryService } from './inventory.service';
+
 
 type Product = {
   id: string;
@@ -22,7 +24,7 @@ type Product = {
 })
 export class Inventory implements OnInit {
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private inventoryService: InventoryService) {}
 
     logout() {
     localStorage.clear();
@@ -80,54 +82,41 @@ export class Inventory implements OnInit {
   }
 
   /* ========== CRUD Methods ========== */
-  async loadProducts() {
-    try {
-      const res = await fetch('http://localhost:4000/api/inventory');
-      this.products = await res.json();
-    } catch (err) {
-      console.error('Error loading inventory:', err);
-    }
-  }
+async loadProducts() {
+  this.inventoryService.getInventory().subscribe({
+    next: (res) => this.products = res,
+    error: (err) => console.error('Error loading inventory:', err)
+  });
+}
 
-  async saveItem(form: any) {
-    if (!this.currentItem.id || !this.currentItem.name) return;
+async saveItem(form: any) {
+  if (!this.currentItem.id || !this.currentItem.name) return;
 
-    try {
-      const url = this.isEditing
-        ? `http://localhost:4000/api/inventory/${this.currentItem.id}`
-        : 'http://localhost:4000/api/inventory';
+  const request = this.isEditing
+    ? this.inventoryService.updateProduct(this.currentItem.id, this.currentItem)
+    : this.inventoryService.addProduct(this.currentItem);
 
-      const method = this.isEditing ? 'PUT' : 'POST';
-      const body = JSON.stringify(this.currentItem);
-
-      await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body
-      });
-
+  request.subscribe({
+    next: async () => {
       this.showModal = false;
       await this.loadProducts();
-    } catch (err) {
-      console.error('Error saving item:', err);
-    }
-  }
+    },
+    error: (err) => console.error('Error saving item:', err)
+  });
+}
 
-  async confirmDelete() {
-    const ids = this.selectedProducts.map(p => p.id);
-    try {
-      await fetch('http://localhost:4000/api/inventory', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids })
-      });
+async confirmDelete() {
+  const ids = this.selectedProducts.map(p => p.id);
+  this.inventoryService.deleteProducts(ids).subscribe({
+    next: async () => {
       this.showDeleteModal = false;
       this.selectedProducts = [];
       await this.loadProducts();
-    } catch (err) {
-      console.error('Error deleting products:', err);
-    }
-  }
+    },
+    error: (err) => console.error('Error deleting products:', err)
+  });
+}
+
 
   /* ========== Selection Logic ========== */
   toggleSelect(item: Product) {

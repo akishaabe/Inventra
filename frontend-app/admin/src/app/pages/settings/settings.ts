@@ -1,64 +1,79 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { NavbarComponent } from '../../components/navbar/navbar';
+import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { SettingsService } from './settings.service';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NavbarComponent, SidebarComponent],
   templateUrl: './settings.html',
   styleUrls: ['./settings.css']
 })
 export class Settings implements OnInit {
   sidebarOpen = false;
 
-  constructor(private settingsService: SettingsService, private router: Router) {}
+  constructor(private settingsService: SettingsService) {}
 
-  // === Profile ===
-  adminId: number | null = null;
+  // === Profile fields ===
+  adminId: number | null = null; // store logged-in admin id when we load profile
   firstName = '';
   lastName = '';
   email = '';
   role = '';
   is2FA = 0;
-  loadingProfile = false;
 
-  // === Users ===
+  // === User list ===
   users: any[] = [];
-  loadingUsers = false;
 
-  // === Modals ===
+  // === Modals and temp models ===
   showAddUser = false;
   showRemoveModal = false;
   showConfirmModal = false;
-  showLogoutModal = false; // ✅ added missing logout modal flag
   confirmMessage = '';
   removeCandidate: any = null;
 
-  // === Form Models ===
   newUser = { email: '', password: '', firstName: '', lastName: '' };
-  passwordPattern =
-    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};:"\\|,.<>\/?]).{8,}$/;
+  passwordPattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};:"\\|,.<>\/?]).{8,}$/;
 
   ngOnInit() {
-    this.loadAdminProfile();
     this.loadUsers();
+    this.loadAdminProfile();
   }
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
   }
 
+  // === Load All Users ===
+loadUsers() {
+  this.settingsService.getAllUsers().subscribe({
+    next: (res) => {
+      if (res.success && Array.isArray(res.data)) {
+        this.users = res.data
+          // 🔹 Filter out SUPERADMIN users
+          .filter((u: any) => u.role !== 'SUPERADMIN')
+          .map((u: any) => ({
+            id: u.user_id, // backend sends user_id, not id
+            name: `${u.first_name} ${u.last_name}`,
+            role: u.role,
+            email: u.email
+          }));
+      }
+    },
+    error: (err) => console.error('Error loading users:', err)
+  });
+}
+
+
   // === Load Admin Profile ===
   loadAdminProfile() {
-    const adminId = 6; // temp placeholder for logged-in admin
-    this.loadingProfile = true;
-
+    const adminId = 6; // temp: replace later with actual logged-in id
     this.settingsService.getAdminProfile(adminId).subscribe({
       next: (res) => {
-        const payload = res?.data ?? res;
+        const payload = res && res.data ? res.data : res;
         if (payload) {
           this.adminId = payload.user_id ?? adminId;
           this.firstName = payload.first_name ?? '';
@@ -68,68 +83,15 @@ export class Settings implements OnInit {
           this.is2FA = payload.is_2fa_enabled ?? 0;
         }
       },
-      error: (err) => console.error('Error loading admin profile:', err),
-      complete: () => (this.loadingProfile = false)
-    });
-  }
-
-  // === Load Users ===
-  loadUsers() {
-    this.loadingUsers = true;
-
-    this.settingsService.getAllUsers().subscribe({
-      next: (res) => {
-        if (res.success && Array.isArray(res.data)) {
-          this.users = res.data
-            .filter((u: any) => u.role !== 'SUPERADMIN')
-            .map((u: any) => ({
-              id: u.user_id,
-              name: `${u.first_name} ${u.last_name}`,
-              role: u.role,
-              email: u.email
-            }));
-        }
-      },
-      error: (err) => console.error('Error loading users:', err),
-      complete: () => (this.loadingUsers = false)
-    });
-  }
-
-  // === Save Admin Changes ===
-  saveChanges() {
-    if (!this.firstName.trim() || !this.lastName.trim() || !this.email.trim()) {
-      this.confirmMessage = 'Please fill in all required fields.';
-      this.showConfirmModal = true;
-      return;
-    }
-
-    const updateData = {
-      first_name: this.firstName,
-      last_name: this.lastName,
-      email: this.email,
-      role: this.role || undefined,
-      is_2fa_enabled: this.is2FA
-    };
-
-    const idToUse = this.adminId ?? 1;
-
-    this.settingsService.updateAdminProfile(idToUse, updateData).subscribe({
-      next: (res) => {
-        this.confirmMessage = res.message || 'Profile updated successfully!';
-        this.showConfirmModal = true;
-        this.loadAdminProfile();
-      },
       error: (err) => {
-        console.error('Error saving admin profile:', err);
-        this.confirmMessage = 'Error saving changes!';
-        this.showConfirmModal = true;
+        console.error('Error loading admin profile:', err);
       }
     });
   }
 
-  // === Add User Modal ===
+  // === Add User ===
   openAddUserModal(event?: Event) {
-    event?.preventDefault();
+    if (event) event.preventDefault();
     this.resetNewUser();
     this.showAddUser = true;
   }
@@ -139,7 +101,7 @@ export class Settings implements OnInit {
   }
 
   submitNewUser(form: any) {
-    if (!form?.valid) {
+    if (!form || form.invalid) {
       Object.values(form.controls).forEach((ctrl: any) => ctrl.markAsTouched());
       return;
     }
@@ -154,7 +116,7 @@ export class Settings implements OnInit {
 
     this.settingsService.addUser(newUserData).subscribe({
       next: (res) => {
-        this.confirmMessage = res.message || 'User added successfully!';
+        this.confirmMessage = res.message || 'User added!';
         this.showConfirmModal = true;
         this.showAddUser = false;
         this.loadUsers();
@@ -172,7 +134,35 @@ export class Settings implements OnInit {
     this.newUser = { email: '', password: '', firstName: '', lastName: '' };
   }
 
-  // === Remove User Modal ===
+  // === Save Admin Changes ===
+  saveChanges() {
+    const idToUse = this.adminId ?? 1;
+    const updateData: any = {
+      first_name: this.firstName,
+      last_name: this.lastName,
+      email: this.email,
+      role: this.role || undefined,
+      is_2fa_enabled: this.is2FA
+    };
+
+    // call the admin-specific endpoint (updateAdminProfile)
+    this.settingsService.updateAdminProfile(idToUse, updateData).subscribe({
+      next: (res) => {
+        this.confirmMessage = res.message || 'Changes saved!';
+        this.showConfirmModal = true;
+        // reload users & profile so UI reflects changes
+        this.loadAdminProfile();
+        this.loadUsers();
+      },
+      error: (err) => {
+        console.error('Error updating admin:', err);
+        this.confirmMessage = 'Error saving changes!';
+        this.showConfirmModal = true;
+      }
+    });
+  }
+
+  // === Remove User ===
   promptRemoveUser(user: any) {
     this.removeCandidate = user;
     this.showRemoveModal = true;
@@ -183,7 +173,7 @@ export class Settings implements OnInit {
 
     this.settingsService.deleteUser(this.removeCandidate.id).subscribe({
       next: (res) => {
-        this.confirmMessage = res.message || 'User removed successfully!';
+        this.confirmMessage = res.message || 'User removed!';
         this.showConfirmModal = true;
         this.showRemoveModal = false;
         this.loadUsers();
@@ -203,27 +193,5 @@ export class Settings implements OnInit {
 
   closeConfirmModal() {
     this.showConfirmModal = false;
-  }
-
-  // === 🟤 LOGOUT MODAL HANDLING (added for missing HTML bindings) ===
-  openLogoutModal() {
-    this.showLogoutModal = true;
-  }
-
-  closeLogoutModal() {
-    this.showLogoutModal = false;
-  }
-
-  confirmLogout() {
-    // ✅ Add your logout logic here (e.g., clearing sessionStorage)
-    sessionStorage.clear();
-    localStorage.clear();
-    this.router.navigate(['/login']);
-    this.showLogoutModal = false;
-  }
-
-  // === 🟤 SETTINGS PAGE NAVIGATION HANDLER ===
-  goToSettings() {
-    this.router.navigate(['/settings']);
   }
 }

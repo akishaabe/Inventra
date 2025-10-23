@@ -71,11 +71,11 @@ def persist_forecasts(product_id, forecast_df):
     cursor = conn.cursor()
 
     insert_sql = """
-        INSERT INTO forecasts (product_id, forecast_date, forecasted_demand, model_meta)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO forecasts (product_id, forecast_date, forecasted_demand, model_meta, created_at)
+        VALUES (%s, %s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE
             forecasted_demand = VALUES(forecasted_demand),
-            created_at = CURRENT_TIMESTAMP
+            created_at = VALUES(created_at)
     """
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -106,7 +106,7 @@ def run_prophet_forecast(df, horizon, product_id=None):
     print("🔮 Training Prophet model...")
     model = Prophet()
     model.fit(df)
-    future = model.make_future_dataframe(periods=req.horizon)
+    future = model.make_future_dataframe(periods=horizon)
     forecast_df = model.predict(future)
     print("✅ Forecast generated.")
     return forecast_df[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail(horizon)
