@@ -14,6 +14,8 @@ import forecastsRoute from "./routes/forecasts.js";
 import adminSettingsRoutes from "./routes/admin_settings.js";
 import adminDashboardRoutes from "./routes/admin_dashboard.js";
 import adminInventoryRoutes from "./routes/admin_inventory.js";
+import adminReportsRoutes from "./routes/admin_reports.js";
+
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -35,6 +37,8 @@ app.use("/api/deleted-items", deletedRoutes);
 app.use("/api/admin/settings", adminSettingsRoutes);
 app.use("/api/admin/dashboard", adminDashboardRoutes);
 app.use("/api/admin/inventory", adminInventoryRoutes);
+app.use("/api/admin/reports", adminReportsRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("Backend is running!");

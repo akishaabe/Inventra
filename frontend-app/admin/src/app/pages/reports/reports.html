@@ -85,9 +85,59 @@
       </table>
     </section>
 
-    <section *ngIf="activeTab === 'forecasting'" class="reports-section">
-      <h2>Forecasting Overview</h2>
-      <p>Coming soon...</p>
-    </section>
+<!-- Forecasting section (replace in your existing HTML) -->
+<section *ngIf="activeTab === 'forecasting'" class="reports-section">
+  <div class="forecast-header">
+    <h2>Forecasting Overview</h2>
+    <div class="forecast-controls">
+      <select [(ngModel)]="selectedHorizon" (change)="fetchForecastData()">
+        <option value="7">Next 7 Days</option>
+        <option value="14">Next 14 Days</option>
+        <option value="30">Next 30 Days</option>
+        <option value="60">Next 60 Days</option>
+        <option value="90">Next 90 Days</option>
+      </select>
+      <button class="print-btn" (click)="printReport()">🖨 Print Report</button>
+    </div>
+  </div>
+
+  <div class="forecast-chart">
+    <canvas id="forecastChart"></canvas>
+  </div>
+
+  <div class="forecast-table-container">
+    <table class="reports-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Date</th>
+          <th>Forecasted Demand</th>
+          <th>Available Qty</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- The backend returns one row per product (latest forecast). Render accordingly -->
+        <tr *ngFor="let f of forecastData">
+          <td>{{ f.product_name }}</td>
+          <td>{{ f.forecast_date | date:'yyyy-MM-dd' }}</td>
+          <td>{{ f.forecasted_demand }}</td>
+          <td>{{ f.quantity_available }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ai-recommendations" *ngIf="aiRecommendations && aiRecommendations.length">
+    <h3>AI Recommendations</h3>
+    <ul>
+      <li *ngFor="let rec of aiRecommendations">
+        <strong>{{ rec.priority | titlecase }}:</strong> {{ rec.text }}
+        <div *ngIf="rec.reason" style="font-size:0.9rem;color:#666">{{ rec.reason }}</div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+
   </main>
 </div>

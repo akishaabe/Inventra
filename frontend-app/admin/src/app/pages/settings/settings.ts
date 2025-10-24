@@ -54,7 +54,7 @@ loadUsers() {
       if (res.success && Array.isArray(res.data)) {
         this.users = res.data
           // 🔹 Filter out SUPERADMIN users
-          .filter((u: any) => u.role !== 'SUPERADMIN')
+          .filter((u: any) => u.role !== 'SUPERADMIN' && u.role !== 'ADMIN')
           .map((u: any) => ({
             id: u.user_id, // backend sends user_id, not id
             name: `${u.first_name} ${u.last_name}`,
