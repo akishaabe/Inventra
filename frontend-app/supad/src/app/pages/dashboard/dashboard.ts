@@ -62,10 +62,21 @@ export class Dashboard implements OnInit {
     }
   }
 
-  logout() {
-    localStorage.clear();
-    this.router.navigate(['/login']);
-  }
+  showLogoutModal = false;
+
+openLogoutModal() {
+  this.showLogoutModal = true;
+}
+
+closeLogoutModal() {
+  this.showLogoutModal = false;
+}
+
+confirmLogout() {
+  localStorage.clear();
+  this.showLogoutModal = false;
+  this.router.navigate(['/home']);
+}
 
   goToSettings() {
   this.router.navigate(['/settings']);

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In</title>
+  <link rel="stylesheet" href="signup.css">
+</head>
+<body>
+
+<div class="signup-container">
+  <div class="signup-card">
+    <a routerLink="/home" class="back-btn">← Back</a>
+
+    <h1 class="signup-title">Sign Up</h1>
+
+    <form (ngSubmit)="onSubmit()" #signupForm="ngForm" novalidate>
+
+      <!-- Email -->
+      <div class="input-group">
+        <input
+          type="email"
+          name="email"
+          placeholder="Enter Email"
+          [(ngModel)]="form.email"
+          #emailCtrl="ngModel"
+          required
+        />
+        <div *ngIf="emailCtrl.invalid && emailCtrl.touched" class="error">
+          Please enter a valid email.
+        </div>
+        <div *ngIf="emailCtrl.valid && !isValidDomain(form.email) && emailCtrl.touched" class="error">
+          Please enter a valid domain.
+        </div>
+      </div>
+
+      <!-- Password -->
+<div class="input-group">
+  <input
+    type="password"
+    name="password"
+    placeholder="Enter Password"
+    [(ngModel)]="form.password"
+    required
+    minlength="8"
+    (input)="onPasswordInput()"
+    #passwordCtrl="ngModel"
+  />
+  <div
+    class="error"
+    *ngIf="(passwordCtrl.touched || signupForm.submitted) && !isPasswordValid(form.password)"
+  >
+    Password must have at least 8 characters, one uppercase letter, and one special character.
+  </div>
+</div>
+
+<!-- Password Strength Meter -->
+<div class="strength-container" *ngIf="form.password">
+  <div class="strength-bar">
+    <div
+      class="strength-fill"
+      [style.width]="(strength * 20) + '%'"
+      [style.background]="strengthColor"
+    ></div>
+  </div>
+  <div class="strength-label" [style.color]="strengthColor">
+    {{ strengthLabel }}
+  </div>
+</div>
+
+<!-- Password Rules -->
+<ul class="pw-rules">
+  <li [class.valid]="hasUppercase">✔ One uppercase letter (A–Z)</li>
+  <li [class.valid]="hasLowercase">✔ One lowercase letter (a–z)</li>
+  <li [class.valid]="hasNumber">✔ One number (0–9)</li>
+  <li [class.valid]="hasSymbol">✔ One special symbol (!@#$...)</li>
+  <li [class.valid]="isLengthValid">✔ At least 8 characters long</li>
+</ul>
+
+
+      <!-- First Name -->
+      <div class="input-group">
+        <input
+          type="text"
+          name="firstName"
+          placeholder="First Name"
+          [(ngModel)]="form.firstName"
+          required
+        />
+      </div>
+
+      <!-- Last Name -->
+      <div class="input-group">
+        <input
+          type="text"
+          name="lastName"
+          placeholder="Last Name"
+          [(ngModel)]="form.lastName"
+          required
+        />
+      </div>
+
+      <!-- Terms & Conditions -->
+      <div class="terms">
+        <input type="checkbox" [(ngModel)]="form.agree" name="agree" required />
+        <label>
+          By signing up, you agree to our
+          <a href="#">Terms and Conditions</a> and
+          <a href="#">Privacy Policy</a>.
+        </label>
+      </div>
+
+      <!-- Continue Button -->
+      <button type="submit" class="continue-btn">Continue</button>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>or Sign Up with</span>
+      </div>
+
+      <!-- Google Sign Up -->
+      <button type="button" class="google-btn" (click)="signUpWithGoogle()">
+        <img src="assets/images/google-icon.png" alt="Google" />
+        Google
+      </button>
+    </form>
+  </div>
+</div>

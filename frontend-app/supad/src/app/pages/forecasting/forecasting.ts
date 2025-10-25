@@ -1,4 +1,5 @@
 import { Component, AfterViewInit, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Router, RouterModule  } from '@angular/router';
 import { Chart } from 'chart.js/auto';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -25,38 +26,48 @@ interface RecommendationCard {
   title: string;
   description: string;
   subtext: string;
-  actionText: string;
-  priority: string;
+  actionText?: string;
+  keyClass: 'high' | 'medium' | 'low' | 'opportunity' | string;
 }
 
 @Component({
   selector: 'app-forecasting',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, RouterModule],
   templateUrl: './forecasting.html',
   styleUrls: ['./forecasting.css']
 })
 export class Forecasting implements OnInit, AfterViewInit {
   @ViewChild('forecastChart') chartRef!: ElementRef<HTMLCanvasElement>;
-
   sidebarOpen = false;
-  forecastData: any[] = [];
-  recommendations: any[] = [];
-  groupedRecommendations: any[] = [];
-  chart: any;
 
-  // table / rec limits & toggles
-  tableLimit = 5;
-  recLimit = 2;
-  tableExpanded = false;
-  recExpanded = false;
+  forecastData: ForecastItem[] = [];
+  recommendations: RecommendationCard[] = [];
+  chart: any;
+  chartData: any[] = [];
+
+
+  // grouping
+  groupedRecs: { [k: string]: RecommendationCard[] } = {
+    high: [],
+    medium: [],
+    low: [],
+    opportunity: []
+  };
+  // track expanded/collapsed state per group (accordion)
+  groupStates: { [k: string]: boolean } = { high: false, medium: false, low: false, opportunity: false };
+  groupOrder = ['high', 'medium', 'low', 'opportunity'];
 
   // forecasting period dropdown
   forecastPeriods = [7, 14, 30, 60, 90];
   selectedPeriod = 14; // default
+
   dataLoaded = false;
 
-  constructor(private http: HttpClient) {}
+
+  // dashboard sidebar
+  constructor(private http: HttpClient, private router: Router) {}
+
 
   ngOnInit() {
     this.loadForecast(this.selectedPeriod);
@@ -68,82 +79,128 @@ export class Forecasting implements OnInit, AfterViewInit {
     }, 120);
   }
 
-  loadForecast(period: number) {
-    this.http
-      .get<any[]>(`${environment.apiBase}/forecasts?refresh=true&period=${period}`)
-      .subscribe({
-        next: (data) => {
-          console.log('Raw API data:', data);
+loadForecast(period: number) {
+  this.http
+    .get<any[]>(`${environment.apiBase}/forecasts?refresh=true&period=${period}`)
+    .subscribe({
+      next: (data) => {
+        // Filter out Beverage products for both table + chart
+        const filteredData = data.filter(item => 
+          !item.product_name || !item.product_name.toLowerCase().includes('beverage')
+        );
 
-          // Process forecast data for table
-          this.forecastData = data.map((item: any) => {
-            const demand = parseFloat(item.forecasted_demand) || 0;
-            const currentQty = parseFloat(item.quantity_available) || 0;
+        // Process forecast data for table (non-beverage only)
+        this.forecastData = filteredData.map((item: any) => {
+          const demand = parseFloat(item.forecasted_demand) || 0;
+          const currentQty = parseFloat(item.quantity_available) || 0;
 
+          return {
+            product: item.product_name,
+            weeks: [this.formatWeek(item.forecast_date)],
+            prediction: [`${demand.toFixed(2)}kg`],
+            current: `${currentQty.toFixed(2)}kg`,
+            action: this.getAction(demand, currentQty),
+            ai_recommendations: Array.isArray(item.ai_recommendations) ? item.ai_recommendations : []
+          };
+        });
+
+        // Flatten AI recs from forecastData (unchanged)
+        const flatRecs: RecommendationCard[] = this.forecastData
+          .flatMap(fd => (fd.ai_recommendations || []).map((r: AiRecommendation) => {
+            const key = this.getKeyFromPriority(r.priority);
             return {
-              product: item.product_name,
-              weeks: [this.formatWeek(item.forecast_date)],
-              prediction: [`${demand.toFixed(2)}kg`],
-              current: `${currentQty.toFixed(2)}kg`,
-              action: this.getAction(demand, currentQty),
-              ai_recommendations: Array.isArray(item.ai_recommendations)
-                ? item.ai_recommendations
-                : []
-            };
-          });
+              title: this.prettyTitleFromKey(key),
+              description: r.text || '',
+              subtext: r.reason || '',
+              actionText: '',
+              keyClass: key
+            } as RecommendationCard;
+          }))
+          .filter(r => r.description && r.description.trim() !== '');
 
-          // Flatten all AI recommendations
-          const flatRecs = this.forecastData
-            .flatMap(item =>
-              (item.ai_recommendations || []).map((r: AiRecommendation) => ({
-                title: r.priority || 'Recommendation',
-                description: r.text,
-                subtext: r.reason || '',
+        // Fallback for alternate API fields (unchanged)
+        if (flatRecs.length === 0 && data && data.length > 0) {
+          const alt = data
+            .map((it: any) => {
+              if (!it.ai_recommendation) return null;
+              const key = this.getKeyFromPriority(it.ai_priority || '');
+              return {
+                title: this.prettyTitleFromKey(key),
+                description: it.ai_recommendation,
+                subtext: it.ai_reason || '',
                 actionText: '',
-                priority: this.mapPriorityClass(r.priority)
-              }))
-            )
-            .filter(r => r.description && r.description.trim() !== '');
+                keyClass: key
+              } as RecommendationCard;
+            })
+            .filter(Boolean) as RecommendationCard[];
+          this.recommendations = alt;
+        } else {
+          this.recommendations = flatRecs;
+        }
 
-          // Remove duplicates
-          this.recommendations = Array.from(
-            new Map(flatRecs.map(r => [r.title + '|' + r.description, r])).values()
-          );
+        // Group AI recs (unchanged)
+        this.resetGroups();
+        this.recommendations.forEach(r => {
+          const k = (r.keyClass || 'low') as string;
+          if (!this.groupedRecs[k]) this.groupedRecs[k] = [];
+          if (!this.groupedRecs[k].some(x => x.description === r.description)) {
+            this.groupedRecs[k].push(r);
+          }
+        });
 
-          this.groupRecommendations();
+        // Use the filtered dataset for chart, too
+        this.chartData = filteredData;
 
-          this.tableLimit = this.tableExpanded ? this.forecastData.length : 10;
-          this.recLimit = this.recExpanded ? this.recommendations.length : 3;
 
-          this.dataLoaded = true;
-          setTimeout(() => this.buildChart(), 80);
-        },
-        error: (err) => console.error('Failed to load forecasts', err)
-      });
-  }
-
-  // 🟢 Group by priority for accordion
-  groupRecommendations() {
-    const groups = ['high-priority', 'medium-priority', 'low-priority', 'opportunity'];
-    this.groupedRecommendations = groups
-      .map(priority => ({
-        priority,
-        expanded: false,
-        items: this.recommendations.filter(r => r.priority === priority)
-      }))
-      .filter(g => g.items.length > 0);
-  }
-
-  toggleGroup(priority: string) {
-    const group = this.groupedRecommendations.find(g => g.priority === priority);
-    if (group) group.expanded = !group.expanded;
-  }
-
-  openRecommendation(rec: any): void {
-  // You can adjust this to whatever behavior you want
-  console.log('Selected recommendation:', rec);
+        this.dataLoaded = true;
+        if (this.chart instanceof Chart) {
+  this.chart.destroy();
 }
 
+        setTimeout(() => this.buildChart(), 80);
+      },
+      error: (err) => {
+        console.error('Failed to load forecasts', err);
+      }
+    });
+}
+
+
+  /* Helpers */
+
+  resetGroups() {
+    this.groupedRecs = { high: [], medium: [], low: [], opportunity: [] };
+  }
+
+  hasAnyRecommendations() {
+    return this.groupOrder.some(g => (this.groupedRecs[g] && this.groupedRecs[g].length > 0));
+  }
+
+  getKeyFromPriority(priority: string): 'high' | 'medium' | 'low' | 'opportunity' {
+    if (!priority) return 'low';
+    const p = priority.toLowerCase();
+    if (p.includes('high')) return 'high';
+    if (p.includes('medium')) return 'medium';
+    if (p.includes('low')) return 'low';
+    if (p.includes('opportunity')) return 'opportunity';
+    // other synonyms
+    if (p.includes('reduce')) return 'low';
+    return 'low';
+  }
+
+  prettyTitleFromKey(k: string) {
+    switch (k) {
+      case 'high': return 'High Priority';
+      case 'medium': return 'Medium Priority';
+      case 'low': return 'Low Priority';
+      case 'opportunity': return 'Opportunities';
+      default: return 'Recommendation';
+    }
+  }
+
+  prettyGroupTitle(k: string) {
+    return this.prettyTitleFromKey(k);
+  }
 
   formatWeek(dateStr: string): string {
     const date = new Date(dateStr);
@@ -157,48 +214,30 @@ export class Forecasting implements OnInit, AfterViewInit {
     return 'No action';
   }
 
-  getPriorityColor(priority: string): string {
-    switch ((priority || '').toLowerCase()) {
-      case 'high-priority':
-        return 'red';
-      case 'medium-priority':
-        return 'orange';
-      case 'low-priority':
-        return 'yellow';
-      case 'opportunity':
-        return 'green';
-      default:
-        return 'black';
-    }
-  }
-
-  mapPriorityClass(priority: string) {
-    switch ((priority || '').toLowerCase()) {
-      case 'high':
-      case 'high-priority':
-        return 'high-priority';
-      case 'medium':
-      case 'medium-priority':
-        return 'medium-priority';
-      case 'low':
-      case 'low-priority':
-        return 'low-priority';
-      case 'opportunity':
-        return 'opportunity';
-      default:
-        return '';
-    }
-  }
-
   buildChart() {
+    console.log('Building chart for forecastData:', this.forecastData);
     const ctx = this.chartRef?.nativeElement?.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      console.warn('Chart context not ready yet.');
+      return;
+    }
 
-    if (this.chart) this.chart.destroy();
+    if (this.chart instanceof Chart) {
+  this.chart.destroy();
+}
 
+
+    // Combine multiple weeks if any
     const labels = this.forecastData.map(d => d.weeks.join(', '));
-    const predicted = this.forecastData.map(d => parseFloat(d.prediction[0]) || 0);
-    const current = this.forecastData.map(d => parseFloat(d.current) || 0);
+
+    const predicted = this.forecastData.map(d => {
+      const num = parseFloat((d.prediction && d.prediction[0]) || '0') || 0;
+      return num;
+    });
+    const current = this.forecastData.map(d => {
+      const num = parseFloat((d.current || '0').toString().replace('kg','')) || 0;
+      return num;
+    });
 
     this.chart = new Chart(ctx, {
       type: 'line',
@@ -245,22 +284,69 @@ export class Forecasting implements OnInit, AfterViewInit {
             }
           }
         },
-        scales: { y: { beginAtZero: true } }
+        scales: {
+          y: { beginAtZero: true }
+        }
       }
     });
   }
 
-  toggleTable() {
-    this.tableExpanded = !this.tableExpanded;
-    this.tableLimit = this.tableExpanded ? this.forecastData.length : 10;
+  /* UI handlers */
+
+  toggleGroup(key: string) {
+    // toggle only target group (accordion-like only for visual expansion; doesn't collapse others)
+    this.groupStates[key] = !this.groupStates[key];
   }
 
-  toggleRecs() {
-    this.recExpanded = !this.recExpanded;
-    this.recLimit = this.recExpanded ? this.recommendations.length : 3;
+  openRecommendation(rec: RecommendationCard) {
+    // open full detail or action - placeholder
+    // for now, just open alert or console log - replace with modal or route if needed
+    alert(`Recommendation: ${rec.description}`);
+  }
+
+  getActionText(priorityKey: string) {
+    switch ((priorityKey || '').toString()) {
+      case 'high': return 'Order ASAP';
+      case 'medium': return 'Review Stock';
+      case 'low': return 'Reduce Inventory';
+      case 'opportunity': return 'Create Promo';
+      default: return 'Take Action';
+    }
+  }
+
+  trackByRec(index: number, item: RecommendationCard) {
+    return item.description || index;
   }
 
   updateForecastPeriod() {
     this.loadForecast(this.selectedPeriod);
   }
+
+// === Navbar + Sidebar Logic !!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ===
+showLogoutModal = false;
+
+toggleSidebar() {
+  this.sidebarOpen = !this.sidebarOpen;
+  document.body.classList.toggle('sidebar-active', this.sidebarOpen);
+}
+
+openLogoutModal() {
+  this.showLogoutModal = true;
+}
+
+closeLogoutModal() {
+  this.showLogoutModal = false;
+}
+
+confirmLogout() {
+  localStorage.clear();
+  this.showLogoutModal = false;
+  this.router.navigate(['/home']);
+}
+
+goToSettings() {
+  this.router.navigate(['/settings']);
+}
 }

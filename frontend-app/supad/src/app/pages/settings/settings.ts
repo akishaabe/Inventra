@@ -33,13 +33,14 @@ export class Settings implements OnInit {
 
   private apiUrl = 'http://localhost:4000/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit() {
     this.loadUsers();
     this.loadAuditLogs();
     this.loadDeletedItems();
   }
+
 
   // ───────────────────── USER DATA ─────────────────────
   loadUsers() {
@@ -182,4 +183,20 @@ export class Settings implements OnInit {
   logout() {
     console.log('Logout clicked');
   }
+
+    showLogoutModal = false;
+
+openLogoutModal() {
+  this.showLogoutModal = true;
+}
+
+closeLogoutModal() {
+  this.showLogoutModal = false;
+}
+
+confirmLogout() {
+  localStorage.clear();
+  this.showLogoutModal = false;
+  this.router.navigate(['/home']);
+}
 }

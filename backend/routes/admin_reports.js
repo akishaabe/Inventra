@@ -1,6 +1,6 @@
 // routes/admin_reports.js
 import express from "express";
-import db from "../db.compose.js";
+import db from "../db.js";
 
 const router = express.Router();
 

@@ -7,6 +7,7 @@ import { Forecasting } from './pages/forecasting/forecasting';
 import { Reports } from './pages/reports/reports';
 import { Settings } from './pages/settings/settings';
 import { Login } from './pages/login/login';
+import { Signup } from './pages/signup/signup';
 import { TwoFA } from './pages/twofa/twofa';
 import { ForgotPassword } from './pages/forgot-password/forgot-password';
 
@@ -14,6 +15,7 @@ export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'home', component: Home },
   { path: 'login', loadComponent: () => import('./pages/login/login').then(m => m.Login) },
+  { path: 'signup', component: Signup },
   { path: 'twofa', component: TwoFA },
   { path: 'dashboard', component: Dashboard },
   { path: 'inventory', component: Inventory },
