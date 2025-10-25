@@ -29,7 +29,7 @@
   </header>
 
   <!-- Main Section -->
-  <main class="inventory-main">
+  <main class="inventory-main" [class.shifted]="sidebarOpen">
     <h1 class="inventory-title">Inventory</h1>
 
     <!-- Controls -->
@@ -146,43 +146,42 @@
       </table>
     </div>
   </main>
-
   <!-- Add/Edit Modal -->
   <div class="modal" *ngIf="showModal">
     <div class="modal-card">
       <a class="back-btn" (click)="closeModal()">← Back</a>
       <h2>{{ isEditing ? 'Edit Item' : 'Add Item' }}</h2>
 
-      <form #itemForm="ngForm" (ngSubmit)="saveItem(itemForm)">
+      <form #itemForm="ngForm" (ngSubmit)="saveItem()">
         <!-- Product ID -->
         <label>Product ID</label>
         <input
           name="id"
           [(ngModel)]="currentItem.id"
-          #idModel="ngModel"
-          required
-          maxlength="30"
+          readonly
+          placeholder="Auto-generated"
         />
-        <div class="error" *ngIf="idModel.invalid && (idModel.touched || itemForm.submitted)">
-          Required Field!
-        </div>
 
-        <!-- Name -->
+        <!-- Product Name -->
         <label>Name</label>
         <input
           name="name"
           [(ngModel)]="currentItem.name"
-          #nameModel="ngModel"
           required
-          maxlength="100"
+          placeholder="Enter product name"
         />
-        <div class="error" *ngIf="nameModel.invalid && (nameModel.touched || itemForm.submitted)">
-          Required Field!
-        </div>
 
+        <!-- Category Dropdown -->
         <label>Category</label>
-        <input name="category" [(ngModel)]="currentItem.category" />
+        <select
+          name="category"
+          [(ngModel)]="currentItem.category"
+          required
+        >
+          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+        </select>
 
+        <!-- Quantity -->
         <label>Quantity</label>
         <input
           name="quantity"
@@ -191,28 +190,35 @@
           [(ngModel)]="currentItem.quantity"
         />
 
+        <!-- Unit -->
         <label>Unit</label>
         <input name="unit" [(ngModel)]="currentItem.unit" />
 
+        <!-- Expiry -->
         <label>Expiry</label>
         <input
           name="expiry"
           type="date"
           [(ngModel)]="currentItem.expiry"
-          #expiryModel="ngModel"
         />
 
+        <!-- Supplier -->
         <label>Supplier</label>
         <input name="supplier" [(ngModel)]="currentItem.supplier" />
 
         <div class="modal-actions">
-          <button class="continue-btn" type="submit" [disabled]="itemForm.invalid">
+          <button
+            type="submit"
+            class="continue-btn"
+            [disabled]="!currentItem.name || !currentItem.category"
+          >
             Continue
           </button>
         </div>
       </form>
     </div>
   </div>
+
 
   <!-- Delete Confirmation Modal -->
   <div class="modal" *ngIf="showDeleteModal">

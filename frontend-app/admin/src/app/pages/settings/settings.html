@@ -1,10 +1,45 @@
-<app-navbar (toggleSidebar)="toggleSidebar()"></app-navbar>
-<app-sidebar [isOpen]="sidebarOpen"></app-sidebar>
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="sidebarOpen">
+    <div class="sidebar-header">
+      <h2 class="logo">inventra</h2>
+      <button class="close-btn" (click)="toggleSidebar()">☰</button>
+    </div>
+    <nav class="nav-links">
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
+      <a routerLink="/forecasting" routerLinkActive="active">Forecasting</a>
+      <a routerLink="/reports" routerLinkActive="active">Reports</a>
+      <a routerLink="/settings" routerLinkActive="active">Settings</a>
+      <a (click)="openLogoutModal()">Logout</a>
+    </nav>
+  </aside>
 
-<main class="settings-main">
-  <h1 class="settings-title">Settings</h1>
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-left">
+      <button class="menu-btn" (click)="toggleSidebar()" *ngIf="!sidebarOpen">☰</button>
+      <h2 class="brand-name" *ngIf="!sidebarOpen">inventra</h2>
+    </div>
 
-  <div class="user-management">
+    <div class="header-right">
+      <span class="user-name">Café Pèdro</span>
+      <img
+        src="assets/images/profile icon.png"
+        alt="Profile"
+        class="profile-icon"
+        (click)="goToSettings()"
+        style="cursor: pointer;"
+      />
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="dashboard-main">
+    <h1 class="dashboard-title">Settings</h1>
+
+    <!-- your existing settings content -->
+ <div class="user-management">
     <!-- LEFT PROFILE SUMMARY -->
     <aside class="profile-summary">
       <div class="profile-pic"></div>
@@ -145,4 +180,15 @@
     </div>
   </div>
 </div>
-
+  <!-- Logout Confirmation Modal -->
+  <div class="logout-modal-overlay" *ngIf="showLogoutModal">
+    <div class="logout-modal">
+      <h2>LOG OUT</h2>
+      <p>Are you sure you want to log out?</p>
+      <div class="logout-buttons">
+        <button class="yes-btn" (click)="confirmLogout()">Yes</button>
+        <button class="no-btn" (click)="closeLogoutModal()">No</button>
+      </div>
+    </div>
+  </div>
+</div>
