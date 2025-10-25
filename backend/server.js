@@ -1,7 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import db from "./db.js";
 import composeDb from "./db.compose.js";
 import inventoryRoutes from "./routes/inventory.js";
@@ -15,11 +15,9 @@ import adminSettingsRoutes from "./routes/admin_settings.js";
 import adminDashboardRoutes from "./routes/admin_dashboard.js";
 import adminInventoryRoutes from "./routes/admin_inventory.js";
 import adminReportsRoutes from "./routes/admin_reports.js";
-
-
 import dotenv from "dotenv";
-dotenv.config();
 
+dotenv.config();
 
 const app = express();
 const PORT = 4000;
@@ -27,6 +25,68 @@ const PORT = 4000;
 app.use(cors());
 app.use(bodyParser.json());
 
+// ------------------------------
+// In-memory storage for verification codes
+// ------------------------------
+const verificationCodes = {};
+
+// ------------------------------
+// Helper: generate random 6-digit code
+// ------------------------------
+function generateCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// ------------------------------
+// Configure Nodemailer transporter
+// ------------------------------
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
+  secure: false, // use true if port 465
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+// Verify the transporter connection
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("❌ Email transporter error:", error);
+  } else {
+    console.log("✅ Email transporter ready to send messages");
+  }
+});
+
+// ------------------------------
+// Helper: send verification email
+// ------------------------------
+async function sendVerificationEmail(email, code) {
+  const mailOptions = {
+    from: `"Inventra Verification" <${process.env.FROM_EMAIL}>`,
+    to: email,
+    subject: "Your Inventra Verification Code",
+    html: `
+      <div style="font-family:sans-serif; line-height:1.6;">
+        <h2>Inventra Verification</h2>
+        <p>Hello,</p>
+        <p>Your verification code is:</p>
+        <h1 style="color:#007bff;">${code}</h1>
+        <p>This code will expire in 10 minutes.</p>
+        <br>
+        <p>— The Inventra Team</p>
+      </div>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+  console.log(`📧 Verification email sent to ${email}`);
+}
+
+// ------------------------------
+// Routes
+// ------------------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/inventory", inventoryRoutes);
@@ -39,160 +99,72 @@ app.use("/api/admin/dashboard", adminDashboardRoutes);
 app.use("/api/admin/inventory", adminInventoryRoutes);
 app.use("/api/admin/reports", adminReportsRoutes);
 
+app.get("/", (req, res) => res.send("Backend is running!"));
 
-app.get("/", (req, res) => {
-  res.send("Backend is running!");
-});
-
-app.get("/api/users", async (req, res) => {
-  try {
-    const [rows] = await db.query("SELECT * FROM users");
-    res.json(rows);
-  } catch (err) {
-    console.error("Database error:", err);
-    res.status(500).json({ error: "Database query failed" });
-  }
-});
-
-app.get("/api/test-users", async (req, res) => {
-  try {
-    const [rows] = await composeDb.query("SELECT * FROM users");
-    res.json(rows);
-  } catch (err) {
-    console.error("Compose DB error:", err);
-    res.status(500).json({ error: "Database query failed" });
-  }
-});
-
-const resend = new Resend("re_29KHLZqH_9eEuBgEVfnKXqi5pWoEM6r98");
-const verificationCodes = {};
-
-// ===============================
-// SEND RESET CODE
-// ===============================
+// ------------------------------
+// Send verification code
+// ------------------------------
 app.post("/api/send-reset-code", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: "Email is required" });
 
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
-
   try {
-    await resend.emails.send({
-      from: "Inventra <onboarding@resend.dev>",
-      to: email,
-      subject: "🔐 Your Inventra Verification Code",
-      html: `
-        <div style="font-family: Arial, sans-serif; background-color: #f7f8fa; padding: 30px;">
-          <div style="max-width: 500px; margin: auto; background: #ffffff; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
-            <div style="background-color: #2563eb; color: white; padding: 15px 20px; text-align: center;">
-              <h2 style="margin: 0;">Inventra Verification</h2>
-            </div>
-            <div style="padding: 25px; color: #333;">
-              <p style="font-size: 15px;">Hi there,</p>
-              <p style="font-size: 15px;">Please use the verification code below to reset your password:</p>
-              <div style="text-align: center; margin: 25px 0;">
-                <h1 style="font-size: 32px; letter-spacing: 6px; color: #2563eb; margin: 0;">${code}</h1>
-              </div>
-              <p style="font-size: 14px; color: #666;">⚠️ This code will expire in <b>10 minutes</b>.</p>
-              <p style="font-size: 14px; color: #666;">If you didn’t request this, you can ignore this email.</p>
-              <p style="margin-top: 30px;">– The Inventra Team</p>
-            </div>
-          </div>
-        </div>
-      `,
-    });
+    const code = generateCode();
+    verificationCodes[email] = { code, expiresAt: Date.now() + 10 * 60 * 1000 }; // expires in 10 min
 
-    verificationCodes[email] = {
-      code,
-      expiresAt: Date.now() + 10 * 60 * 1000,
-    };
+    await sendVerificationEmail(email, code);
 
-    res.json({ success: true, message: "Verification code sent!" });
+    res.json({ success: true, message: "Verification code sent to your email." });
   } catch (err) {
-    console.error("Email sending error:", err);
-    res.status(500).json({ error: "Failed to send email" });
+    console.error("Error sending verification email:", err);
+    res.status(500).json({ error: "Failed to send verification email." });
   }
 });
 
-// ===============================
-// VERIFY CODE
-// ===============================
-app.post("/api/verify-code", (req, res) => {
-  const { email, code } = req.body;
-
-  const record = verificationCodes[email];
-  if (!record) return res.status(400).json({ error: "No code found for this email" });
-  if (Date.now() > record.expiresAt) return res.status(400).json({ error: "Code expired" });
-  if (record.code !== code) return res.status(400).json({ error: "Invalid code" });
-
-  delete verificationCodes[email];
-  res.json({ success: true });
-});
-
-// ===============================
-// RESEND CODE
-// ===============================
+// ------------------------------
+// Resend code
+// ------------------------------
 app.post("/api/resend-code", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: "Email is required" });
 
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
-
   try {
-    await resend.emails.send({
-      from: "Inventra <onboarding@resend.dev>",
-      to: email,
-      subject: "🔄 Your New Inventra Verification Code",
-      html: `
-        <div style="font-family: Arial, sans-serif; background-color: #f7f8fa; padding: 30px;">
-          <div style="max-width: 500px; margin: auto; background: #ffffff; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
-            <div style="background-color: #2563eb; color: white; padding: 15px 20px; text-align: center;">
-              <h2 style="margin: 0;">Inventra Verification</h2>
-            </div>
-            <div style="padding: 25px; color: #333;">
-              <p style="font-size: 15px;">Hi again,</p>
-              <p style="font-size: 15px;">Here’s your new verification code:</p>
-              <div style="text-align: center; margin: 25px 0;">
-                <h1 style="font-size: 32px; letter-spacing: 6px; color: #2563eb; margin: 0;">${code}</h1>
-              </div>
-              <p style="font-size: 14px; color: #666;">⚠️ This code will expire in <b>10 minutes</b>.</p>
-              <p style="font-size: 14px; color: #666;">If you didn’t request this, please ignore this message.</p>
-              <p style="margin-top: 30px;">– The Inventra Team</p>
-            </div>
-          </div>
-        </div>
-      `,
-    });
+    const code = generateCode();
+    verificationCodes[email] = { code, expiresAt: Date.now() + 10 * 60 * 1000 };
 
-    verificationCodes[email] = {
-      code,
-      expiresAt: Date.now() + 10 * 60 * 1000,
-    };
+    await sendVerificationEmail(email, code);
 
-    res.json({ success: true, message: "Verification code resent!" });
+    res.json({ success: true, message: "New verification code sent to your email." });
   } catch (err) {
-    console.error("Error resending email:", err);
-    res.status(500).json({ error: "Failed to resend verification code" });
+    console.error("Error resending verification code:", err);
+    res.status(500).json({ error: "Failed to resend verification code." });
   }
 });
 
-// ===============================
-// DASHBOARD DATA
-// ===============================
+// ------------------------------
+// Verify code
+// ------------------------------
+app.post("/api/verify-code", (req, res) => {
+  const { email, code } = req.body;
+  const record = verificationCodes[email];
+
+  if (!record) return res.status(400).json({ error: "No code found for this email." });
+  if (Date.now() > record.expiresAt) return res.status(400).json({ error: "Code expired." });
+  if (record.code !== code) return res.status(400).json({ error: "Invalid code." });
+
+  delete verificationCodes[email];
+  res.json({ success: true, message: "Email verified successfully!" });
+});
+
+// ------------------------------
+// Dashboard data
+// ------------------------------
 app.get("/api/dashboard", async (req, res) => {
   try {
-    const [sales] = await db.query(
-      "SELECT SUM(amount) AS total FROM sales WHERE DATE(date) = CURDATE()"
-    );
-    const [lowStock] = await db.query(
-      "SELECT COUNT(*) AS count FROM products WHERE stock < reorder_level"
-    );
-    const [stockValue] = await db.query(
-      "SELECT SUM(stock * price) AS value FROM products"
-    );
-    const [forecast] = await db.query(
-      "SELECT SUM(predicted_sales) AS demand FROM forecast_data"
-    );
+    const [sales] = await db.query("SELECT SUM(amount) AS total FROM sales WHERE DATE(date) = CURDATE()");
+    const [lowStock] = await db.query("SELECT COUNT(*) AS count FROM products WHERE stock < reorder_level");
+    const [stockValue] = await db.query("SELECT SUM(stock * price) AS value FROM products");
+    const [forecast] = await db.query("SELECT SUM(predicted_sales) AS demand FROM forecast_data");
 
     res.json({
       todaySales: sales[0].total || 0,
