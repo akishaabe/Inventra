@@ -4,18 +4,22 @@ import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { SettingsService } from './settings.service';
+import { Router, RouterModule } from '@angular/router';
+
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent, SidebarComponent],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './settings.html',
   styleUrls: ['./settings.css']
 })
 export class Settings implements OnInit {
   sidebarOpen = false;
+  showLogoutModal = false;
 
-  constructor(private settingsService: SettingsService) {}
+
+constructor(private settingsService: SettingsService, private router: Router) {}
 
   // === Profile fields ===
   adminId: number | null = null; // store logged-in admin id when we load profile
@@ -194,4 +198,24 @@ loadUsers() {
   closeConfirmModal() {
     this.showConfirmModal = false;
   }
+
+  // === From Dashboard Nav Bar and Side Bar ===
+  openLogoutModal() {
+  this.showLogoutModal = true;
+}
+
+closeLogoutModal() {
+  this.showLogoutModal = false;
+}
+
+confirmLogout() {
+  localStorage.clear();
+  this.showLogoutModal = false;
+  window.location.href = '/home'; // or use router if you prefer
+}
+
+goToSettings() {
+  this.router.navigate(['/settings']);
+}
+
 }

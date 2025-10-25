@@ -19,14 +19,20 @@ export class InventoryService {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
-  addProduct(item: any): Observable<any> {
-    // backend expects { product_id, quantity }
-    const body = {
-      product_id: item.id,
-      quantity: item.quantity ?? 0
-    };
-    return this.http.post(this.apiUrl, body);
+  getProducts(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/products`);
+}
+
+  getNextProductId(): Observable<{ nextId: string }> {
+    return this.http.get<{ nextId: string }>(`${this.apiUrl}/next-id`);
   }
+
+
+
+addProduct(item: any): Observable<any> {
+  return this.http.post(this.apiUrl, item);
+}
+
 
   updateProduct(id: string, item: any): Observable<any> {
     // backend only updates quantity

@@ -14,10 +14,31 @@
   top: 0;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s ease;
+  transition: left 0.4s ease;
   box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
   z-index: 100;
 }
+
+/* shift header and main when sidebar is open */
+.inventory-main {
+  margin-left: 0;
+  transition: margin-left 0.4s ease;
+}
+
+.inventory-main.shifted {
+  margin-left: 240px; /* same width as sidebar */
+}
+
+.inventory-header {
+  left: 0;
+  transition: left 0.4s ease;
+}
+
+.sidebar.open ~ .inventory-header {
+  left: 240px; /* header moves too */
+}
+
+/* shift header and main when sidebar is open */
 
 .sidebar-header {
   display: flex;
@@ -397,4 +418,32 @@
 
 .sidebar.open ~ .inventory-header {
   left: 240px;
+}
+
+
+/* === Inventra Dropdown Styling === */
+.modal-card select {
+  width: 100%;
+  padding: 12px 14px;
+  margin-top: 6px;
+  border-radius: 10px;
+  border: none;
+  background: #fbf6f4 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='10'><path fill='%233e2723' d='M7 10L0 0h14z'/></svg>") no-repeat right 12px center;
+  appearance: none;
+  background-size: 10px;
+  font-size: 1rem;
+  color: #3e2723;
+  font-family: 'SF Pro Display', sans-serif;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.06) inset;
+  cursor: pointer;
+}
+
+.modal-card select:focus {
+  outline: 2px solid rgba(75,46,43,0.15);
+}
+
+.modal-card option {
+  background: #fffaf6;
+  color: #3e2723;
+  font-family: 'SF Pro Display', sans-serif;
 }

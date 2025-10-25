@@ -1,195 +1,119 @@
-// C:\Inventra\backend\routes\admin_inventory.js
 import express from "express";
 import composeDb from "../db.compose.js";
 
+
 const router = express.Router();
 
-/**
- * GET /api/inventory
- * Return joined inventory+product rows mapped to the frontend shape.
- */
+// ✅ GET all inventory items
 router.get("/", async (req, res) => {
   try {
-    const [rows] = await composeDb.query(
-      `SELECT
-         i.product_id AS id,
-         p.product_name AS name,
-         p.category AS category,
-         i.quantity_available AS quantity,
-         p.unit AS unit,
-         p.supplier_id AS supplier_id,
-         i.inventory_id AS inventory_id,
-         i.last_updated AS last_updated
-       FROM inventory i
-       JOIN products p ON i.product_id = p.product_id
-       ORDER BY i.last_updated DESC`
-    );
-
-    // Only return columns frontend expects (no placeholders)
-    const mapped = rows.map(r => ({
-      id: r.id,
-      name: r.name,
-      category: r.category,
-      quantity: Number(r.quantity),
-      unit: r.unit,
-      supplier_id: r.supplier_id,
-      inventory_id: r.inventory_id,
-      last_updated: r.last_updated
-    }));
-
-    res.json(mapped);
+    const [rows] = await composeDb.query(`
+      SELECT 
+        p.product_id AS id,
+        p.product_name AS name,
+        p.category,
+        i.quantity_available AS quantity,
+        p.unit,
+        p.has_expiry AS expiry,
+        p.supplier_id AS supplier
+      FROM products p
+      LEFT JOIN inventory i ON p.product_id = i.product_id
+      ORDER BY p.product_id ASC
+    `);
+    res.json(rows);
   } catch (err) {
-    console.error("Error fetching inventory:", err);
-    res.status(500).json({ error: "Failed to fetch inventory data." });
-  }
+  console.error("🔥 Error adding product:");
+  console.error(err.stack || err);
+  res.status(500).json({
+    error: err.message || "Failed to add product",
+    details: err
+  });
+}
+
 });
 
-/**
- * GET /api/inventory/:id
- * Return single inventory row by product_id (frontend uses product_id as id).
- */
-router.get("/:id", async (req, res) => {
-  const productId = req.params.id;
+// ✅ GET next auto-increment product ID
+router.get("/next-id", async (req, res) => {
   try {
-    const [rows] = await composeDb.query(
-      `SELECT
-         i.product_id AS id,
-         p.product_name AS name,
-         p.category AS category,
-         i.quantity_available AS quantity,
-         p.unit AS unit,
-         p.supplier_id AS supplier_id,
-         i.inventory_id AS inventory_id,
-         i.last_updated AS last_updated
-       FROM inventory i
-       JOIN products p ON i.product_id = p.product_id
-       WHERE i.product_id = ?`,
-      [productId]
-    );
-
-    if (rows.length === 0) return res.status(404).json({ error: "Item not found." });
-    const r = rows[0];
-    res.json({
-      id: r.id,
-      name: r.name,
-      category: r.category,
-      quantity: Number(r.quantity),
-      unit: r.unit,
-      supplier_id: r.supplier_id,
-      inventory_id: r.inventory_id,
-      last_updated: r.last_updated
-    });
+    const [rows] = await composeDb.query(`SELECT AUTO_INCREMENT AS nextId FROM information_schema.TABLES WHERE TABLE_NAME='products' AND TABLE_SCHEMA='inventra'`);
+    res.json({ nextId: rows[0]?.nextId || 1 });
   } catch (err) {
-    console.error("Error fetching inventory item:", err);
-    res.status(500).json({ error: "Failed to fetch item." });
+    console.error("Error fetching next product ID:", err);
+    res.status(500).json({ error: "Failed to get next product ID" });
   }
 });
 
-/**
- * POST /api/inventory
- * Create inventory row for a product_id. Body: { product_id, quantity }
- */
+// ✅ ADD new product (with supplier existence check)
 router.post("/", async (req, res) => {
-  const { product_id, quantity } = req.body;
+  const { name, category, unit, supplier_id, quantity, expiry } = req.body;
 
-  if (!product_id || quantity === undefined) {
-    return res.status(400).json({ error: "Missing required fields: product_id, quantity." });
-  }
+  if (!name) return res.status(400).json({ error: "Missing product name" });
 
   try {
-    // Prevent duplicate product inventory (product_id is UNIQUE in inventory)
-    const [exists] = await composeDb.query(
-      "SELECT 1 FROM inventory WHERE product_id = ? LIMIT 1",
-      [product_id]
-    );
-    if (exists.length > 0) {
-      return res.status(409).json({ error: "Inventory for this product already exists." });
-    }
+    // 🧩 Check if supplier exists before insert
+    const supplierId = await (async () => {
+      if (!supplier_id || isNaN(Number(supplier_id))) return null;
+      const [rows] = await composeDb.query(
+        "SELECT supplier_id FROM suppliers WHERE supplier_id = ?",
+        [Number(supplier_id)]
+      );
+      return rows.length > 0 ? Number(supplier_id) : null;
+    })();
 
-    const [result] = await composeDb.query(
-      "INSERT INTO inventory (product_id, quantity_available) VALUES (?, ?)",
-      [product_id, quantity]
+    // 1️⃣ Insert into products table
+    const [productResult] = await composeDb.query(
+      `INSERT INTO products (product_name, category, unit, supplier_id, reorder_level, cost_per_unit, has_expiry)
+       VALUES (?, ?, ?, ?, 0, 0.00, ?)`,
+      [name, category || null, unit || "pcs", supplierId, expiry ? 1 : 0]
     );
 
-    res.status(201).json({ message: "Inventory item added.", insertId: result.insertId });
+    const newProductId = productResult.insertId;
+
+    // 2️⃣ Insert into inventory table
+    await composeDb.query(
+      `INSERT INTO inventory (product_id, quantity_available)
+       VALUES (?, ?)`,
+      [newProductId, quantity || 0]
+    );
+
+    res.status(201).json({ message: "Product added successfully", id: newProductId });
   } catch (err) {
-    console.error("Error adding inventory item:", err);
-    res.status(500).json({ error: "Failed to add item." });
+    console.error("Error adding product:", err);
+    res.status(500).json({ error: "Failed to add product" });
   }
 });
 
-/**
- * PUT /api/inventory/:id
- * Update an inventory row by product_id. Body: { quantity }
- * (If you want to update product_id itself, do that via products table.)
- */
+
+
+// ✅ UPDATE quantity only
 router.put("/:id", async (req, res) => {
-  const productId = req.params.id;
+  const { id } = req.params;
   const { quantity } = req.body;
 
-  if (quantity === undefined) {
-    return res.status(400).json({ error: "Missing required field: quantity." });
-  }
-
   try {
-    const [result] = await composeDb.query(
-      `UPDATE inventory
-       SET quantity_available = ?
-       WHERE product_id = ?`,
-      [quantity, productId]
+    await composeDb.query(
+      `UPDATE inventory SET quantity_available = ? WHERE product_id = ?`,
+      [quantity ?? 0, id]
     );
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Inventory item not found." });
-    }
-    res.json({ message: "Inventory item updated." });
+    res.json({ message: "Quantity updated successfully" });
   } catch (err) {
-    console.error("Error updating inventory item:", err);
-    res.status(500).json({ error: "Failed to update item." });
+    console.error("Error updating inventory:", err);
+    res.status(500).json({ error: "Failed to update product" });
   }
 });
 
-/**
- * DELETE /api/inventory
- * Bulk delete — body: { ids: [product_id, ...] }
- * Matches your frontend's bulk-delete behavior.
- */
+// ✅ DELETE multiple products
 router.delete("/", async (req, res) => {
-  const ids = req.body?.ids;
-  if (!Array.isArray(ids) || ids.length === 0) {
-    return res.status(400).json({ error: "Provide an array of product ids in `ids`." });
-  }
+  const { ids } = req.body;
+  if (!ids?.length) return res.status(400).json({ error: "No IDs provided" });
 
   try {
-    const placeholders = ids.map(() => "?").join(",");
-    const [result] = await composeDb.query(
-      `DELETE FROM inventory WHERE product_id IN (${placeholders})`,
-      ids
-    );
-
-    res.json({ message: `Deleted ${result.affectedRows} inventory item(s).` });
+    await composeDb.query(`DELETE FROM inventory WHERE product_id IN (?)`, [ids]);
+    await composeDb.query(`DELETE FROM products WHERE product_id IN (?)`, [ids]);
+    res.json({ message: "Products deleted successfully" });
   } catch (err) {
-    console.error("Error deleting inventory items:", err);
-    res.status(500).json({ error: "Failed to delete items." });
-  }
-});
-
-/**
- * DELETE /api/inventory/:id
- * Delete single inventory row by product_id
- */
-router.delete("/:id", async (req, res) => {
-  const productId = req.params.id;
-  try {
-    const [result] = await composeDb.query(
-      "DELETE FROM inventory WHERE product_id = ?",
-      [productId]
-    );
-    if (result.affectedRows === 0) return res.status(404).json({ error: "Item not found." });
-    res.json({ message: "Inventory item deleted." });
-  } catch (err) {
-    console.error("Error deleting inventory item:", err);
-    res.status(500).json({ error: "Failed to delete item." });
+    console.error("Error deleting products:", err);
+    res.status(500).json({ error: "Failed to delete products" });
   }
 });
 
