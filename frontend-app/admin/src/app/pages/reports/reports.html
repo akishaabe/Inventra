@@ -39,8 +39,12 @@
       <button [class.active]="activeTab === 'forecasting'" (click)="setActiveTab('forecasting')">Forecasting</button>
     </div>
 
-    <section *ngIf="activeTab === 'sales'" class="reports-section">
-      <h2>Sales Report</h2>
+   <section *ngIf="activeTab === 'sales'" class="reports-section">
+  <div class="forecast-header">
+    <h2>Sales Report</h2>
+    <button class="print-btn" (click)="printReport()">🖨 Print Report</button>
+  </div>
+
       <table class="reports-table">
         <thead>
           <tr>
@@ -61,8 +65,12 @@
       </table>
     </section>
 
-    <section *ngIf="activeTab === 'inventory'" class="reports-section">
-      <h2>Inventory Summary</h2>
+<section *ngIf="activeTab === 'inventory'" class="reports-section">
+  <div class="forecast-header">
+    <h2>Inventory Summary</h2>
+    <button class="print-btn" (click)="printReport()">🖨 Print Report</button>
+  </div>
+
       <table class="reports-table">
         <thead>
           <tr>

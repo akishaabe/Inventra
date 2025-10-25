@@ -8,9 +8,6 @@
     <nav class="nav-links">
       <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
       <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
-      <a routerLink="/forecasting" routerLinkActive="active">Forecasting</a>
-      <a routerLink="/reports" routerLinkActive="active">Reports</a>
-      <a routerLink="/settings" routerLinkActive="active">Settings</a>
       <a (click)="logout()">Logout</a>
     </nav>
   </aside>
@@ -18,8 +15,9 @@
   <!-- Header -->
   <header class="dashboard-header">
     <div class="header-left">
-      <button class="menu-btn" (click)="toggleSidebar()"*ngIf="!sidebarOpen">☰</button>
-      <h2 class="brand-name"*ngIf="!sidebarOpen">inventra</h2>
+<button class="menu-btn" (click)="toggleSidebar()" *ngIf="!sidebarOpen">☰</button>
+<h2 class="brand-name" *ngIf="!sidebarOpen">inventra</h2>
+
     </div>
 
     <div class="header-right">

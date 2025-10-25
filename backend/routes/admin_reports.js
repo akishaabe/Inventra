@@ -4,17 +4,21 @@ import db from "../db.compose.js";
 
 const router = express.Router();
 
-// === SALES REPORT ===
+/* =====================
+   ADMIN - SALES REPORT
+===================== */
 router.get("/sales", async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT 
         p.product_name,
-        SUM(s.quantity_sold) AS units_sold,
-        SUM(s.quantity_sold * s.price) AS revenue
-      FROM sales s
-      JOIN products p ON s.product_id = p.product_id
-      GROUP BY s.product_id
+        SUM(si.quantity) AS units_sold,
+        SUM(si.line_total) AS revenue
+      FROM sales_items si
+      JOIN products p ON si.product_id = p.product_id
+      JOIN sales s ON si.sale_id = s.sale_id
+      GROUP BY si.product_id
+      ORDER BY revenue DESC
     `);
 
     if (!rows.length) return res.json([]);
@@ -22,38 +26,42 @@ router.get("/sales", async (req, res) => {
     const totalRevenue = rows.reduce((acc, r) => acc + Number(r.revenue), 0);
     const report = rows.map(r => ({
       product_name: r.product_name,
-      units_sold: r.units_sold,
-      revenue: r.revenue,
-      percentage: ((r.revenue / totalRevenue) * 100).toFixed(2),
+      units_sold: Number(r.units_sold),
+      revenue: Number(r.revenue),
+      percentage: ((r.revenue / totalRevenue) * 100).toFixed(2)
     }));
 
     res.json(report);
   } catch (err) {
-    console.error("Error generating sales report:", err);
+    console.error("Error generating admin sales report:", err);
     res.status(500).json({ error: "Failed to fetch sales report" });
   }
 });
 
-// === INVENTORY REPORT ===
+/* =====================
+   ADMIN - INVENTORY REPORT
+===================== */
 router.get("/inventory", async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT 
-        i.item_name,
-        i.stock,
-        i.reorder_level
+        p.product_name AS item_name,
+        i.quantity_available AS stock,
+        p.reorder_level
       FROM inventory i
+      JOIN products p ON i.product_id = p.product_id
+      ORDER BY p.product_name ASC
     `);
 
     const report = rows.map(r => ({
       item_name: r.item_name,
-      stock: r.stock,
-      reorder_level: r.reorder_level,
+      stock: Number(r.stock),
+      reorder_level: Number(r.reorder_level)
     }));
 
     res.json(report);
   } catch (err) {
-    console.error("Error generating inventory report:", err);
+    console.error("Error generating admin inventory report:", err);
     res.status(500).json({ error: "Failed to fetch inventory report" });
   }
 });

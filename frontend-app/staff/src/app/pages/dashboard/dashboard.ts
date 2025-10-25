@@ -1,11 +1,11 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router'
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
@@ -26,19 +26,14 @@ export class Dashboard implements OnInit {
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
-        if (this.sidebarOpen) {
-      document.body.classList.add('sidebar-active');
-    } else {
-      document.body.classList.remove('sidebar-active');
-    }
+    document.body.classList.toggle('sidebar-active', this.sidebarOpen);
   }
 
   @HostListener('document:click', ['$event'])
   onClickOutside(event: MouseEvent) {
     const sidebar = document.querySelector('.sidebar');
-    const toggleBtn = document.querySelector('.menu-toggle');
+    const toggleBtn = document.querySelector('.menu-btn'); // ✅ fixed selector
 
-  
     if (
       this.sidebarOpen &&
       sidebar &&
@@ -51,7 +46,6 @@ export class Dashboard implements OnInit {
     }
   }
 
-  
   async fetchDashboardData() {
     try {
       const res = await fetch('http://localhost:4000/api/dashboard');
@@ -67,12 +61,15 @@ export class Dashboard implements OnInit {
     this.router.navigate(['/login']);
   }
 
+  goToInventory() {
+    this.router.navigate(['/inventory']);
+  }
+
   goToSettings() {
-  this.router.navigate(['/settings']);
-}
+    this.router.navigate(['/settings']);
+  }
 
-goToInventory() {
-  this.router.navigate(['/inventory']);
-}
-
+  goToDashboard() {
+    this.router.navigate(['/dashboard']);
+  }
 }

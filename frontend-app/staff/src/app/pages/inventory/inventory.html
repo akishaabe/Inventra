@@ -1,1 +1,230 @@
-<p>inventory works!</p>
+<div class="inventory-container">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="sidebarOpen">
+    <div class="sidebar-header">
+      <h2 class="logo">inventra</h2>
+      <button class="close-btn" (click)="toggleSidebar()">☰</button>
+    </div>
+    <nav class="nav-links">
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
+      <a (click)="logout()">Logout</a>
+    </nav>
+  </aside>
+
+  <!-- Header -->
+  <header class="inventory-header">
+    <div class="header-left">
+      <button class="menu-btn" (click)="toggleSidebar()" *ngIf="!sidebarOpen">☰</button>
+      <h2 class="brand-name" *ngIf="!sidebarOpen">inventra</h2>
+    </div>
+
+    <div class="header-right">
+      <span class="user-name">Café Pèdro</span>
+    <img src="assets/images/profile icon.png" alt="Profile" class="profile-icon"   (click)="goToSettings()">
+    </div>
+  </header>
+
+  <!-- Main Section -->
+  <main class="inventory-main" [class.shifted]="sidebarOpen">
+    <h1 class="inventory-title">Inventory</h1>
+
+    <!-- Controls -->
+    <div class="controls-row">
+      <input
+        class="search"
+        type="text"
+        placeholder="Search products..."
+        [(ngModel)]="searchQuery"
+        name="search"
+      />
+
+      <div class="sort-wrapper">
+        <label>Sort:</label>
+        <select
+          [(ngModel)]="sortColumn"
+          (ngModelChange)="sortBy(sortColumn)"
+          name="sortSelect"
+        >
+          <option value="id">Product ID</option>
+          <option value="name">Name</option>
+          <option value="category">Category</option>
+          <option value="quantity">Qty</option>
+          <option value="expiry">Expiry</option>
+        </select>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn add" (click)="openAddModal()">ADD</button>
+        <button
+          class="btn edit"
+          [disabled]="selectedProducts.length !== 1"
+          (click)="openEditModal()"
+        >
+          EDIT
+        </button>
+        <button
+          class="btn delete"
+          [disabled]="selectedProducts.length === 0"
+          (click)="openDeleteModal()"
+        >
+          DELETE
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table class="inventory-table">
+        <thead>
+          <tr>
+            <th class="col-check">
+              <input
+                type="checkbox"
+                [checked]="isAllSelected()"
+                (change)="toggleSelectAll($event)"
+                aria-label="select all"
+              />
+            </th>
+
+            <!-- sortable headers -->
+            <th (click)="sortBy('id')" class="sortable">
+              Product ID
+              <span class="sort-indicator">{{ sortIndicator('id') }}</span>
+            </th>
+            <th (click)="sortBy('name')" class="sortable">
+              Name
+              <span class="sort-indicator">{{ sortIndicator('name') }}</span>
+            </th>
+            <th (click)="sortBy('category')" class="sortable">
+              Category
+              <span class="sort-indicator">{{ sortIndicator('category') }}</span>
+            </th>
+            <th (click)="sortBy('quantity')" class="sortable">
+              Qty
+              <span class="sort-indicator">{{ sortIndicator('quantity') }}</span>
+            </th>
+            <th>Unit</th>
+            <th (click)="sortBy('expiry')" class="sortable">
+              Expiry
+              <span class="sort-indicator">{{ sortIndicator('expiry') }}</span>
+            </th>
+            <th>Supplier</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr
+            *ngFor="let item of visibleProducts"
+            (click)="toggleSelect(item)"
+            [class.selected]="selectedProducts.includes(item)"
+          >
+            <td class="col-check">
+              <input
+                type="checkbox"
+                [checked]="selectedProducts.includes(item)"
+                (click)="$event.stopPropagation(); toggleSelect(item)"
+                aria-label="select row"
+              />
+            </td>
+            <td>{{ item.id }}</td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.category }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.unit }}</td>
+            <td>{{ item.expiry }}</td>
+            <td>{{ item.supplier }}</td>
+          </tr>
+
+          <tr *ngIf="visibleProducts.length === 0">
+            <td colspan="8" class="empty">No results</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+  <!-- Add/Edit Modal -->
+  <div class="modal" *ngIf="showModal">
+    <div class="modal-card">
+      <a class="back-btn" (click)="closeModal()">← Back</a>
+      <h2>{{ isEditing ? 'Edit Item' : 'Add Item' }}</h2>
+
+      <form #itemForm="ngForm" (ngSubmit)="saveItem()">
+        <!-- Product ID -->
+        <label>Product ID</label>
+        <input
+          name="id"
+          [(ngModel)]="currentItem.id"
+          readonly
+          placeholder="Auto-generated"
+        />
+
+        <!-- Product Name -->
+        <label>Name</label>
+        <input
+          name="name"
+          [(ngModel)]="currentItem.name"
+          required
+          placeholder="Enter product name"
+        />
+
+        <!-- Category Dropdown -->
+        <label>Category</label>
+        <select
+          name="category"
+          [(ngModel)]="currentItem.category"
+          required
+        >
+          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+        </select>
+
+        <!-- Quantity -->
+        <label>Quantity</label>
+        <input
+          name="quantity"
+          type="number"
+          min="0"
+          [(ngModel)]="currentItem.quantity"
+        />
+
+        <!-- Unit -->
+        <label>Unit</label>
+        <input name="unit" [(ngModel)]="currentItem.unit" />
+
+        <!-- Expiry -->
+        <label>Expiry</label>
+        <input
+          name="expiry"
+          type="date"
+          [(ngModel)]="currentItem.expiry"
+        />
+
+        <!-- Supplier -->
+        <label>Supplier</label>
+        <input name="supplier" [(ngModel)]="currentItem.supplier" />
+
+        <div class="modal-actions">
+          <button
+            type="submit"
+            class="continue-btn"
+            [disabled]="!currentItem.name || !currentItem.category"
+          >
+            Continue
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal" *ngIf="showDeleteModal">
+    <div class="modal-card delete">
+      <p>DELETE THIS ITEM(S)?</p>
+      <div class="modal-buttons">
+        <button class="confirm-delete" (click)="confirmDelete()">Yes</button>
+        <button (click)="closeDeleteModal()">No</button>
+      </div>
+    </div>
+  </div>
+</div>
