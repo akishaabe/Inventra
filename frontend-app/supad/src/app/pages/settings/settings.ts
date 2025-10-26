@@ -178,14 +178,14 @@ export class Settings implements OnInit {
 
   // ───────────────────── AUDIT LOGS / DELETED ITEMS ─────────────────────
   loadAuditLogs() {
-    this.http.get<any[]>(`${this.apiUrl}/audit_logs`).subscribe({
+    this.http.get<any[]>(`${this.apiUrl}/audit-logs`).subscribe({
       next: (data) => (this.auditLogs = data),
       error: (err) => console.error('Failed to load audit logs:', err)
     });
   }
 
   loadDeletedItems() {
-    this.http.get<any[]>(`${this.apiUrl}/deleted_items`).subscribe({
+    this.http.get<any[]>(`${this.apiUrl}/deleted-items`).subscribe({
       next: (data) => (this.deletedItems = data),
       error: (err) => console.error('Failed to load deleted items:', err)
     });
@@ -213,13 +213,10 @@ export class Settings implements OnInit {
   @HostListener('document:click', ['$event'])
   onClickOutside(event: MouseEvent) {
     const sidebar = document.querySelector('.sidebar');
-    const toggleBtn = document.querySelector('.menu-btn');
     if (
       this.sidebarOpen &&
       sidebar &&
-      !sidebar.contains(event.target as Node) &&
-      toggleBtn &&
-      !toggleBtn.contains(event.target as Node)
+      !sidebar.contains(event.target as Node)
     ) {
       this.sidebarOpen = false;
       document.body.classList.remove('sidebar-active');

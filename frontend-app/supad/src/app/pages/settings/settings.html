@@ -64,7 +64,7 @@
             <div class="user-grid">
               <div class="user-card-mini" *ngFor="let u of superAdmins">
                 <div class="user-icon"></div>
-                <p class="user-name1">{{ u.name }}</p>
+                <p class="user-name1">{{ u.first_name }} {{ u.last_name }}</p>
                 <p class="user-role">{{ u.role }}</p>
               </div>
             </div>
@@ -73,7 +73,7 @@
             <div class="user-grid">
               <div class="user-card-mini" *ngFor="let u of admins">
                 <div class="user-icon"></div>
-                <p class="user-name1">{{ u.name }}</p>
+                <p class="user-name1">{{ u.first_name }} {{ u.last_name }}</p>
                 <p class="user-role">{{ u.role }}</p>
                 <button class="remove-btn" (click)="openRemoveUser(u)">👤-</button>
               </div>
@@ -83,7 +83,7 @@
             <div class="user-grid">
               <div class="user-card-mini" *ngFor="let u of staffList">
                 <div class="user-icon"></div>
-                <p class="user-name1">{{ u.name }}</p>
+                <p class="user-name1">{{ u.first_name }} {{ u.last_name }}</p>
                 <p class="user-role">{{ u.role }}</p>
                 <button class="remove-btn" (click)="openRemoveUser(u)">👤-</button>
               </div>
@@ -205,6 +205,21 @@
       <h2 class="success-title">User added!</h2>
       <p class="success-text">User has been added into the system!</p>
       <button class="ok-btn" (click)="closeUserAdded()">Okay</button>
+    </div>
+  </div>
+
+  <!-- CHANGE PASSWORD MODAL -->
+  <div class="modal" *ngIf="showChangePassword">
+    <div class="modal-content add-user">
+      <button class="back-btn" (click)="showChangePassword = false">← Back</button>
+      <h2 class="modal-title">Change Password</h2>
+
+      <form novalidate (ngSubmit)="savePassword()" #pwdForm="ngForm" class="modal-form">
+        <input type="password" placeholder="Current Password" [(ngModel)]="passwords.current" name="current" required />
+        <input type="password" placeholder="New Password" [(ngModel)]="passwords.new" name="new" required />
+        <input type="password" placeholder="Confirm New Password" [(ngModel)]="passwords.confirm" name="confirm" required />
+        <button type="submit" class="save-btn" [disabled]="pwdForm.invalid">Save</button>
+      </form>
     </div>
   </div>
 

@@ -12,7 +12,7 @@
   width: 240px;
   height: 100vh;
   position: fixed;
-  left: 0;
+  left: -240px; /* closed by default */
   top: 0;
   display: flex;
   flex-direction: column;
@@ -20,6 +20,8 @@
   box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
   z-index: 200;
 }
+
+.sidebar.open { left: 0; }
 
 .sidebar-header {
   display: flex;
@@ -117,10 +119,13 @@
 /* === Main Layout === */
 .settings-main {
   margin-top: 84px;
-  margin-left: 230px; /* align with fixed sidebar like dashboard */
   padding: 2rem 3rem;
   background: #f6f6f6;
   min-height: calc(100vh - 84px);
+  max-width: 1200px; /* centered content */
+  margin-left: auto;
+  margin-right: auto;
+  transition: transform 0.4s ease;
 }
 
 .settings-layout {
@@ -423,12 +428,12 @@
   }
 }
 
-
+/* ensure closed-by-default behavior (override late duplicate) */
 .sidebar {
   width: 240px;
   height: 100vh;
   position: fixed;
-  left: 0; /* always visible, like dashboard */
+  left: -240px;
   top: 0;
   display: flex;
   flex-direction: column;
@@ -436,6 +441,7 @@
   box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
   z-index: 200;
 }
+.sidebar.open { left: 0; }
 
 .settings-header {
   position: fixed;
@@ -452,7 +458,11 @@
   transition: left 0.4s ease;
 }
 
-.settings-header { left: 230px; }
+.settings-header { left: 0; }
+
+/* Shift header and main when sidebar opens */
+.sidebar.open ~ .settings-header { left: 240px; }
+.sidebar.open ~ .settings-main { transform: translateX(240px); }
 
 /* Overlay */
 .modal {
