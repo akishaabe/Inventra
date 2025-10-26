@@ -11,6 +11,7 @@ export class DashboardService {
   constructor(private http: HttpClient) {}
 
   getDashboardData(): Observable<any> {
-    return this.http.get<any>(this.apiUrl);
+    // Default to a 7-day horizon for projected demand
+    return this.http.get<any>(`${this.apiUrl}?horizon=7`);
   }
 }

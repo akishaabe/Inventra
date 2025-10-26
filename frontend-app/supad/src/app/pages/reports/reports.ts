@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 import Chart from 'chart.js/auto';
@@ -22,9 +22,14 @@ export class Reports implements OnInit {
   selectedHorizon = 14;
   forecastChart: any;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit() {
+    // read query param to set tab
+    const tab = this.route.snapshot.queryParamMap.get('tab');
+    if (tab) {
+      this.setActiveTab(tab);
+    }
     this.fetchReportData();
     this.fetchForecastData();
   }
@@ -68,8 +73,9 @@ closeLogoutModal() {
 
 confirmLogout() {
   localStorage.clear();
+  document.cookie = 'inventra_user=; Max-Age=0; Path=/; SameSite=Lax';
   this.showLogoutModal = false;
-  this.router.navigate(['/home']);
+  window.location.href = `${environment.sharedBase}/`;
 }
 
 async fetchReportData() {

@@ -23,6 +23,7 @@
     </div>
     <div class="header-right">
       <span class="user-name">Café Pèdro</span>
+      <img src="assets/images/profile icon.png" alt="Profile" class="profile-icon" (click)="goToSettings()" style="cursor: pointer;"/>
     </div>
   </header>
 
@@ -33,11 +34,11 @@
       <section class="settings-left">
         <div class="user-card">
           <div class="profile-pic"></div>
-          <h3 class="user-name1">Juana Dela Cruz</h3>
+          <h3 class="user-name1">{{ currentUser.first_name }} {{ currentUser.last_name }}</h3>
           <p class="label">Email</p>
-          <p class="value">juandelacruz123@gmail.com</p>
+          <p class="value">{{ currentUser.email }}</p>
           <p class="label">Role</p>
-          <p class="value">Super Admin</p>
+          <p class="value">{{ currentUser.role }}</p>
           <a class="change-pass" (click)="openChangePassword()">Change Password</a>
         </div>
 

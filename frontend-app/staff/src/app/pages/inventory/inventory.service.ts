@@ -35,9 +35,8 @@ addProduct(item: any): Observable<any> {
 
 
   updateProduct(id: string, item: any): Observable<any> {
-    // backend only updates quantity
-    const body = { quantity: item.quantity ?? 0 };
-    return this.http.put(`${this.apiUrl}/${id}`, body);
+    // send full payload so backend can update all editable fields
+    return this.http.put(`${this.apiUrl}/${id}`, item);
   }
 
   deleteProducts(ids: string[]): Observable<any> {

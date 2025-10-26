@@ -10,8 +10,8 @@
       <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
       <a routerLink="/forecasting" routerLinkActive="active">Forecasting</a>
       <a routerLink="/reports" routerLinkActive="active">Reports</a>
-      <a routerLink="/settings" routerLinkActive="active">Settings</a>
-      <a (click)="logout()">Logout</a>
+  <a routerLink="/settings" routerLinkActive="active">Settings</a>
+  <a (click)="openLogoutModal()">Logout</a>
     </nav>
   </aside>
 
@@ -148,4 +148,15 @@
 
 
   </main>
+</div>
+<!-- Logout Confirmation Modal -->
+<div class="logout-modal-overlay" *ngIf="showLogoutModal">
+  <div class="logout-modal">
+    <h2>LOG OUT</h2>
+    <p>Are you sure you want to log out?</p>
+    <div class="logout-buttons">
+      <button class="yes-btn" (click)="confirmLogout()">Yes</button>
+      <button class="no-btn" (click)="closeLogoutModal()">No</button>
+    </div>
+  </div>
 </div>

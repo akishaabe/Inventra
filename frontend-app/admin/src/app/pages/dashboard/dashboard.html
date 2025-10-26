@@ -57,9 +57,10 @@
       </div>
 
       <div class="stat-card forecast">
-        <h2>Forecast Demand</h2>
-        <p class="stat-value">₱{{ dashboardData.forecastDemand | number: '1.2-2' }}</p>
-        <a class="stat-link">Generate Report</a>
+        <h2>Projected 7-day Demand</h2>
+        <p class="stat-value">{{ dashboardData.forecastDemand | number: '1.0-0' }}</p>
+        <small class="stat-trend">Summary: Next 7 days</small>
+        <a class="stat-link" (click)="goToReportsForecasting()" style="cursor: pointer;">Generate Report</a>
       </div>
     </div>
   </main>

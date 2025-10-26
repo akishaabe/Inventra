@@ -55,7 +55,7 @@ export class Dashboard implements OnInit {
   
   async fetchDashboardData() {
     try {
-      const res = await fetch('http://localhost:4000/api/dashboard');
+      const res = await fetch('http://localhost:4000/api/dashboard?horizon=7');
       const data = await res.json();
       this.dashboardData = data;
     } catch (err) {
@@ -86,6 +86,10 @@ confirmLogout() {
 
 goToInventory() {
   this.router.navigate(['/inventory']);
+}
+
+goToReportsForecasting() {
+  this.router.navigate(['/reports'], { queryParams: { tab: 'forecasting' } });
 }
 
 }

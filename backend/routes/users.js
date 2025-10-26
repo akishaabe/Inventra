@@ -3,6 +3,24 @@ import db from "../db.js";
 
 const router = express.Router();
 
+// ───────────── GET USER BY EMAIL ─────────────
+router.get("/by-email", async (req, res) => {
+  const { email } = req.query;
+  if (!email) return res.status(400).json({ error: "Email is required" });
+
+  try {
+    const [rows] = await db.query(
+      "SELECT user_id, first_name, last_name, email, role FROM users WHERE email = ?",
+      [email]
+    );
+    if (!rows || rows.length === 0) return res.status(404).json({ error: "User not found" });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("Error fetching user by email:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
 // ───────────── GET ALL USERS ─────────────
 router.get("/", async (req, res) => {
   try {

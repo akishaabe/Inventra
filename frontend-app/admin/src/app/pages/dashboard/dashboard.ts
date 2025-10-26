@@ -100,4 +100,8 @@ goToInventory() {
   this.router.navigate(['/inventory']);
 }
 
+goToReportsForecasting() {
+  this.router.navigate(['/reports'], { queryParams: { tab: 'forecasting' } });
+}
+
 }

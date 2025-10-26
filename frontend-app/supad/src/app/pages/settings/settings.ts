@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -15,6 +15,7 @@ import { environment } from '../../../environments/environment';
 export class Settings implements OnInit {
   sidebarOpen = false;
   selectedTab = 'users';
+  currentUser: any = { first_name: '', last_name: '', email: '', role: '' };
 
   showAddUser = false;
   showRemoveUser = false;
@@ -37,9 +38,25 @@ export class Settings implements OnInit {
   constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit() {
+    this.loadCurrentUser();
     this.loadUsers();
     this.loadAuditLogs();
     this.loadDeletedItems();
+  }
+  // ───────────────────── CURRENT USER ─────────────────────
+  loadCurrentUser() {
+    try {
+      const userRaw = localStorage.getItem('user');
+      const user = userRaw ? JSON.parse(userRaw) : null;
+      const email = user?.email;
+      if (!email) return;
+      this.http.get<any>(`${this.apiUrl}/users/by-email`, { params: { email } }).subscribe({
+        next: (u) => this.currentUser = u,
+        error: (err) => console.error('Failed to load current user:', err)
+      });
+    } catch (e) {
+      console.error('Failed to parse current user from storage', e);
+    }
   }
 
 
@@ -126,7 +143,22 @@ export class Settings implements OnInit {
       return;
     }
 
+    // Resolve email reliably (fallback to localStorage if currentUser not yet loaded)
+    let email = this.currentUser?.email;
+    if (!email) {
+      try {
+        const raw = localStorage.getItem('user');
+        const u = raw ? JSON.parse(raw) : null;
+        email = u?.email;
+      } catch {}
+    }
+    if (!email) {
+      alert('Could not resolve your email. Please re-login and try again.');
+      return;
+    }
+
     const payload = {
+      email,
       currentPassword: this.passwords.current,
       newPassword: this.passwords.new
     };
@@ -175,10 +207,31 @@ export class Settings implements OnInit {
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
+    document.body.classList.toggle('sidebar-active', this.sidebarOpen);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.querySelector('.menu-btn');
+    if (
+      this.sidebarOpen &&
+      sidebar &&
+      !sidebar.contains(event.target as Node) &&
+      toggleBtn &&
+      !toggleBtn.contains(event.target as Node)
+    ) {
+      this.sidebarOpen = false;
+      document.body.classList.remove('sidebar-active');
+    }
   }
 
   selectTab(tab: string) {
     this.selectedTab = tab;
+  }
+
+  goToSettings() {
+    this.router.navigate(['/settings']);
   }
 
   logout() {

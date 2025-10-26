@@ -71,7 +71,7 @@
   left: 0;
   right: 0;
   height: 70px;
-  background-color: #3c2321;
+  background-color: #f7f4f0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -90,7 +90,7 @@
 .menu-btn {
   background: none;
   border: none;
-  color: #f7f4f0;
+  color: #3c2321;
   font-size: 1.6rem;
   cursor: pointer;
 }
@@ -98,7 +98,7 @@
 .brand-name {
   font-family: 'Archivo Black', serif;
   font-size: 1.5rem;
-  color: #f7f4f0;
+  color: #3c2321;
   letter-spacing: 0.5px;
 }
 
@@ -111,12 +111,13 @@
 .user-name {
   font-weight: 600;
   font-size: 1.1rem;
-  color: #f7f4f0;
+  color: #3c2321;
 }
 
 /* === Main Layout === */
 .settings-main {
   margin-top: 84px;
+  margin-left: 230px; /* align with fixed sidebar like dashboard */
   padding: 2rem 3rem;
   background: #f6f6f6;
   min-height: calc(100vh - 84px);
@@ -427,29 +428,13 @@
   width: 240px;
   height: 100vh;
   position: fixed;
-  left: -240px;
+  left: 0; /* always visible, like dashboard */
   top: 0;
   display: flex;
   flex-direction: column;
   transition: all 0.4s ease;
   box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
   z-index: 200;
-}
-
-.sidebar.open {
-  left: 0;
-}
-
-.sidebar-active main.settings-main::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  backdrop-filter: blur(4px);
-  background-color: rgba(0, 0, 0, 0.1);
-  z-index: 50;
 }
 
 .settings-header {
@@ -467,9 +452,7 @@
   transition: left 0.4s ease;
 }
 
-.sidebar.open ~ .settings-header {
-  left: 240px;
-}
+.settings-header { left: 230px; }
 
 /* Overlay */
 .modal {

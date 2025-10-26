@@ -1,17 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NavbarComponent } from '../../components/navbar/navbar';
-import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { SettingsService } from './settings.service';
 import { Router, RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { HttpClientModule } from '@angular/common/http';
 
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, HttpClientModule],
   templateUrl: './settings.html',
   styleUrls: ['./settings.css']
 })
@@ -75,23 +74,27 @@ loadUsers() {
 
   // === Load Admin Profile ===
   loadAdminProfile() {
-    const adminId = 6; // temp: replace later with actual logged-in id
-    this.settingsService.getAdminProfile(adminId).subscribe({
-      next: (res) => {
-        const payload = res && res.data ? res.data : res;
-        if (payload) {
-          this.adminId = payload.user_id ?? adminId;
-          this.firstName = payload.first_name ?? '';
-          this.lastName = payload.last_name ?? '';
-          this.email = payload.email ?? '';
-          this.role = payload.role ?? '';
-          this.is2FA = payload.is_2fa_enabled ?? 0;
-        }
-      },
-      error: (err) => {
-        console.error('Error loading admin profile:', err);
-      }
-    });
+    try {
+      const userRaw = localStorage.getItem('user');
+      const user = userRaw ? JSON.parse(userRaw) : null;
+      const email = user?.email;
+      if (!email) return;
+
+      this.settingsService.getUserByEmail(email).subscribe({
+        next: (payload) => {
+          if (payload) {
+            this.adminId = payload.user_id ?? null;
+            this.firstName = payload.first_name ?? '';
+            this.lastName = payload.last_name ?? '';
+            this.email = payload.email ?? '';
+            this.role = payload.role ?? '';
+          }
+        },
+        error: (err) => console.error('Error loading admin profile:', err)
+      });
+    } catch (e) {
+      console.error('Failed to parse current user from storage', e);
+    }
   }
 
   // === Add User ===

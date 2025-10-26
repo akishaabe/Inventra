@@ -229,20 +229,92 @@ res.json({
 
 
 // ------------------------------
+// Change password
+// ------------------------------
+app.put("/api/change-password", async (req, res) => {
+  try {
+    const { email, currentPassword, newPassword } = req.body || {};
+    if (!email || !currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Email, currentPassword and newPassword are required" });
+    }
+
+    const [rows] = await db.query(
+      "SELECT user_id, password_hash FROM users WHERE email = ?",
+      [email]
+    );
+    if (!rows || !rows.length) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const user = rows[0];
+    const hash = user.password_hash || "";
+    const bcrypt = (await import("bcryptjs")).default;
+
+    let valid = false;
+    if (hash.startsWith("$2a$") || hash.startsWith("$2b$") || hash.startsWith("$2y$")) {
+      valid = await bcrypt.compare(currentPassword, hash);
+    } else {
+      // Legacy plaintext support
+      valid = currentPassword === hash;
+    }
+
+    if (!valid) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+    await db.query("UPDATE users SET password_hash = ? WHERE email = ?", [newHash, email]);
+
+    res.json({ success: true, message: "Password updated successfully" });
+  } catch (err) {
+    console.error("Error changing password:", err);
+    res.status(500).json({ error: "Failed to change password" });
+  }
+});
+
+
+// ------------------------------
 // Dashboard data
 // ------------------------------
 app.get("/api/dashboard", async (req, res) => {
   try {
-    const [sales] = await db.query("SELECT SUM(amount) AS total FROM sales WHERE DATE(date) = CURDATE()");
-    const [lowStock] = await db.query("SELECT COUNT(*) AS count FROM products WHERE stock < reorder_level");
-    const [stockValue] = await db.query("SELECT SUM(stock * price) AS value FROM products");
-    const [forecast] = await db.query("SELECT SUM(predicted_sales) AS demand FROM forecast_data");
+    // Optional: horizon for forecast demand aggregation (days ahead)
+    const horizon = parseInt(req.query.horizon) || 14;
+
+    // NOTE: Keep existing sales query as-is (depends on your schema)
+    const [sales] = await db.query(
+      "SELECT SUM(amount) AS total FROM sales WHERE DATE(date) = CURDATE()"
+    );
+
+    // Low stock uses inventory.quantity_available vs products.reorder_level
+    const [lowStock] = await db.query(
+      `SELECT COUNT(*) AS count
+       FROM products p
+       LEFT JOIN inventory i ON i.product_id = p.product_id
+       WHERE COALESCE(i.quantity_available, 0) < COALESCE(p.reorder_level, 0)`
+    );
+
+    // Stock value = sum(quantity_available * cost_per_unit)
+    const [stockValue] = await db.query(
+      `SELECT SUM(COALESCE(i.quantity_available,0) * COALESCE(p.cost_per_unit,0)) AS value
+       FROM products p
+       LEFT JOIN inventory i ON i.product_id = p.product_id`
+    );
+
+    // Forecast demand: sum forecasted_demand for next {horizon} days
+    const [forecast] = await db.query(
+      `SELECT SUM(forecasted_demand) AS demand
+       FROM forecasts
+       WHERE forecast_date >= CURDATE()
+         AND forecast_date < DATE_ADD(CURDATE(), INTERVAL ? DAY)`,
+      [horizon]
+    );
 
     res.json({
-      todaySales: sales[0].total || 0,
-      lowStock: lowStock[0].count || 0,
-      stockValue: stockValue[0].value || 0,
-      forecastDemand: forecast[0].demand || 0,
+      todaySales: sales?.[0]?.total || 0,
+      lowStock: lowStock?.[0]?.count || 0,
+      stockValue: stockValue?.[0]?.value || 0,
+      forecastDemand: forecast?.[0]?.demand || 0,
     });
   } catch (err) {
     console.error("Error fetching dashboard data:", err);

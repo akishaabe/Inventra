@@ -21,6 +21,13 @@ export class SettingsService {
     return this.http.get<any>(`${this.apiUrl}/${id}`); // GET /api/admin/settings/:id
   }
 
+  // Get user by email (from /api/users)
+  getUserByEmail(email: string): Observable<any> {
+    return this.http.get<any>(`http://localhost:4000/api/users/by-email`, {
+      params: { email }
+    });
+  }
+
   // Alias - same as getUserById (keeps names used in components)
   getAdminProfile(id: number): Observable<any> {
     return this.getUserById(id);

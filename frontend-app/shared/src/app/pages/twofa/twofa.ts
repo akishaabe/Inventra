@@ -87,8 +87,17 @@ export class TwoFA implements OnInit, OnDestroy {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        // we receive role from backend
-  const role = (data.role || '').toUpperCase();
+        // Normalize role variants (e.g., "SUPER ADMIN", "SupAd") to exact tokens
+  const rawRole = (data.role || '').toString().toUpperCase();
+  const compact = rawRole.replace(/[^A-Z]/g, '');
+  let role: 'SUPERADMIN' | 'ADMIN' | 'STAFF' | '' = '';
+  if (compact === 'SUPERADMIN' || compact === 'SUPER' || compact === 'SUPAD') {
+    role = 'SUPERADMIN';
+  } else if (compact === 'ADMIN' || compact === 'ADM') {
+    role = 'ADMIN';
+  } else if (compact === 'STAFF') {
+    role = 'STAFF';
+  }
   // Store minimal session info for role apps' guards
   localStorage.setItem('user', JSON.stringify({ email: this.email, role }));
   // Set a short-lived cookie shared across ports on localhost for cross-app handoff
@@ -98,18 +107,22 @@ export class TwoFA implements OnInit, OnDestroy {
   localStorage.removeItem('twofaEmail');
 
         // Redirect to corresponding frontend
+        // Give the cookie a brief moment to flush before cross-port redirect
+  const redirect = (url: string) => setTimeout(() => (window.location.href = url), 50);
+  const qp = `?e=${encodeURIComponent(this.email)}&r=${encodeURIComponent(role)}`;
+
         switch (role) {
           case 'SUPERADMIN':
-            window.location.href = 'http://localhost:4600/dashboard';
+            redirect('http://localhost:4600/dashboard' + qp);
             break;
           case 'ADMIN':
-            window.location.href = 'http://localhost:4400/dashboard';
+            redirect('http://localhost:4400/dashboard' + qp);
             break;
           case 'STAFF':
-            window.location.href = 'http://localhost:4500/dashboard';
+            redirect('http://localhost:4500/dashboard' + qp);
             break;
           default:
-            alert('Invalid role.');
+            alert('Invalid role. Please contact support to update your user role.');
             this.router.navigate(['/login']);
         }
 

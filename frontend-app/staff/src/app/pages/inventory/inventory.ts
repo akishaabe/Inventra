@@ -82,7 +82,7 @@ export class Inventory implements OnInit {
   @HostListener('document:click', ['$event'])
   onClickOutside(event: MouseEvent) {
     const sidebar = document.querySelector('.sidebar');
-    const toggleBtn = document.querySelector('.menu-toggle');
+    const toggleBtn = document.querySelector('.menu-btn');
     if (
       this.sidebarOpen &&
       sidebar &&

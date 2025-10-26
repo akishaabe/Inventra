@@ -85,19 +85,41 @@ router.post("/", async (req, res) => {
 
 
 
-// ✅ UPDATE quantity only
+// ✅ UPDATE product details + quantity
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { quantity } = req.body;
+  const { name, category, unit, supplier_id, expiry, quantity } = req.body;
 
   try {
+    // Update products table fields if provided
+    await composeDb.query(
+      `UPDATE products 
+         SET 
+           product_name = COALESCE(?, product_name),
+           category = COALESCE(?, category),
+           unit = COALESCE(?, unit),
+           supplier_id = ?,
+           has_expiry = COALESCE(?, has_expiry)
+       WHERE product_id = ?`,
+      [
+        name ?? null,
+        category ?? null,
+        unit ?? null,
+        supplier_id ? Number(supplier_id) : null,
+        typeof expiry !== 'undefined' && expiry !== null ? (expiry ? 1 : 0) : null,
+        id,
+      ]
+    );
+
+    // Update inventory quantity (default to 0 if missing)
     await composeDb.query(
       `UPDATE inventory SET quantity_available = ? WHERE product_id = ?`,
       [quantity ?? 0, id]
     );
-    res.json({ message: "Quantity updated successfully" });
+
+    res.json({ message: "Product updated successfully" });
   } catch (err) {
-    console.error("Error updating inventory:", err);
+    console.error("Error updating product:", err);
     res.status(500).json({ error: "Failed to update product" });
   }
 });
