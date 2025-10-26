@@ -1,0 +1,109 @@
+networks:
+  inventra-net:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: inventra-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # Optional: place .sql/.sh files in deploy/db-init to auto-run on FIRST startup only
+      - ../db-init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - inventra-net
+
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    container_name: inventra-backend
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PORT: ${PORT}
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      FROM_EMAIL: ${FROM_EMAIL}
+      JWT_SECRET: ${JWT_SECRET}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      ML_SERVICE_URL: ${ML_SERVICE_URL}
+    expose:
+      - "${PORT}"
+    networks:
+      - inventra-net
+
+  ml_service:
+    build:
+      context: ../../ml_service
+      dockerfile: Dockerfile
+    container_name: inventra-ml
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      ML_DB_HOST: ${ML_DB_HOST}
+      ML_DB_USER: ${ML_DB_USER}
+      ML_DB_PASS: ${ML_DB_PASS}
+      ML_DB_NAME: ${ML_DB_NAME}
+    expose:
+      - "5000"
+    networks:
+      - inventra-net
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: inventra-nginx
+    depends_on:
+      - backend
+      - ml_service
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../nginx/conf.d:/etc/nginx/conf.d:ro
+      - ../static/admin:/usr/share/nginx/html/admin:ro
+      - ../static/supad:/usr/share/nginx/html/supad:ro
+      - ../static/staff:/usr/share/nginx/html/staff:ro
+      - ../static/shared:/usr/share/nginx/html/shared:ro
+      # Let's Encrypt certbot shared volumes
+      - ../certbot/www:/var/www/certbot
+      - ../certbot/conf:/etc/letsencrypt
+    networks:
+      - inventra-net
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: inventra-certbot
+    volumes:
+      - ../certbot/www:/var/www/certbot
+      - ../certbot/conf:/etc/letsencrypt
+    networks:
+      - inventra-net

@@ -84,7 +84,7 @@ confirmLogout() {
 
 async fetchReportData() {
   try {
-    const res = await fetch('http://localhost:4000/api/admin/reports/sales');
+  const res = await fetch(`${environment.apiBase}/admin/reports/sales`);
     const data = await res.json();
     this.reportData = Array.isArray(data) ? data : [];
   } catch (err) {
@@ -95,7 +95,7 @@ async fetchReportData() {
 
 async fetchInventoryData() {
   try {
-    const res = await fetch('http://localhost:4000/api/admin/reports/inventory');
+  const res = await fetch(`${environment.apiBase}/admin/reports/inventory`);
     const data = await res.json();
     this.inventoryData = Array.isArray(data) ? data : [];
   } catch (err) {
@@ -106,7 +106,7 @@ async fetchInventoryData() {
 async fetchForecastData() {
   try {
     const res = await fetch(
-      `http://localhost:4000/api/forecasts?refresh=true&period=${this.selectedHorizon}`
+  `${environment.apiBase}/forecasts?refresh=true&period=${this.selectedHorizon}`
     );
 
     if (!res.ok) {

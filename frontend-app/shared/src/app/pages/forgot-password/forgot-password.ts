@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-forgot-password',
@@ -28,7 +29,7 @@ export class ForgotPassword {
   this.sending = true;
 
 
-fetch('http://localhost:4000/api/send-reset-code', {
+fetch(`${environment.apiBase}/send-reset-code`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ email: this.email })

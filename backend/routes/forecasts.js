@@ -4,7 +4,9 @@ import composeDb from "../db.js";
 
 const router = express.Router();
 
-const ML_URL = process.env.ML_SERVICE_URL || "http://ml_service:5000/forecast";
+// Normalize ML service URL: allow env to be base (http://ml_service:5000) or full path
+const mlBase = process.env.ML_SERVICE_URL || "http://ml_service:5000";
+const ML_URL = mlBase.replace(/\/+$/, "") + "/forecast"; // ensure trailing /forecast
 
 /**
  * Persist forecasts for given product_id
@@ -43,24 +45,24 @@ SELECT
   MAX(f.forecast_date) AS forecast_date,
   ANY_VALUE(f.forecasted_demand) AS forecasted_demand,
   IFNULL(i.quantity_available, 0) AS quantity_available,
-  IFNULL(
-    JSON_ARRAYAGG(
-      JSON_OBJECT(
-        'text', a.recommendation_text,
-        'priority', a.priority,
-        'reason', a.reason
-      )
+  COALESCE(
+    (
+      SELECT JSON_ARRAYAGG(
+               JSON_OBJECT(
+                 'text', ar.recommendation_text,
+                 'priority', ar.priority,
+                 'reason', ar.reason
+               )
+             )
+      FROM ai_recommendations ar
+      WHERE ar.product_id = p.product_id AND ar.is_active = 1
     ), JSON_ARRAY()
   ) AS ai_recommendations
 FROM forecasts f
 JOIN products p ON f.product_id = p.product_id
 LEFT JOIN inventory i ON p.product_id = i.product_id
-LEFT JOIN ai_recommendations a ON p.product_id = a.product_id AND a.is_active = 1
 GROUP BY p.product_id
 ORDER BY p.product_name;
-
-
-
     `);
 
     // If forecasts exist and not refreshing, return them
@@ -70,7 +72,13 @@ ORDER BY p.product_name;
     const [products] = await composeDb.query("SELECT product_id FROM products");
 
     for (const product of products) {
-      const mlResponse = await axios.post(ML_URL, { horizon, product_id: product.product_id });
+      const mlResponse = await axios.post(ML_URL, { horizon, product_id: product.product_id }).catch((e) => {
+        // Improve diagnostics without crashing full refresh loop
+        const status = e?.response?.status;
+        const data = e?.response?.data;
+        console.error("ML service error:", status, data || e.message);
+        return { data: [] };
+      });
       const mlData = Array.isArray(mlResponse.data) ? mlResponse.data : [];
       if (mlData.length > 0) await persistForecasts(product.product_id, mlData);
     }
@@ -84,19 +92,22 @@ SELECT
   MAX(f.forecast_date) AS forecast_date,
   ANY_VALUE(f.forecasted_demand) AS forecasted_demand,
   IFNULL(i.quantity_available, 0) AS quantity_available,
-  IFNULL(
-    JSON_ARRAYAGG(
-      JSON_OBJECT(
-        'text', a.recommendation_text,
-        'priority', a.priority,
-        'reason', a.reason
-      )
+  COALESCE(
+    (
+      SELECT JSON_ARRAYAGG(
+               JSON_OBJECT(
+                 'text', ar.recommendation_text,
+                 'priority', ar.priority,
+                 'reason', ar.reason
+               )
+             )
+      FROM ai_recommendations ar
+      WHERE ar.product_id = p.product_id AND ar.is_active = 1
     ), JSON_ARRAY()
   ) AS ai_recommendations
 FROM forecasts f
 JOIN products p ON f.product_id = p.product_id
 LEFT JOIN inventory i ON p.product_id = i.product_id
-LEFT JOIN ai_recommendations a ON p.product_id = a.product_id AND a.is_active = 1
 GROUP BY p.product_id
 ORDER BY p.product_name;
     `, [horizon]);

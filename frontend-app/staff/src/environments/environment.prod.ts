@@ -1,5 +1,7 @@
 export const environment = {
   production: true,
+  apiBase: 'http://api.cafe-inventra.com/api',
+  sharedBase: 'http://shared.cafe-inventra.com',
   firebase: {
   apiKey: "AIzaSyBwHVxnhWkp8Fpa407Aa4IOVR84zXReJPQ",
   authDomain: "inventra-c2dd0.firebaseapp.com",

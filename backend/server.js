@@ -20,9 +20,20 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
 
-app.use(cors());
+// CORS: allow only configured origins in production
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || "").split(",").filter(Boolean);
+app.use(
+  cors({
+    origin: function (origin, cb) {
+      if (!origin || allowedOrigins.length === 0) return cb(null, true); // allow server-to-server or if not configured
+      if (allowedOrigins.includes(origin)) return cb(null, true);
+      return cb(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 app.use(bodyParser.json());
 
 // ------------------------------
@@ -100,6 +111,9 @@ app.use("/api/admin/inventory", adminInventoryRoutes);
 app.use("/api/admin/reports", adminReportsRoutes);
 
 app.get("/", (req, res) => res.send("Backend is running!"));
+
+// health endpoint for load balancers/monitoring
+app.get("/health", (req, res) => res.status(200).json({ status: "ok" }));
 
 // ------------------------------
 // Start login: verify password, then send email code (2FA)

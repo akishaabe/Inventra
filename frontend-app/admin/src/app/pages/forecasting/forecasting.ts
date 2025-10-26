@@ -115,18 +115,20 @@ loadForecast(period: number) {
             prediction: [`${demand.toFixed(2)}kg`],
             current: `${currentQty.toFixed(2)}kg`,
             action: this.getAction(demand, currentQty),
-            ai_recommendations: Array.isArray(item.ai_recommendations) ? item.ai_recommendations : []
+            ai_recommendations: Array.isArray(item.ai_recommendations)
+              ? item.ai_recommendations.filter((r: any) => r && typeof r === 'object' && (r.text || r.recommendation_text))
+              : []
           };
         });
 
         // Flatten AI recs from forecastData (unchanged)
         const flatRecs: RecommendationCard[] = this.forecastData
-          .flatMap(fd => (fd.ai_recommendations || []).map((r: AiRecommendation) => {
+          .flatMap(fd => (fd.ai_recommendations || []).map((r: any) => {
             const key = this.getKeyFromPriority(r.priority);
             return {
               title: this.prettyTitleFromKey(key),
-              description: r.text || '',
-              subtext: r.reason || '',
+              description: (r.text || r.recommendation_text || '').toString(),
+              subtext: (r.reason || '').toString(),
               actionText: '',
               keyClass: key
             } as RecommendationCard;

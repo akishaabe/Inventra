@@ -33,7 +33,7 @@ export class Settings implements OnInit {
   auditLogs: any[] = [];
   deletedItems: any[] = [];
 
-  private apiUrl = 'http://localhost:4000/api';
+  private apiUrl = environment.apiBase;
 
   constructor(private http: HttpClient, private router: Router) {}
 

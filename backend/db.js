@@ -4,8 +4,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const db = mysql.createPool({
-  host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "root",
+  // Default host to the Docker Compose service name so containers work without extra env
+  host: process.env.DB_HOST || "mysql",
+  user: process.env.DB_USER || "inventra",
   password: process.env.DB_PASSWORD || "",
   database: process.env.DB_NAME || "inventra",
 });

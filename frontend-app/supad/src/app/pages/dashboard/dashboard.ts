@@ -57,11 +57,11 @@ export class Dashboard implements OnInit {
   
   async fetchDashboardData() {
     try {
-      const res = await fetch('http://localhost:4000/api/dashboard?horizon=7');
+      const res = await fetch(`${environment.apiBase}/dashboard?horizon=7`);
       const data = await res.json();
       this.dashboardData = data;
       // Fetch AI recommendation
-  const airec = await fetch('http://localhost:4000/api/forecasts/ai-recommendation');
+  const airec = await fetch(`${environment.apiBase}/forecasts/ai-recommendation`);
   this.aiRec = await airec.json();
     } catch (err) {
       console.error('Error fetching dashboard data:', err);

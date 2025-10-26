@@ -1,9 +1,9 @@
 export const environment = {
   production: true,
-  apiBase: 'http://localhost:4000/api',
-  adminBase: 'http://localhost:4400',
-  staffBase: 'http://localhost:4500',
-  supadBase: 'http://localhost:4600',
+  apiBase: 'http://api.cafe-inventra.com/api',
+  adminBase: 'http://admin.cafe-inventra.com',
+  staffBase: 'http://staff.cafe-inventra.com',
+  supadBase: 'http://supad.cafe-inventra.com',
   firebase: {
   apiKey: "AIzaSyBwHVxnhWkp8Fpa407Aa4IOVR84zXReJPQ",
   authDomain: "inventra-c2dd0.firebaseapp.com",

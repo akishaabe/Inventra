@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: inventra-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: inventra-mysql
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "8080:80"
+    depends_on:
+      - inventra-mysql
+    networks:
+      - compose_inventra-net
+
+networks:
+  compose_inventra-net:
+    external: true

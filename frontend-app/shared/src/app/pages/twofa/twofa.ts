@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-twofa',
@@ -78,7 +79,7 @@ export class TwoFA implements OnInit, OnDestroy {
     }
 
     try {
-      const response = await fetch('http://localhost:4000/api/verify-code', {
+  const response = await fetch(`${environment.apiBase}/verify-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: this.email, code: enteredCode })
@@ -100,10 +101,21 @@ export class TwoFA implements OnInit, OnDestroy {
   }
   // Store minimal session info for role apps' guards
   localStorage.setItem('user', JSON.stringify({ email: this.email, role }));
-  // Set a short-lived cookie shared across ports on localhost for cross-app handoff
-  // Note: cookies are shared by domain (localhost) across ports.
+  // Set a short-lived cookie for cross-subdomain handoff in production.
+  // On localhost, omit Domain so it remains available across ports.
   const cookiePayload = encodeURIComponent(JSON.stringify({ email: this.email, role }));
-  document.cookie = `inventra_user=${cookiePayload}; Max-Age=900; Path=/; SameSite=Lax`;
+  const isProd = environment.production;
+  const host = window.location.hostname;
+  const isLocal = host === 'localhost' || host === '127.0.0.1';
+  // Derive base domain like .cafe-inventra.com for subdomain sharing
+  let domainAttr = '';
+  if (isProd && !isLocal && host.split('.').length >= 2) {
+    const parts = host.split('.');
+    const baseDomain = `.${parts.slice(-2).join('.')}`; // e.g., .cafe-inventra.com
+    domainAttr = `; Domain=${baseDomain}`;
+  }
+  const secureAttr = window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `inventra_user=${cookiePayload}; Max-Age=900; Path=/; SameSite=Lax${domainAttr}${secureAttr}`;
   localStorage.removeItem('twofaEmail');
 
         // Redirect to corresponding frontend
@@ -113,13 +125,13 @@ export class TwoFA implements OnInit, OnDestroy {
 
         switch (role) {
           case 'SUPERADMIN':
-            redirect('http://localhost:4600/dashboard' + qp);
+            redirect(`${environment.supadBase}/dashboard` + qp);
             break;
           case 'ADMIN':
-            redirect('http://localhost:4400/dashboard' + qp);
+            redirect(`${environment.adminBase}/dashboard` + qp);
             break;
           case 'STAFF':
-            redirect('http://localhost:4500/dashboard' + qp);
+            redirect(`${environment.staffBase}/dashboard` + qp);
             break;
           default:
             alert('Invalid role. Please contact support to update your user role.');
@@ -158,7 +170,7 @@ export class TwoFA implements OnInit, OnDestroy {
     this.error = '';
 
     try {
-      const response = await fetch('http://localhost:4000/api/resend-code', {
+  const response = await fetch(`${environment.apiBase}/resend-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: this.email })

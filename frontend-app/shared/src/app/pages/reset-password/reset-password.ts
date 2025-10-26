@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-reset-password',
@@ -98,7 +99,7 @@ export class ResetPassword {
     }
 
     this.sending = true;
-    fetch('http://localhost:4000/api/reset-password', {
+  fetch(`${environment.apiBase}/reset-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, code, newPassword: this.password })
@@ -109,7 +110,7 @@ export class ResetPassword {
         localStorage.removeItem('resetEmail');
         localStorage.removeItem('resetCode');
         // Auto-redirect to home landing page
-        this.router.navigate(['/']);
+  this.router.navigate(['/']);
       })
       .catch(err => {
         this.error = 'Failed to reset password. Please try again.';

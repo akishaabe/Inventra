@@ -61,7 +61,7 @@ fetchDashboardData() {
     next: (data) => {
       this.dashboardData = data;
       // Fetch AI recommendation separately
-      fetch('http://localhost:4000/api/forecasts/ai-recommendation')
+      fetch(`${environment.apiBase}/forecasts/ai-recommendation`)
         .then(r => r.json())
         .then(a => this.aiRec = a)
         .catch(err => console.error('AI rec fetch error:', err));
