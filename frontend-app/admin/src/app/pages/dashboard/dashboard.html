@@ -56,11 +56,13 @@
         <p class="stat-value">₱{{ dashboardData.stockValue | number: '1.2-2' }}</p>
       </div>
 
-      <div class="stat-card forecast">
-        <h2>Projected 7-day Demand</h2>
-        <p class="stat-value">{{ dashboardData.forecastDemand | number: '1.0-0' }}</p>
-        <small class="stat-trend">Summary: Next 7 days</small>
-        <a class="stat-link" (click)="goToReportsForecasting()" style="cursor: pointer;">Generate Report</a>
+      <div class="stat-card forecast" (click)="goToForecasting()" style="cursor: pointer;">
+        <span class="ai-badge" *ngIf="aiRec?.priority">{{ aiRec.priority | uppercase }}</span>
+        <h2>AI Recommendation</h2>
+        <div class="ai-product" *ngIf="aiRec?.product_name">{{ aiRec.product_name }}</div>
+        <div class="ai-text">{{ aiRec?.recommendation_text || 'No high-priority recommendation available.' }}</div>
+        <div class="ai-reason" *ngIf="aiRec?.reason">Why: {{ aiRec.reason }}</div>
+        <small class="stat-trend">Tap to view forecasting</small>
       </div>
     </div>
   </main>

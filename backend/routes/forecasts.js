@@ -106,4 +106,30 @@ ORDER BY p.product_name;
   }
 });
 
+// Return one highest-priority active AI recommendation for dashboard cards
+router.get("/ai-recommendation", async (req, res) => {
+  try {
+    const [rows] = await composeDb.query(
+      `SELECT a.id,
+              a.product_id,
+              p.product_name,
+              a.recommendation_text,
+              a.reason,
+              a.priority,
+              a.created_at
+       FROM ai_recommendations a
+       LEFT JOIN products p ON p.product_id = a.product_id
+       WHERE a.is_active = 1 AND LOWER(a.priority) = 'high'
+       ORDER BY a.created_at DESC
+       LIMIT 1`
+    );
+
+    if (!rows || rows.length === 0) return res.json(null);
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("AI recommendation fetch error:", err);
+    res.status(500).json({ error: "Failed to fetch AI recommendation" });
+  }
+});
+
 export default router;

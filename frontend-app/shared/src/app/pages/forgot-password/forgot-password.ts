@@ -40,7 +40,7 @@ fetch('http://localhost:4000/api/send-reset-code', {
     
     localStorage.setItem('resetEmail', this.email);
 
-    this.router.navigate(['/verify-code'], { queryParams: { email: this.email } });
+  this.router.navigate(['/verify-code'], { queryParams: { email: this.email } });
   })
   .catch(err => {
     this.error = 'Failed to send verification code.';

@@ -201,6 +201,76 @@ app.post("/api/resend-code", async (req, res) => {
 });
 
 // ------------------------------
+// Forgot password: send reset code (email only)
+// ------------------------------
+app.post("/api/send-reset-code", async (req, res) => {
+  const { email } = req.body || {};
+  if (!email) return res.status(400).json({ error: "Email is required" });
+
+  try {
+    const [rows] = await db.query("SELECT user_id, role FROM users WHERE email = ?", [email]);
+    if (!rows || !rows.length) return res.status(404).json({ error: "Email not found." });
+
+    const code = generateCode();
+    verificationCodes[email] = { code, expiresAt: Date.now() + 10 * 60 * 1000 };
+    await sendVerificationEmail(email, code);
+
+    res.json({ success: true, message: "Reset code sent to your email." });
+  } catch (err) {
+    console.error("Error sending reset code:", err);
+    res.status(500).json({ error: "Failed to send reset code." });
+  }
+});
+
+// ------------------------------
+// Forgot password: verify reset code (non-destructive)
+// ------------------------------
+app.post("/api/verify-reset-code", async (req, res) => {
+  const { email, code } = req.body || {};
+  if (!email || !code) return res.status(400).json({ error: "Email and code are required" });
+
+  const record = verificationCodes[email];
+  if (!record) return res.status(400).json({ error: "No code found for this email." });
+  if (Date.now() > record.expiresAt) return res.status(400).json({ error: "Code expired." });
+  if (record.code !== code) return res.status(400).json({ error: "Invalid code." });
+
+  // Do NOT delete code here; allow subsequent reset-password to verify again.
+  res.json({ success: true, message: "Code verified." });
+});
+
+// ------------------------------
+// Forgot password: complete reset with email+code+newPassword
+// ------------------------------
+app.post("/api/reset-password", async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body || {};
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ error: "Email, code and newPassword are required" });
+    }
+
+    const record = verificationCodes[email];
+    if (!record) return res.status(400).json({ error: "No code found for this email." });
+    if (Date.now() > record.expiresAt) return res.status(400).json({ error: "Code expired." });
+    if (record.code !== code) return res.status(400).json({ error: "Invalid code." });
+
+    const [rows] = await db.query("SELECT user_id FROM users WHERE email = ?", [email]);
+    if (!rows || !rows.length) return res.status(404).json({ error: "User not found" });
+
+    const bcrypt = (await import("bcryptjs")).default;
+    const newHash = await bcrypt.hash(newPassword, 10);
+    await db.query("UPDATE users SET password_hash = ? WHERE email = ?", [newHash, email]);
+
+    // Invalidate code after successful reset
+    delete verificationCodes[email];
+
+    res.json({ success: true, message: "Password reset successfully" });
+  } catch (err) {
+    console.error("Error resetting password:", err);
+    res.status(500).json({ error: "Failed to reset password" });
+  }
+});
+
+// ------------------------------
 // Verify code
 // ------------------------------
 app.post("/api/verify-code", async (req, res) => {

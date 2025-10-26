@@ -18,6 +18,7 @@ export class Dashboard implements OnInit {
     stockValue: 0,
     forecastDemand: 0
   };
+  aiRec: any = null;
 
   constructor(private router: Router) {}
 
@@ -58,6 +59,9 @@ export class Dashboard implements OnInit {
       const res = await fetch('http://localhost:4000/api/dashboard?horizon=7');
       const data = await res.json();
       this.dashboardData = data;
+      // Fetch AI recommendation
+  const airec = await fetch('http://localhost:4000/api/forecasts/ai-recommendation');
+  this.aiRec = await airec.json();
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
     }
@@ -88,8 +92,8 @@ goToInventory() {
   this.router.navigate(['/inventory']);
 }
 
-goToReportsForecasting() {
-  this.router.navigate(['/reports'], { queryParams: { tab: 'forecasting' } });
+goToForecasting() {
+  this.router.navigate(['/forecasting']);
 }
 
 }

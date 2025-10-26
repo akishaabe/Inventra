@@ -90,15 +90,35 @@ export class ResetPassword {
       return;
     }
 
+    const email = localStorage.getItem('resetEmail');
+    const code = localStorage.getItem('resetCode');
+    if (!email || !code) {
+      this.error = 'Reset session not found. Please restart the process.';
+      return;
+    }
+
     this.sending = true;
-    setTimeout(() => {
-      this.sending = false;
-      this.passwordChanged = true;
-    }, 1000);
+    fetch('http://localhost:4000/api/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code, newPassword: this.password })
+    })
+      .then(async res => {
+        if (!res.ok) throw new Error(await res.text());
+        this.passwordChanged = true;
+        // Clean up reset flow items
+        localStorage.removeItem('resetEmail');
+        localStorage.removeItem('resetCode');
+      })
+      .catch(err => {
+        this.error = 'Failed to reset password. Please try again.';
+        console.error(err);
+      })
+      .finally(() => (this.sending = false));
   }
 
   closePopup() {
     this.passwordChanged = false;
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/login']);
   }
 }

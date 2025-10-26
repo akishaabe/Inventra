@@ -49,8 +49,11 @@
       </div>
 
       <div class="stat-card forecast">
-        <h2>Forecast Demand</h2>
-        <p class="stat-value">₱{{ dashboardData.forecastDemand | number: '1.2-2' }}</p>
+        <span class="ai-badge" *ngIf="aiRec?.priority">{{ aiRec.priority | uppercase }}</span>
+        <h2>AI Recommendation</h2>
+        <div class="ai-product" *ngIf="aiRec?.product_name">{{ aiRec.product_name }}</div>
+        <div class="ai-text">{{ aiRec?.recommendation_text || 'No high-priority recommendation available.' }}</div>
+        <div class="ai-reason" *ngIf="aiRec?.reason">Why: {{ aiRec.reason }}</div>
       </div>
     </div>
   </main>

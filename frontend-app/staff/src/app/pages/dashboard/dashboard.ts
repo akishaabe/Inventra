@@ -18,6 +18,7 @@ export class Dashboard implements OnInit {
     stockValue: 0,
     forecastDemand: 0
   };
+  aiRec: any = null;
   showLogoutModal = false;
 
   constructor(private router: Router) {}
@@ -53,6 +54,8 @@ export class Dashboard implements OnInit {
       const res = await fetch('http://localhost:4000/api/dashboard');
       const data = await res.json();
       this.dashboardData = data;
+  const airec = await fetch('http://localhost:4000/api/forecasts/ai-recommendation');
+  this.aiRec = await airec.json();
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
     }
