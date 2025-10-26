@@ -569,6 +569,23 @@
   font-size: 15px;
 }
 
+/* Style the role dropdown to match inputs/buttons */
+.modal-form select {
+  width: 100%;
+  background: #F8F5EF;
+  color: #4B2E23;
+  border: none;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.modal-form select option {
+  color: #4B2E23;
+}
+
 .save-btn {
   background: #F8F5EF;
   color: #4B2E23;
