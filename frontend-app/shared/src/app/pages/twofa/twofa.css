@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@700&family=Archivo+Black&family=Inter:wght@400;500;600&display=swap');
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: #f8f2ea;
+  font-family: 'Inter', sans-serif;
+  color: #2b2b2b;
+}
+
+.twofa-page {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo {
+  position: absolute;
+  top: 30px;
+  right: 60px;
+  font-family: 'Abhaya Libre', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #2b2b2b;
+}
+
+.twofa-container {
+  text-align: left;
+  width: 550px;
+  max-width: 90%;
+  background: #f8f2ea;
+  padding: 40px 20px;
+}
+
+.twofa-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.icon {
+  width: 48px;
+  height: 48px;
+}
+
+h1 {
+  font-weight: 700;
+  font-size: 28px;
+  margin: 0;
+  color: #1f1f1f;
+}
+
+.instruction {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.code-inputs {
+  display: flex;
+  justify-content: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.code-box {
+  width: 65px;
+  height: 75px;
+  background-color: #d9d9d9;
+  border: none;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 26px;
+  font-weight: bold;
+  color: #2b2b2b;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.code-box:focus {
+  background-color: #eaeaea;
+  transform: scale(1.05);
+}
+
+.resend-container p {
+  font-size: 14px;
+  color: #6b6b6b;
+}
+
+.resend-container button {
+  background: none;
+  border: none;
+  color: #3b57ff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.resend-container button:hover {
+  text-decoration: underline;
+}
+
+.continue-btn {
+  display: block;
+  margin-left: auto;
+  margin-top: 30px;
+  padding: 10px 40px;
+  border: 1px solid #3c2321;
+  border-radius: 25px;
+  background-color: #f8f2ea;
+  color: #3c2321;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.continue-btn:hover:not(:disabled) {
+  background-color: #efe7dd;
+  transform: scale(1.03);
+}
+
+.continue-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #d72638;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 20px;
+}

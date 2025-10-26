@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@700&family=Archivo+Black&family=Inter:wght@400;500;600&display=swap');
 
 .sidebar {
   position: fixed;
@@ -27,7 +27,7 @@
 
 .sidebar li {
   padding: 14px 28px;
-  font-family: 'SF Pro Display', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 16px;
   color: #3E2723;
   cursor: pointer;

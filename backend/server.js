@@ -109,12 +109,18 @@ app.post("/api/send-reset-code", async (req, res) => {
   if (!email) return res.status(400).json({ error: "Email is required" });
 
   try {
+    const [rows] = await db.query("SELECT role FROM users WHERE email = ?", [email]);
+    if (!rows || !rows.length) {
+      return res.status(404).json({ error: "User not found." });
+    }
+    const user = rows[0];
+
     const code = generateCode();
     verificationCodes[email] = { code, expiresAt: Date.now() + 10 * 60 * 1000 }; // expires in 10 min
 
     await sendVerificationEmail(email, code);
 
-    res.json({ success: true, message: "Verification code sent to your email." });
+    res.json({ success: true, message: "Verification code sent to your email.", role: (user.role || '').toUpperCase() });
   } catch (err) {
     console.error("Error sending verification email:", err);
     res.status(500).json({ error: "Failed to send verification email." });
@@ -129,12 +135,20 @@ app.post("/api/resend-code", async (req, res) => {
   if (!email) return res.status(400).json({ error: "Email is required" });
 
   try {
+    const [rows] = await db.query("SELECT role FROM users WHERE email = ?", [email]);
+    if (!rows || !rows.length) return res.status(404).json({ error: "User not found." });
+    const user = rows[0];
+
     const code = generateCode();
     verificationCodes[email] = { code, expiresAt: Date.now() + 10 * 60 * 1000 };
 
     await sendVerificationEmail(email, code);
 
-    res.json({ success: true, message: "New verification code sent to your email." });
+    res.json({
+      success: true,
+      message: "New verification code sent to your email.",
+      role: (user.role || '').toUpperCase(),
+    });
   } catch (err) {
     console.error("Error resending verification code:", err);
     res.status(500).json({ error: "Failed to resend verification code." });
@@ -144,7 +158,7 @@ app.post("/api/resend-code", async (req, res) => {
 // ------------------------------
 // Verify code
 // ------------------------------
-app.post("/api/verify-code", (req, res) => {
+app.post("/api/verify-code", async (req, res) => {
   const { email, code } = req.body;
   const record = verificationCodes[email];
 
@@ -152,9 +166,22 @@ app.post("/api/verify-code", (req, res) => {
   if (Date.now() > record.expiresAt) return res.status(400).json({ error: "Code expired." });
   if (record.code !== code) return res.status(400).json({ error: "Invalid code." });
 
-  delete verificationCodes[email];
-  res.json({ success: true, message: "Email verified successfully!" });
+const [rows] = await db.query("SELECT role FROM users WHERE email = ?", [email]);
+if (!rows || !rows.length) {
+  return res.status(404).json({ error: "User not found." });
+}
+
+const user = rows[0];
+delete verificationCodes[email];
+
+res.json({
+  success: true,
+  message: "Email verified successfully!",
+  role: (user.role || '').toUpperCase(),
 });
+
+});
+
 
 // ------------------------------
 // Dashboard data

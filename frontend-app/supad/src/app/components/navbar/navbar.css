@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@700&family=Archivo+Black&family=Inter:wght@400;500;600&display=swap');
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -5,7 +6,7 @@
   background-color: #3b231f;
   color: #fff;
   padding: 14px 28px;
-  font-family: 'SF Pro Display', sans-serif;
+  font-family: 'Inter', sans-serif;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 

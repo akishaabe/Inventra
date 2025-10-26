@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@700&family=Archivo+Black&family=Inter:wght@400;500;600&display=swap');
 
 .navbar {
   position: fixed;
@@ -53,7 +53,7 @@ html, body {
 
 .store-name {
   font-size: 16px;
-  font-family: 'SF Pro Display', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 400;
   color: #3E2723;
 }
