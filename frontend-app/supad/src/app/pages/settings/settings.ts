@@ -22,7 +22,7 @@ export class Settings implements OnInit {
   showChangePassword = false;
   showUserAdded = false;
 
-  newUser = { email: '', tempPass: '', firstName: '', lastName: '' };
+  newUser = { email: '', tempPass: '', firstName: '', lastName: '', role: 'STAFF' };
   selectedUser: any = null;
 
 toggleSidebar() {
@@ -108,8 +108,9 @@ toggleSidebar() {
       first_name: this.newUser.firstName,
       last_name: this.newUser.lastName,
       email: this.newUser.email,
-      password_hash: this.newUser.tempPass,
-      role: 'STAFF'
+      // Send plaintext to backend; backend will hash
+      password: this.newUser.tempPass,
+      role: (this.newUser.role || 'STAFF').toUpperCase()
     };
 
     this.http.post(`${this.apiUrl}/users`, payload).subscribe({
@@ -288,7 +289,7 @@ toggleSidebar() {
 
   closeAddUser() {
     this.showAddUser = false;
-    this.newUser = { email: '', tempPass: '', firstName: '', lastName: '' };
+    this.newUser = { email: '', tempPass: '', firstName: '', lastName: '', role: 'STAFF' };
   }
 
 @HostListener('document:click', ['$event'])

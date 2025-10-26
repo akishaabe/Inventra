@@ -188,12 +188,17 @@
       <button class="back-btn" (click)="closeAddUser()">← Back</button>
       <h2 class="modal-title">Add User</h2>
 
-      <!-- 🔹 FIXED FORM -->
+      <!-- 🔹 Add User Form with Role Selection -->
       <form novalidate (ngSubmit)="saveUser()" #userForm="ngForm" class="modal-form">
         <input placeholder="Enter Email" [(ngModel)]="newUser.email" name="email" required />
         <input placeholder="Enter Temporary Password" [(ngModel)]="newUser.tempPass" name="tempPass" required />
         <input placeholder="First Name" [(ngModel)]="newUser.firstName" name="firstName" required />
         <input placeholder="Last Name" [(ngModel)]="newUser.lastName" name="lastName" required />
+        <select name="role" [(ngModel)]="newUser.role" required>
+          <option value="SUPERADMIN">SUPERADMIN</option>
+          <option value="ADMIN">ADMIN</option>
+          <option value="STAFF">STAFF</option>
+        </select>
         <button type="submit" class="save-btn" [disabled]="userForm.invalid">Save</button>
       </form>
     </div>
@@ -305,5 +310,22 @@
     </div>
   </div>
 </div>
+
+  <!-- REMOVE USER CONFIRMATION MODAL -->
+  <div class="modal" *ngIf="showRemoveUser">
+    <div class="modal-content add-user">
+      <button class="back-btn" (click)="closeRemoveUser()">← Back</button>
+      <h2 class="modal-title">Remove User</h2>
+      <p>
+        Are you sure you want to remove
+        <strong>{{ selectedUser?.first_name }} {{ selectedUser?.last_name }}</strong>
+        ({{ selectedUser?.email }})?
+      </p>
+      <div style="display:flex; gap:12px; margin-top:16px;">
+        <button class="delete" (click)="confirmRemoveUser()">Confirm</button>
+        <button class="save-btn" (click)="closeRemoveUser()">Cancel</button>
+      </div>
+    </div>
+  </div>
 
 </div>

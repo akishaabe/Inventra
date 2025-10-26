@@ -1,5 +1,6 @@
 import express from "express";
 import db from "../db.js";
+import bcrypt from "bcryptjs";
 
 const router = express.Router();
 
@@ -34,18 +35,30 @@ router.get("/", async (req, res) => {
 
 // ───────────── ADD USER ─────────────
 router.post("/", async (req, res) => {
-  const { first_name, last_name, email, password_hash, role } = req.body;
+  const { first_name, last_name, email, password, password_hash, role } = req.body || {};
 
-  if (!first_name || !last_name || !email || !password_hash) {
+  if (!first_name || !last_name || !email || (!password && !password_hash)) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
+    // Normalize role
+    const roleNorm = (role || "STAFF").toString().toUpperCase();
+    const allowedRoles = new Set(["SUPERADMIN", "ADMIN", "STAFF"]);
+    const finalRole = allowedRoles.has(roleNorm) ? roleNorm : "STAFF";
+
+    // Always store a bcrypt hash; accept plaintext via `password` or legacy `password_hash` if it's not already a bcrypt hash
+    let toHash = password || password_hash || "";
+    let finalHash = toHash;
+    if (!toHash.startsWith("$2a$") && !toHash.startsWith("$2b$") && !toHash.startsWith("$2y$")) {
+      finalHash = await bcrypt.hash(toHash, 10);
+    }
+
     const sql = `
       INSERT INTO users (first_name, last_name, email, password_hash, role)
       VALUES (?, ?, ?, ?, ?)
     `;
-    await db.query(sql, [first_name, last_name, email, password_hash, role || "STAFF"]);
+    await db.query(sql, [first_name, last_name, email, finalHash, finalRole]);
     res.status(201).json({ message: "User added successfully" });
   } catch (err) {
     console.error("Error adding user:", err);
