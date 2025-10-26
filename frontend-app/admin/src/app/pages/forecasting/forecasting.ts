@@ -63,6 +63,9 @@ export class Forecasting implements OnInit, AfterViewInit {
   selectedPeriod = 14; // default
 
   dataLoaded = false;
+  today = new Date();
+  categories: string[] = ['All'];
+  selectedCategory = 'All';
 
 
   // dashboard sidebar
@@ -84,10 +87,22 @@ loadForecast(period: number) {
     .get<any[]>(`${environment.apiBase}/forecasts?refresh=true&period=${period}`)
     .subscribe({
       next: (data) => {
-        // Filter out Beverage products for both table + chart
-        const filteredData = data.filter(item => 
-          !item.product_name || !item.product_name.toLowerCase().includes('beverage')
-        );
+        // Build categories from data
+        const apiCats = Array.from(new Set((data || []).map((d: any) => (d.category || '').toString())));
+        const canonical = ['Flavoring','Ingredient','Packaging','Raw Material','Supply'];
+        const merged = new Set<string>(['All', ...canonical]);
+        for (const c of apiCats) {
+          if (!c) continue;
+          // Title-case fallback
+          const t = c.charAt(0).toUpperCase() + c.slice(1).toLowerCase();
+          merged.add(t);
+        }
+        this.categories = Array.from(merged);
+
+        // Apply category filter (default All)
+        const filteredData = (this.selectedCategory === 'All')
+          ? data
+          : (data || []).filter(d => (d.category || '').toLowerCase() === this.selectedCategory.toLowerCase());
 
         // Process forecast data for table (non-beverage only)
         this.forecastData = filteredData.map((item: any) => {
@@ -163,6 +178,11 @@ loadForecast(period: number) {
         console.error('Failed to load forecasts', err);
       }
     });
+}
+
+// moved below: updateForecastPeriod() exists later in file
+onCategoryChange() {
+  this.loadForecast(this.selectedPeriod);
 }
 
 

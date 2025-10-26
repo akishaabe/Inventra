@@ -32,6 +32,7 @@
   <!-- Main Content -->
   <main class="reports-main">
     <h1 class="reports-title">Reports</h1>
+  <div class="today-date" style="margin-top:5px;color:#666">{{ today | date:'fullDate' }}</div>
 
     <div class="reports-buttons">
       <button [class.active]="activeTab === 'sales'" (click)="setActiveTab('sales')">Sales</button>
@@ -105,6 +106,9 @@
         <option value="60">Next 60 Days</option>
         <option value="90">Next 90 Days</option>
       </select>
+      <select [(ngModel)]="selectedCategory" (change)="onCategoryChange()" style="margin-left:8px">
+        <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+      </select>
       <button class="print-btn" (click)="printReport()">🖨 Print Report</button>
     </div>
   </div>
@@ -125,7 +129,7 @@
       </thead>
       <tbody>
         <!-- The backend returns one row per product (latest forecast). Render accordingly -->
-        <tr *ngFor="let f of forecastData">
+        <tr *ngFor="let f of filteredForecastData">
           <td>{{ f.product_name }}</td>
           <td>{{ f.forecast_date | date:'yyyy-MM-dd' }}</td>
           <td>{{ f.forecasted_demand }}</td>

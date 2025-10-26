@@ -105,10 +105,11 @@ export class ResetPassword {
     })
       .then(async res => {
         if (!res.ok) throw new Error(await res.text());
-        this.passwordChanged = true;
         // Clean up reset flow items
         localStorage.removeItem('resetEmail');
         localStorage.removeItem('resetCode');
+        // Auto-redirect to home landing page
+        this.router.navigate(['/']);
       })
       .catch(err => {
         this.error = 'Failed to reset password. Please try again.';

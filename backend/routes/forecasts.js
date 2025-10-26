@@ -39,6 +39,7 @@ router.get("/", async (req, res) => {
 SELECT 
   p.product_id,
   p.product_name,
+  p.category,
   MAX(f.forecast_date) AS forecast_date,
   ANY_VALUE(f.forecasted_demand) AS forecasted_demand,
   IFNULL(i.quantity_available, 0) AS quantity_available,
@@ -79,6 +80,7 @@ ORDER BY p.product_name;
 SELECT 
   p.product_id,
   p.product_name,
+  p.category,
   MAX(f.forecast_date) AS forecast_date,
   ANY_VALUE(f.forecasted_demand) AS forecasted_demand,
   IFNULL(i.quantity_available, 0) AS quantity_available,

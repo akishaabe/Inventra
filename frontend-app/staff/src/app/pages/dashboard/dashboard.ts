@@ -12,6 +12,7 @@ import { environment } from '../../../environments/environment';
 })
 export class Dashboard implements OnInit {
   sidebarOpen = false;
+  today = new Date();
   dashboardData = {
     todaySales: 0,
     lowStock: 0,

@@ -18,9 +18,13 @@ export class Reports implements OnInit {
   reportData: any[] = [];
   inventoryData: any[] = [];
   forecastData: any[] = [];
+  filteredForecastData: any[] = [];
   aiRecommendations: any[] = [];
   selectedHorizon = 14;
   forecastChart: any;
+  today = new Date();
+  categories: string[] = ['All','Flavoring','Ingredient','Packaging','Raw Material','Supply'];
+  selectedCategory = 'All';
 
   constructor(private router: Router, private route: ActivatedRoute) {}
 
@@ -99,6 +103,17 @@ async fetchForecastData() {
     // Ensure we have an array
     this.forecastData = Array.isArray(data) ? data : [];
 
+    // Build categories from data (merge with canonical)
+    const apiCats = Array.from(new Set(this.forecastData.map((d: any) => (d.category || '').toString())));
+    const canonical = ['Flavoring','Ingredient','Packaging','Raw Material','Supply'];
+    const merged = new Set<string>(['All', ...canonical]);
+    for (const c of apiCats) {
+      if (!c) continue;
+      const t = c.charAt(0).toUpperCase() + c.slice(1).toLowerCase();
+      merged.add(t);
+    }
+    this.categories = Array.from(merged);
+
     // Build chart dataset — for chart we will plot the top N products (or aggregated)
     // Here: take the first product's horizon if backend returns per-date data
     // But based on your current backend response (one row per product) we will plot product demand.
@@ -109,6 +124,9 @@ async fetchForecastData() {
       quantity_available: r.quantity_available !== undefined ? Number(r.quantity_available) : null,
       ai_recommendations: r.ai_recommendations || []
     }));
+
+    // Apply category filter now
+    this.applyCategoryFilter();
 
     // Try generating the chart only if there is at least one item and canvas exists
     setTimeout(() => {
@@ -129,7 +147,7 @@ generateChart() {
     console.warn('Chart canvas not found yet.');
     return;
   }
-  if (!this.forecastData || !this.forecastData.length) {
+  if (!this.filteredForecastData || !this.filteredForecastData.length) {
     // clear existing chart if any
     if (this.forecastChart) {
       this.forecastChart.destroy();
@@ -139,8 +157,8 @@ generateChart() {
   }
 
   // Simple chart: product vs forecasted_demand
-  const labels = this.forecastData.map(f => f.product_name || `P${f.product_id}`);
-  const values = this.forecastData.map(f => f.forecasted_demand || 0);
+  const labels = this.filteredForecastData.map(f => f.product_name || `P${f.product_id}`);
+  const values = this.filteredForecastData.map(f => f.forecasted_demand || 0);
 
   if (this.forecastChart) this.forecastChart.destroy();
 
@@ -210,6 +228,21 @@ this.aiRecommendations = deduped.filter(r =>
 
   printReport() {
     window.print();
+  }
+
+  onCategoryChange() {
+    this.applyCategoryFilter();
+    // regenerate chart on category change
+    setTimeout(() => this.generateChart(), 0);
+  }
+
+  private applyCategoryFilter() {
+    if (this.selectedCategory === 'All') {
+      this.filteredForecastData = this.forecastData;
+    } else {
+      const sel = this.selectedCategory.toLowerCase();
+      this.filteredForecastData = this.forecastData.filter((d: any) => (d.category || '').toLowerCase() === sel);
+    }
   }
 
   // Logout modal controls

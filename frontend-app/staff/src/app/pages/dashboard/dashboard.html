@@ -28,6 +28,7 @@
   <!-- Main Content -->
   <main class="dashboard-main">
     <h1 class="dashboard-title">Dashboard</h1>
+  <div class="today-date" style="margin-top:5px;color:#666">{{ today | date:'fullDate' }}</div>
 
     <!-- Stats Grid -->
     <div class="stats-grid">
@@ -53,7 +54,6 @@
         <h2>AI Recommendation</h2>
         <div class="ai-product" *ngIf="aiRec?.product_name">{{ aiRec.product_name }}</div>
         <div class="ai-text">{{ aiRec?.recommendation_text || 'No high-priority recommendation available.' }}</div>
-        <div class="ai-reason" *ngIf="aiRec?.reason">Why: {{ aiRec.reason }}</div>
       </div>
     </div>
   </main>
