@@ -19,11 +19,13 @@
   <header class="settings-header">
     <div class="header-left">
       <button class="menu-btn" (click)="toggleSidebar()" *ngIf="!sidebarOpen">☰</button>
-      <h2 class="brand-name" *ngIf="!sidebarOpen">inventra</h2>
+      <h2 class="brand-name"*ngIf="!sidebarOpen">inventra</h2>
     </div>
+
     <div class="header-right">
       <span class="user-name">Café Pèdro</span>
-      <img src="assets/images/profile icon.png" alt="Profile" class="profile-icon" (click)="goToSettings()" style="cursor: pointer;"/>
+      <img src="assets/images/profile icon.png" alt="Profile" class="profile-icon"   (click)="goToSettings()"
+  style="cursor: pointer;"/>
     </div>
   </header>
 
@@ -44,8 +46,6 @@
 
         <nav class="inner-nav">
           <a [class.active]="selectedTab === 'users'" (click)="selectTab('users')">Manage Users</a>
-          <a [class.active]="selectedTab === 'audit'" (click)="selectTab('audit')">Audit Log</a>
-          <a [class.active]="selectedTab === 'deleted'" (click)="selectTab('deleted')">Recently Deleted</a>
           <a [class.active]="selectedTab === 'security'" (click)="selectTab('security')">Security Settings</a>
         </nav>
       </section>
@@ -209,19 +209,91 @@
   </div>
 
   <!-- CHANGE PASSWORD MODAL -->
-  <div class="modal" *ngIf="showChangePassword">
-    <div class="modal-content add-user">
-      <button class="back-btn" (click)="showChangePassword = false">← Back</button>
-      <h2 class="modal-title">Change Password</h2>
+<div class="modal" *ngIf="showChangePassword">
+  <div class="modal-content add-user">
+    <button class="back-btn" (click)="showChangePassword = false">← Back</button>
+    <h2 class="modal-title">Change Password</h2>
 
-      <form novalidate (ngSubmit)="savePassword()" #pwdForm="ngForm" class="modal-form">
-        <input type="password" placeholder="Current Password" [(ngModel)]="passwords.current" name="current" required />
-        <input type="password" placeholder="New Password" [(ngModel)]="passwords.new" name="new" required />
-        <input type="password" placeholder="Confirm New Password" [(ngModel)]="passwords.confirm" name="confirm" required />
-        <button type="submit" class="save-btn" [disabled]="pwdForm.invalid">Save</button>
-      </form>
-    </div>
+    <form
+      novalidate
+      (ngSubmit)="savePassword()"
+      #pwdForm="ngForm"
+      class="modal-form reset-form"
+    >
+      <!-- Current Password -->
+      <div class="input-group">
+        <input
+          type="password"
+          placeholder="Current Password"
+          [(ngModel)]="passwords.current"
+          name="current"
+          required
+        />
+      </div>
+
+      <!-- New Password -->
+      <div class="input-group">
+        <input
+          type="password"
+          name="new"
+          placeholder="Enter new password"
+          [(ngModel)]="passwords.new"
+          (input)="onPasswordInput()"
+          required
+        />
+      </div>
+
+      <!-- Strength Indicator -->
+      <div class="strength-container" *ngIf="passwords.new">
+        <div class="strength-bar">
+          <div
+            class="strength-fill"
+            [style.width]="(strength * 20) + '%'"
+            [style.background]="strengthColor"
+          ></div>
+        </div>
+        <div class="strength-label" [style.color]="strengthColor">
+          {{ strengthLabel }}
+        </div>
+      </div>
+
+      <!-- Password Rules -->
+      <ul class="pw-rules">
+        <li [class.valid]="hasUppercase">✔ One uppercase letter (A–Z)</li>
+        <li [class.valid]="hasLowercase">✔ One lowercase letter (a–z)</li>
+        <li [class.valid]="hasNumber">✔ One number (0–9)</li>
+        <li [class.valid]="hasSymbol">✔ One special symbol (!@#$...)</li>
+        <li [class.valid]="isLengthValid">✔ At least 8 characters long</li>
+      </ul>
+
+      <!-- Confirm Password -->
+      <div class="input-group">
+        <input
+          type="password"
+          name="confirm"
+          placeholder="Confirm new password"
+          [(ngModel)]="passwords.confirm"
+          (input)="onConfirmPasswordInput()"
+          required
+        />
+      </div>
+
+      <!-- Mismatch Warning -->
+      <div class="mismatch" *ngIf="!passwordsMatch && passwords.confirm">
+        Passwords do not match
+      </div>
+
+      <button
+        type="submit"
+        class="save-btn"
+        [disabled]="pwdForm.invalid || !passwordsMatch || strength < 3"
+      >
+        Save
+      </button>
+    </form>
   </div>
+</div>
+
 
   <div class="logout-modal-overlay" *ngIf="showLogoutModal">
   <div class="logout-modal">
