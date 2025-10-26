@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-sidebar',
@@ -12,6 +13,8 @@ export class SidebarComponent {
   @Input() isOpen = false;
 
   logout() {
-    console.log('Logging out...');
+    localStorage.clear();
+    document.cookie = 'inventra_user=; Max-Age=0; Path=/; SameSite=Lax';
+    window.location.href = `${environment.sharedBase}/`;
   }
 }

@@ -2,6 +2,7 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule  } from '@angular/router';
 import { DashboardService } from './dashboard.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-dashboard',
@@ -82,10 +83,12 @@ closeLogoutModal() {
 }
 
 confirmLogout() {
+  // Clear local session and shared cookie
   localStorage.clear();
+  document.cookie = 'inventra_user=; Max-Age=0; Path=/; SameSite=Lax';
   this.showLogoutModal = false;
- this.router.navigate(['/home']);
-  window.location.href = 'http://localhost:4000';
+  // Hard redirect to shared home (cross-app)
+  window.location.href = `${environment.sharedBase}/`;
 }
 
 

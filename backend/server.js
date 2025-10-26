@@ -113,7 +113,7 @@ app.post("/api/auth/request-code", async (req, res) => {
       "SELECT user_id, email, password_hash, role FROM users WHERE email = ?",
       [email]
     );
-    if (!rows || !rows.length) return res.status(401).json({ error: "Invalid email or password." });
+    if (!rows || !rows.length) return res.status(404).json({ error: "Email not found." });
     const user = rows[0];
 
     const hash = user.password_hash || "";
@@ -125,7 +125,7 @@ app.post("/api/auth/request-code", async (req, res) => {
       valid = password === hash;
     }
 
-    if (!valid) return res.status(401).json({ error: "Invalid email or password." });
+  if (!valid) return res.status(401).json({ error: "Invalid email or password." });
 
     const code = generateCode();
     verificationCodes[email] = { code, expiresAt: Date.now() + 10 * 60 * 1000 }; // expires in 10 min
@@ -139,6 +139,36 @@ app.post("/api/auth/request-code", async (req, res) => {
   } catch (err) {
     console.error("Error starting login (request code):", err);
     res.status(500).json({ error: "Failed to start login." });
+  }
+});
+
+// ------------------------------
+// Start login via Google: verify user exists, then send email code (2FA)
+// ------------------------------
+app.post("/api/auth/request-code-google", async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: "Email is required" });
+
+  try {
+    const [rows] = await db.query(
+      "SELECT user_id, email, role FROM users WHERE email = ?",
+      [email]
+    );
+    if (!rows || !rows.length) return res.status(404).json({ error: "Email not found." });
+
+    const user = rows[0];
+    const code = generateCode();
+    verificationCodes[email] = { code, expiresAt: Date.now() + 10 * 60 * 1000 };
+    await sendVerificationEmail(email, code);
+
+    res.json({
+      success: true,
+      message: "Verification code sent to your email.",
+      role: (user.role || '').toUpperCase(),
+    });
+  } catch (err) {
+    console.error("Error starting Google login (request code):", err);
+    res.status(500).json({ error: "Failed to start Google login." });
   }
 });
 

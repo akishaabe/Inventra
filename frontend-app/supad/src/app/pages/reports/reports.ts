@@ -2,6 +2,7 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 import Chart from 'chart.js/auto';
 
 @Component({
@@ -225,7 +226,8 @@ this.aiRecommendations = deduped.filter(r =>
 
   logout() {
     localStorage.clear();
-    this.router.navigate(['/login']);
+    document.cookie = 'inventra_user=; Max-Age=0; Path=/; SameSite=Lax';
+    window.location.href = `${environment.sharedBase}/`;
   }
 
   goToSettings() {

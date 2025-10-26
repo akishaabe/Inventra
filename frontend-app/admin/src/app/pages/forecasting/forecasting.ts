@@ -342,8 +342,9 @@ closeLogoutModal() {
 
 confirmLogout() {
   localStorage.clear();
+  document.cookie = 'inventra_user=; Max-Age=0; Path=/; SameSite=Lax';
   this.showLogoutModal = false;
-  this.router.navigate(['/home']);
+  window.location.href = `${environment.sharedBase}/`;
 }
 
 goToSettings() {

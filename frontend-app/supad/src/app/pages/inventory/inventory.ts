@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { InventoryService } from './inventory.service';
+import { environment } from '../../../environments/environment';
 
 type Product = {
   id: string;
@@ -53,7 +54,8 @@ export class Inventory implements OnInit {
 
   logout() {
     localStorage.clear();
-    this.router.navigate(['/login']);
+    document.cookie = 'inventra_user=; Max-Age=0; Path=/; SameSite=Lax';
+    window.location.href = `${environment.sharedBase}/`;
   }
 
   goToSettings() {
@@ -215,8 +217,9 @@ closeLogoutModal() {
 
 confirmLogout() {
   localStorage.clear();
+  document.cookie = 'inventra_user=; Max-Age=0; Path=/; SameSite=Lax';
   this.showLogoutModal = false;
-  this.router.navigate(['/home']);
+  window.location.href = `${environment.sharedBase}/`;
 }
 
   closeModal() {

@@ -1,6 +1,7 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router'
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-dashboard',
@@ -67,8 +68,9 @@ export class Dashboard implements OnInit {
 
   confirmLogout() {
     localStorage.clear();
+    document.cookie = 'inventra_user=; Max-Age=0; Path=/; SameSite=Lax';
     this.showLogoutModal = false;
-    this.router.navigate(['/login']);
+    window.location.href = `${environment.sharedBase}/`;
   }
 
   goToInventory() {

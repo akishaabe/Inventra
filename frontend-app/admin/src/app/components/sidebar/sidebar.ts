@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
@@ -17,8 +18,8 @@ export class SidebarComponent {
 
   // ✅ This fixes the missing logout() function
   logout() {
-    localStorage.removeItem('twofaEmail');
-    localStorage.removeItem('twofaCode');
-    this.router.navigate(['/login']);
+    localStorage.clear();
+    document.cookie = 'inventra_user=; Max-Age=0; Path=/; SameSite=Lax';
+    window.location.href = `${environment.sharedBase}/`;
   }
 }

@@ -40,7 +40,12 @@ export class Login {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        alert(data.error || 'Invalid email or password.');
+        // Show a specific message if the email is not found
+        if (response.status === 404) {
+          alert('That email does not exist in our database.');
+        } else {
+          alert(data.error || 'Invalid email or password.');
+        }
         return;
       }
 
@@ -61,16 +66,33 @@ export class Login {
     const provider = new GoogleAuthProvider();
 
     try {
-      const result = await signInWithPopup(this.auth, provider);
-      const email = result.user.email;
+  const result = await signInWithPopup(this.auth, provider);
+  const email = result.user.email;
 
       if (!email) {
         alert('Google account has no email.');
         return;
       }
 
-      // Directly attempt a login by email with no password (backend should not allow this).
-      alert('Google sign-in is enabled, but password-based login is required for this flow.');
+      // Start 2FA flow for Google sign-in (no password required)
+      const response = await fetch(`${environment.apiBase}/auth/request-code-google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        if (response.status === 404) {
+          alert('That email does not exist in our database.');
+        } else {
+          alert(data.error || 'Failed to start Google login.');
+        }
+        return;
+      }
+
+      localStorage.setItem('twofaEmail', email);
+      this.router.navigate(['/twofa']);
     } catch (error) {
       console.error('Google Sign-In failed:', error);
       alert('Google Sign-In failed. Please try again.');

@@ -5,6 +5,7 @@ import { NavbarComponent } from '../../components/navbar/navbar';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { SettingsService } from './settings.service';
 import { Router, RouterModule } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 
 @Component({
@@ -210,8 +211,9 @@ closeLogoutModal() {
 
 confirmLogout() {
   localStorage.clear();
+  document.cookie = 'inventra_user=; Max-Age=0; Path=/; SameSite=Lax';
   this.showLogoutModal = false;
-  window.location.href = '/home'; // or use router if you prefer
+  window.location.href = `${environment.sharedBase}/`;
 }
 
 goToSettings() {

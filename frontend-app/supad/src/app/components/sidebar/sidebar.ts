@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-sidebar',
@@ -15,8 +16,8 @@ export class Sidebar {
   constructor(private router: Router) {}
 
   logout() {
-    localStorage.removeItem('twofaEmail');
-    localStorage.removeItem('twofaCode');
-    this.router.navigate(['/login']);
+    localStorage.clear();
+    document.cookie = 'inventra_user=; Max-Age=0; Path=/; SameSite=Lax';
+    window.location.href = `${environment.sharedBase}/`;
   }
 }
