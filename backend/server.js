@@ -102,28 +102,43 @@ app.use("/api/admin/reports", adminReportsRoutes);
 app.get("/", (req, res) => res.send("Backend is running!"));
 
 // ------------------------------
-// Send verification code
+// Start login: verify password, then send email code (2FA)
 // ------------------------------
-app.post("/api/send-reset-code", async (req, res) => {
-  const { email } = req.body;
-  if (!email) return res.status(400).json({ error: "Email is required" });
+app.post("/api/auth/request-code", async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
 
   try {
-    const [rows] = await db.query("SELECT role FROM users WHERE email = ?", [email]);
-    if (!rows || !rows.length) {
-      return res.status(404).json({ error: "User not found." });
-    }
+    const [rows] = await db.query(
+      "SELECT user_id, email, password_hash, role FROM users WHERE email = ?",
+      [email]
+    );
+    if (!rows || !rows.length) return res.status(401).json({ error: "Invalid email or password." });
     const user = rows[0];
+
+    const hash = user.password_hash || "";
+    let valid = false;
+    if (hash.startsWith("$2a$") || hash.startsWith("$2b$") || hash.startsWith("$2y$")) {
+      valid = await (await import('bcryptjs')).default.compare(password, hash);
+    } else {
+      // Legacy plaintext support
+      valid = password === hash;
+    }
+
+    if (!valid) return res.status(401).json({ error: "Invalid email or password." });
 
     const code = generateCode();
     verificationCodes[email] = { code, expiresAt: Date.now() + 10 * 60 * 1000 }; // expires in 10 min
-
     await sendVerificationEmail(email, code);
 
-    res.json({ success: true, message: "Verification code sent to your email.", role: (user.role || '').toUpperCase() });
+    res.json({
+      success: true,
+      message: "Verification code sent to your email.",
+      role: (user.role || '').toUpperCase(),
+    });
   } catch (err) {
-    console.error("Error sending verification email:", err);
-    res.status(500).json({ error: "Failed to send verification email." });
+    console.error("Error starting login (request code):", err);
+    res.status(500).json({ error: "Failed to start login." });
   }
 });
 

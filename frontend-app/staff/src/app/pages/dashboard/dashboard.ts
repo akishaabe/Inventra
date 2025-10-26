@@ -17,6 +17,7 @@ export class Dashboard implements OnInit {
     stockValue: 0,
     forecastDemand: 0
   };
+  showLogoutModal = false;
 
   constructor(private router: Router) {}
 
@@ -56,8 +57,17 @@ export class Dashboard implements OnInit {
     }
   }
 
-  logout() {
+  openLogoutModal() {
+    this.showLogoutModal = true;
+  }
+
+  closeLogoutModal() {
+    this.showLogoutModal = false;
+  }
+
+  confirmLogout() {
     localStorage.clear();
+    this.showLogoutModal = false;
     this.router.navigate(['/login']);
   }
 

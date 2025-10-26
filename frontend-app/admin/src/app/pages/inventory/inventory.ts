@@ -51,8 +51,19 @@ export class Inventory implements OnInit {
   }
 
 
-  logout() {
+  showLogoutModal = false;
+
+  openLogoutModal() {
+    this.showLogoutModal = true;
+  }
+
+  closeLogoutModal() {
+    this.showLogoutModal = false;
+  }
+
+  confirmLogout() {
     localStorage.clear();
+    this.showLogoutModal = false;
     this.router.navigate(['/login']);
   }
 

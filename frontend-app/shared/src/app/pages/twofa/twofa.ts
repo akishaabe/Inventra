@@ -87,22 +87,18 @@ export class TwoFA implements OnInit, OnDestroy {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        // Fetch user by email to determine role
-        const usersResp = await fetch('http://localhost:4000/api/users');
-        const users = await usersResp.json();
-        const user = users.find((u: any) => u.email === this.email);
-
-        if (!user) {
-          alert('User not found.');
-          this.loading = false;
-          return;
-        }
-
-        localStorage.removeItem('twofaEmail');
-        localStorage.setItem('user', JSON.stringify(user));
+        // we receive role from backend
+  const role = (data.role || '').toUpperCase();
+  // Store minimal session info for role apps' guards
+  localStorage.setItem('user', JSON.stringify({ email: this.email, role }));
+  // Set a short-lived cookie shared across ports on localhost for cross-app handoff
+  // Note: cookies are shared by domain (localhost) across ports.
+  const cookiePayload = encodeURIComponent(JSON.stringify({ email: this.email, role }));
+  document.cookie = `inventra_user=${cookiePayload}; Max-Age=900; Path=/; SameSite=Lax`;
+  localStorage.removeItem('twofaEmail');
 
         // Redirect to corresponding frontend
-        switch (user.role.toUpperCase()) {
+        switch (role) {
           case 'SUPERADMIN':
             window.location.href = 'http://localhost:4600/dashboard';
             break;

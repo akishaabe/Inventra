@@ -6,9 +6,9 @@
       <button class="close-btn" (click)="toggleSidebar()">☰</button>
     </div>
     <nav class="nav-links">
-      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-      <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
-      <a (click)="logout()">Logout</a>
+  <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+  <a routerLink="/inventory" routerLinkActive="active">Inventory</a>
+  <a (click)="openLogoutModal()">Logout</a>
     </nav>
   </aside>
 
@@ -228,3 +228,14 @@
     </div>
   </div>
 </div>
+  <!-- Logout Confirmation Modal -->
+  <div class="logout-modal-overlay" *ngIf="showLogoutModal">
+    <div class="logout-modal">
+      <h2>LOG OUT</h2>
+      <p>Are you sure you want to log out?</p>
+      <div class="logout-buttons">
+        <button class="yes-btn" (click)="confirmLogout()">Yes</button>
+        <button class="no-btn" (click)="closeLogoutModal()">No</button>
+      </div>
+    </div>
+  </div>

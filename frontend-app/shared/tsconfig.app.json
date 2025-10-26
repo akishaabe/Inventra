@@ -3,10 +3,10 @@
   "compilerOptions": {
     "outDir": "./out-tsc/app",
     "types": [],
-    "isolatedModules": false,
-    "allowImportingTsExtensions": false,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+  "isolatedModules": false,
+  "allowImportingTsExtensions": false,
+  "module": "ESNext",
+  "moduleResolution": "Bundler",
     "baseUrl": "."
   },
   "include": [
