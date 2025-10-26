@@ -4,7 +4,6 @@
 .settings-container {
   background: #ffffff;
   font-family: 'Inter', sans-serif;
-  min-height: 100vh;
 }
 
 .sidebar {
@@ -12,16 +11,18 @@
   width: 240px;
   height: 100vh;
   position: fixed;
-  left: -240px; /* closed by default */
   top: 0;
+  left: -240px; /* hidden by default */
   display: flex;
   flex-direction: column;
-  transition: all 0.4s ease;
+  transition: left 0.4s ease;
   box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
   z-index: 200;
 }
 
-.sidebar.open { left: 0; }
+.sidebar.open {
+  left: 0; /* slide in */
+}
 
 .sidebar-header {
   display: flex;
@@ -36,12 +37,77 @@
   color: #3c2321;
 }
 
+.profile-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .close-btn {
   background: none;
   border: none;
   font-size: 1.6rem;
   cursor: pointer;
   color: #3c2321;
+}
+
+.error {
+  font-size: 13px;
+  color: #b30000;
+  margin-top: 6px;
+}
+
+.pw-rules {
+  list-style: none;
+  padding-left: 0;
+  font-size: 14px;
+  margin: 10px 0 20px;
+  color: #F8F5EF;
+}
+
+.pw-rules li {
+  margin-bottom: 6px;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+}
+
+.pw-rules li.valid {
+  color: green;
+  font-weight: 500;
+  opacity: 1;
+}
+
+.strength-container {
+  margin-top: 6px;
+  margin-bottom: 12px;
+}
+
+.strength-bar {
+  width: 107%;
+  height: 6px;
+  background-color: #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 10px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.mismatch {
+  color: red;
+  font-size: 14px;
+  margin-top: 4px;
 }
 
 .nav-links {
@@ -55,6 +121,7 @@
   text-decoration: none;
   color: #3c2321;
   font-size: 1.3rem;
+  font-family: 'Inter', sans-serif;
   transition: all 0.3s ease;
   border-left: 4px solid transparent;
 }
@@ -70,7 +137,7 @@
 .settings-header {
   position: fixed;
   top: 0;
-  left: 0;
+  left: 230px;
   right: 0;
   height: 70px;
   background-color: #f7f4f0;
@@ -79,8 +146,7 @@
   align-items: center;
   padding: 0 2rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  z-index: 150;
-  transition: left 0.4s ease;
+  z-index: 99;
 }
 
 .header-left {
@@ -95,6 +161,7 @@
   color: #3c2321;
   font-size: 1.6rem;
   cursor: pointer;
+  z-index: 300;
 }
 
 .brand-name {
@@ -114,6 +181,15 @@
   font-weight: 600;
   font-size: 1.1rem;
   color: #3c2321;
+}
+
+/* === CONTENT SHIFTS === */
+.sidebar.open ~ .settings-header {
+  left: 240px;
+}
+
+.sidebar.open ~ .settings-main {
+  margin-left: 240px;
 }
 
 /* === Main Layout === */
@@ -299,42 +375,6 @@
   font-size: 1.1rem;
 }
 
-/* === Table === */
-.audit-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-}
-
-.audit-table th,
-.audit-table td {
-  border-bottom: 1px solid #ddd;
-  padding: 10px;
-  text-align: left;
-  color: #333;
-}
-
-.audit-table th {
-  background: #f0f0f0;
-  font-weight: 700;
-}
-
-.restore {
-  color: blue;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.delete {
-  color: red;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
 /* === Modal === */
 .modal {
   position: fixed;
@@ -377,7 +417,7 @@
   font-weight: 700;
 }
 
-/* === Animations === */
+
 /* === Animations === */
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -643,4 +683,53 @@
   background-color: #3c2321;
   color: #fff;
 }
+
+/* Closed by default */
+.sidebar {
+  left: -240px;
+}
+
+/* When open */
+.sidebar.open {
+  left: 0;
+}
+
+/* Move main content when sidebar open (desktop) */
+.settings-main.shifted {
+  transform: translateX(240px);
+  transition: transform 0.4s ease;
+}
+
+/* Responsive behavior for smaller screens */
+@media (max-width: 992px) {
+  .settings-main.shifted {
+    transform: none; /* Don't shift content on mobile */
+  }
+
+  .sidebar {
+    width: 70%;
+    max-width: 260px;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  /* Optional overlay for mobile */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  body.sidebar-active::after {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 

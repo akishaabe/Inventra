@@ -24,12 +24,36 @@ export class Settings implements OnInit {
 
   newUser = { email: '', tempPass: '', firstName: '', lastName: '' };
   selectedUser: any = null;
+
+toggleSidebar() {
+  this.sidebarOpen = !this.sidebarOpen;
+  if (this.sidebarOpen) {
+    document.body.classList.add('sidebar-active');
+  } else {
+    document.body.classList.remove('sidebar-active');
+  }
+}
+
+
+  // Passwords
   passwords = { current: '', new: '', confirm: '' };
+  error = '';
+  sending = false;
+
+  // Password strength & validation
+  hasUppercase = false;
+  hasLowercase = false;
+  hasNumber = false;
+  hasSymbol = false;
+  isLengthValid = false;
+  strength = 0;
+  strengthLabel = '';
+  strengthColor = '';
+  passwordsMatch = true;
 
   superAdmins: any[] = [];
   admins: any[] = [];
   staffList: any[] = [];
-
   auditLogs: any[] = [];
   deletedItems: any[] = [];
 
@@ -43,6 +67,7 @@ export class Settings implements OnInit {
     this.loadAuditLogs();
     this.loadDeletedItems();
   }
+
   // ───────────────────── CURRENT USER ─────────────────────
   loadCurrentUser() {
     try {
@@ -51,14 +76,13 @@ export class Settings implements OnInit {
       const email = user?.email;
       if (!email) return;
       this.http.get<any>(`${this.apiUrl}/users/by-email`, { params: { email } }).subscribe({
-        next: (u) => this.currentUser = u,
+        next: (u) => (this.currentUser = u),
         error: (err) => console.error('Failed to load current user:', err)
       });
     } catch (e) {
       console.error('Failed to parse current user from storage', e);
     }
   }
-
 
   // ───────────────────── USER DATA ─────────────────────
   loadUsers() {
@@ -93,7 +117,7 @@ export class Settings implements OnInit {
         this.closeAddUser();
         this.showUserAdded = true;
         this.loadUsers();
-        this.loadAuditLogs(); // record add action
+        this.loadAuditLogs();
       },
       error: (err) => {
         console.error('Error saving user:', err);
@@ -113,8 +137,8 @@ export class Settings implements OnInit {
       next: () => {
         this.showRemoveUser = false;
         this.loadUsers();
-        this.loadDeletedItems(); // update deleted records
-        this.loadAuditLogs(); // record removal action
+        this.loadDeletedItems();
+        this.loadAuditLogs();
       },
       error: (err) => {
         console.error('Error removing user:', err);
@@ -127,23 +151,82 @@ export class Settings implements OnInit {
     this.showRemoveUser = false;
   }
 
+  // ───────────────────── PASSWORD VALIDATION LOGIC ─────────────────────
+  onPasswordInput() {
+    const pw = this.passwords.new;
+
+    this.hasUppercase = /[A-Z]/.test(pw);
+    this.hasLowercase = /[a-z]/.test(pw);
+    this.hasNumber = /\d/.test(pw);
+    this.hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(pw);
+    this.isLengthValid = pw.length >= 8;
+
+    let score = 0;
+    if (this.hasUppercase) score++;
+    if (this.hasLowercase) score++;
+    if (this.hasNumber) score++;
+    if (this.hasSymbol) score++;
+    if (this.isLengthValid) score++;
+
+    this.strength = score;
+
+    if (score <= 2) {
+      this.strengthLabel = 'Weak';
+      this.strengthColor = 'red';
+    } else if (score === 3 || score === 4) {
+      this.strengthLabel = 'Medium';
+      this.strengthColor = 'orange';
+    } else if (score === 5) {
+      this.strengthLabel = 'Strong';
+      this.strengthColor = 'green';
+    }
+
+    this.checkPasswordMatch();
+  }
+
+  onConfirmPasswordInput() {
+    this.checkPasswordMatch();
+  }
+
+  checkPasswordMatch() {
+    this.passwordsMatch =
+      this.passwords.new === this.passwords.confirm || !this.passwords.confirm;
+  }
+
   // ───────────────────── CHANGE PASSWORD ─────────────────────
   openChangePassword() {
     this.showChangePassword = true;
   }
 
   savePassword() {
+    this.error = '';
+
     if (!this.passwords.current || !this.passwords.new || !this.passwords.confirm) {
-      alert('Please fill in all fields.');
+      this.error = 'Please fill in all fields.';
+      alert(this.error);
       return;
     }
 
-    if (this.passwords.new !== this.passwords.confirm) {
-      alert('New passwords do not match.');
+    const strongPassword =
+      this.hasUppercase &&
+      this.hasLowercase &&
+      this.hasNumber &&
+      this.hasSymbol &&
+      this.isLengthValid;
+
+    if (!strongPassword) {
+      this.error = 'Please make sure your password meets all the requirements.';
+      alert(this.error);
       return;
     }
 
-    // Resolve email reliably (fallback to localStorage if currentUser not yet loaded)
+    if (!this.passwordsMatch) {
+      this.error = 'Passwords do not match.';
+      alert(this.error);
+      return;
+    }
+
+    // Resolve email reliably
     let email = this.currentUser?.email;
     if (!email) {
       try {
@@ -163,13 +246,16 @@ export class Settings implements OnInit {
       newPassword: this.passwords.new
     };
 
+    this.sending = true;
     this.http.put(`${this.apiUrl}/change-password`, payload).subscribe({
       next: () => {
+        this.sending = false;
         alert('Password changed successfully.');
         this.showChangePassword = false;
         this.passwords = { current: '', new: '', confirm: '' };
       },
       error: (err) => {
+        this.sending = false;
         console.error('Failed to change password:', err);
         alert('Error changing password.');
       }
@@ -205,23 +291,22 @@ export class Settings implements OnInit {
     this.newUser = { email: '', tempPass: '', firstName: '', lastName: '' };
   }
 
-  toggleSidebar() {
-    this.sidebarOpen = !this.sidebarOpen;
-    document.body.classList.toggle('sidebar-active', this.sidebarOpen);
-  }
+@HostListener('document:click', ['$event'])
+onClickOutside(event: MouseEvent) {
+  const sidebar = document.querySelector('.sidebar');
+  const toggleBtn = document.querySelector('.menu-btn'); // match your HTML
 
-  @HostListener('document:click', ['$event'])
-  onClickOutside(event: MouseEvent) {
-    const sidebar = document.querySelector('.sidebar');
-    if (
-      this.sidebarOpen &&
-      sidebar &&
-      !sidebar.contains(event.target as Node)
-    ) {
-      this.sidebarOpen = false;
-      document.body.classList.remove('sidebar-active');
-    }
+  if (
+    this.sidebarOpen &&
+    sidebar &&
+    !sidebar.contains(event.target as Node) &&
+    toggleBtn &&
+    !toggleBtn.contains(event.target as Node)
+  ) {
+    this.sidebarOpen = false;
+    document.body.classList.remove('sidebar-active');
   }
+}
 
   selectTab(tab: string) {
     this.selectedTab = tab;
@@ -235,20 +320,20 @@ export class Settings implements OnInit {
     console.log('Logout clicked');
   }
 
-    showLogoutModal = false;
+  showLogoutModal = false;
 
-openLogoutModal() {
-  this.showLogoutModal = true;
-}
+  openLogoutModal() {
+    this.showLogoutModal = true;
+  }
 
-closeLogoutModal() {
-  this.showLogoutModal = false;
-}
+  closeLogoutModal() {
+    this.showLogoutModal = false;
+  }
 
-confirmLogout() {
-  localStorage.clear();
-  document.cookie = 'inventra_user=; Max-Age=0; Path=/; SameSite=Lax';
-  this.showLogoutModal = false;
-  window.location.href = `${environment.sharedBase}/`;
-}
+  confirmLogout() {
+    localStorage.clear();
+    document.cookie = 'inventra_user=; Max-Age=0; Path=/; SameSite=Lax';
+    this.showLogoutModal = false;
+    window.location.href = `${environment.sharedBase}/`;
+  }
 }
